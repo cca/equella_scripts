@@ -1,0 +1,15 @@
+# EQUELLA Scripts
+
+Various scripts, mostly server-side JavaScript, used in our EQUELLA instance.
+
+The scripts are categorized by where they're used:
+
+**asc** contains Advanced Scripting Controls used in Contribution Wizards.
+
+**user-scripts** contains bulk metadata update tools meant to be run from the _Manage Resources_ section.
+
+Most of the scripts sitting in the root of this repo are data munging for import or miscellaneous utilities that run outside of EQUELLA.
+
+## Notes
+
+EQUELLA's internal JavaScript engine is most likely Mozilla's [Rhino](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino), for what it's worth. That means modern JavaScript features (e.g. ES5 stuff like `Array#map`) may not be available.

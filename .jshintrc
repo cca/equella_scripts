@@ -4,5 +4,6 @@
         "$": false,
         "xml": false
     },
-    "rhino": true
+    "rhino": true,
+    "eqeqeq": false
 }

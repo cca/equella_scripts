@@ -7,7 +7,9 @@
 var dateXPath = '/mods/name/subNameWrapper/gradDate',
     date = xml.get(dateXPath);
 
-if (date != "") {
+// weird behavior; if EQUELLA doesn't recognize date value it'll set it to 
+// "2020" (no month, no day), below we work around that
+if (date != '' && date != '2020') {
     var year = date.substr(0,4);
     xml.set(dateXPath, year);
 }

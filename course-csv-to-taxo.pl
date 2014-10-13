@@ -106,6 +106,8 @@ while(my $line = <$filehandle>){
     		$term = "Spring";
     	}elsif ($2 eq "FA"){
     		$term = "Fall";
+        }elsif ($2 eq "SU"){
+            $term = "Summer";
     	}else{
     		die "unrecognized term (not FA or SP)\n";
     	}

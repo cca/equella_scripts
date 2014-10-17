@@ -30,4 +30,8 @@ if (assessment[0] != '') {
         // sensible fallback, we assume it's a program activity
         xml.set('local/assessmentWrapper/program', assessment[2]);
     }
+
+    // we use local/accreditation as a human-readable summary
+    // makes usage in display templates easier
+    xml.set('local/accreditation', assessment.join(' '));
 }

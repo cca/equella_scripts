@@ -13,20 +13,21 @@ var assessmemt = xml.get('local/assessmentWrapper/staging').split("\\\\");
 // guard against aW/staging being empty, xml.get returns
 // empty string if node is empty, so assessment.length != 0
 if (assessment[0] != '') {
-    var type = assessment[1];
+    // just used for conditions below
+    var type = assessment[1].toLowerCase();
 
     xml.set('local/assessmentWrapper/date', assessment[0]);
-    xml.set('local/assessmentWrapper/type', type);
+    xml.set('local/assessmentWrapper/type', assessment[1]);
 
     // the taxonomy leaf node has 2 distinct meanings:
     // could be a CCA program for assessment, ext. reviews, etc.
     // or an accrediting body (NASAD, etc.) for accreditation
-    if (type == 'External Review' || type == 'Assessment') {
+    if (type.indexOf('external review') != -1 || type.indexOf('assessment') != -1 ) {
         xml.set('local/assessmentWrapper/program', assessment[2]);
-    } else if (type == 'Accreditation') {
+    } else if (type.indexOf('accreditation') != -1 ) {
         xml.set('local/assessmentWrapper/organization', assessment[2]);
     } else {
-        // @todo is this the sensible fallback?
+        // sensible fallback, we assume it's a program activity
         xml.set('local/assessmentWrapper/program', assessment[2]);
     }
 }

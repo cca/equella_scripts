@@ -8,10 +8,9 @@
 // taxonomy rather than each node individually, since it's quicker,
 // but we want to record parsed out individual nodes, too.
 
-var assessmemt = xml.get('local/assessmentWrapper/staging').split("\\\\");
+var assessment = xml.get('local/assessmentWrapper/staging').split("\\\\");
 
-// guard against aW/staging being empty, xml.get returns
-// empty string if node is empty, so assessment.length != 0
+// guard against staging being empty string, assessment.length != 0
 if (assessment[0] != '') {
     // just used for conditions below
     var type = assessment[1].toLowerCase();

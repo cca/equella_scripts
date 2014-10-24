@@ -2,9 +2,13 @@
     "globals": {
         "jQuery": false,
         "$": false,
-        "xml": false
+        "xml": false,
+        "data": false,
+        "user": false,
+        "staging": false
     },
     "rhino": true,
     "laxcomma": true,
-    "eqeqeq": false
+    "eqeqeq": false,
+    "undef": true
 }

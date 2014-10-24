@@ -1,3 +1,4 @@
+/*jshint browser:true */
 /*
  * Bookmarklet to copy current VAULT page URL as link sent through
  * login redirect. Run `make bookmarklet` to create it & copy to

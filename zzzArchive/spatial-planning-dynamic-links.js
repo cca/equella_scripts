@@ -1,3 +1,4 @@
+/* global console */
 // usage: node spatialPlanningDynamicLinks.js
 // (prints out the output)
 //

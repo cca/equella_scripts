@@ -1,3 +1,4 @@
+/* global prompt */
 /*jshint browser:true */
 /*
  * Bookmarklet to copy current VAULT page URL as link sent through

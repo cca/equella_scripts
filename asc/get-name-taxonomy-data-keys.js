@@ -12,6 +12,12 @@ var fullname = user.getLastName() + ', ' + user.getFirstName();
 // searchTerms returns an iterator, not an array
 var terms = nameTaxo.searchTerms(fullname);
 
+function set (path, value) {
+    if (value !== undefined) {
+        xml.set(path, value);
+    }
+}
+
 // note: searchTerms searches full term paths for query string _with wildcard
 // appended_ (e.g. John Smith also returns John Smithsonian)
 // below, we ensure the term we use actually matches the name we want
@@ -27,7 +33,7 @@ for (var i = terms.size() - 1; i >= 0; i--) {
     }
 }
 
-xml.set('mods/name/subNameWrapper/username', username);
-xml.set('mods/name/subNameWrapper/major', major);
-xml.set('local/courseInfo/semester', semester);
-xml.set('mods/name/subNameWrapper/ccaAffiliated', studentID);
+set('mods/name/subNameWrapper/username', username);
+set('mods/name/subNameWrapper/major', major);
+set('local/courseInfo/semester', semester);
+set('mods/name/subNameWrapper/ccaAffiliated', studentID);

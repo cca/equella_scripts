@@ -13,7 +13,7 @@ var fullname = user.getLastName() + ', ' + user.getFirstName();
 var terms = nameTaxo.searchTerms(fullname);
 
 function set (path, value) {
-    if (value !== undefined) {
+    if (value !== undefined && xml.get(path) == "") {
         xml.set(path, value);
     }
 }
@@ -25,7 +25,6 @@ for (var i = terms.size() - 1; i >= 0; i--) {
     var term = terms.get(i);
 
     if (term.getTerm() == fullname) {
-        var username = term.getData('username');
         var major = term.getData('major');
         var semester = term.getData('semester');
         var studentID = term.getData('studentID');
@@ -33,7 +32,9 @@ for (var i = terms.size() - 1; i >= 0; i--) {
     }
 }
 
+set('mods/name/namePart', fullname);
 set('mods/name/subNameWrapper/username', username);
+// these come from the taxonomy
 set('mods/name/subNameWrapper/major', major);
 set('local/courseInfo/semester', semester);
 set('mods/name/subNameWrapper/ccaAffiliated', studentID);

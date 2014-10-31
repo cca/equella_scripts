@@ -37,16 +37,20 @@ if ($#ARGV < 0) {
     print q{
 =============================================================
 |                                                           |
-|                  Coded by Cian Phillips - 2014            |
-|              For California College of the Arts           |
+|              Coded by Cian Phillips - 2014                |
+|             (with edits by Eric Phetteplace)              |
+|             For California College of the Arts            |
 |                                                           |
 |-----------------------------------------------------------|
-|             Syntax - ProcessFiles.pl ARG1                 |
+|         Syntax - ProcessFiles.pl ARG1 [-p|--program]      |
+|         the -p or --program flag keeps the program        |
+|         in the output, default is to drop it (e.g. for    |
+|         program-specific taxonomies)                      |
 |                                                           |
 =============================================================
 };
     exit;
-} elsif ($#ARGV > 0) {
+} elsif ($#ARGV > 1) {
     print "
     You have provided too many arguments, I'm confused.
     Check to make sure you have escaped or used single quotes
@@ -56,7 +60,9 @@ if ($#ARGV < 0) {
 
 
 ## Sets the variable $filename to the first argument after ProcessFiles.pl
-	my $filename = $ARGV[0];
+my $filename = $ARGV[0];
+## Whether or not to keep or drop program info
+my $pflag = $ARGV[1] || undef;
 ## Opens the file and readies it for reading
 open(my $filehandle, '<', $filename) or die "Could not open $filename\n";
 
@@ -74,22 +80,23 @@ while(my $line = <$filehandle>){
     $line=~ s/\"$//;
     ## splits each line on "," into an array
     ## puts each value in the @linearray array into an easy to use variable
-     @linearray = split(/\"\,\"/, $line);
-     $term = $linearray['0'];
-     $program = $linearray['1'];
-     $coursename = $linearray['2'];
-     $faculty = $linearray['3'];
-     $coursecode2 = $linearray['4'];
-     $coursecode = $linearray['5'];
-     $xlist = $linearray['6'];
-     $facultyuid = $linearray['7'];
+    @linearray = split(/\"\,\"/, $line);
 
-     if(! defined $xlist){
-     	$xlist = "NA";
-     }
-     if(! defined $facultyuid){
-     	$facultyuid = "TBD";
-     }
+    $term = $linearray['0'];
+    $program = $linearray['1'];
+    $coursename = $linearray['2'];
+    $faculty = $linearray['3'];
+    $coursecode2 = $linearray['4'];
+    $coursecode = $linearray['5'];
+    $xlist = $linearray['6'];
+    $facultyuid = $linearray['7'];
+
+    if(! defined $xlist){
+    	$xlist = "NA";
+    }
+    if(! defined $facultyuid){
+    	$facultyuid = "TBD";
+    }
 
 ## take the first field 2014SP and split it into human readable $term and $year
 ## the =~ indicates a following regular expression that starts and ends with /
@@ -98,6 +105,8 @@ while(my $line = <$filehandle>){
 ## a forward slash so it's not looking for a literal d character - uppercase 'D's
 ## match two non-numeric characters and plop them into the $2 variable
 ## if the value of $term doesn't match the 2014SP format die and throw an error
+## @todo make this smart enough to skip program values (for single program
+## taxonomies) or include based on a CLI parameter
     if($term =~ /(\d\d\d\d)(\D\D)/) {
     	my $year = $1;
 ## if the non numeric characters match SP or FA convert them to the nicer human
@@ -111,12 +120,13 @@ while(my $line = <$filehandle>){
     	}else{
     		die "unrecognized term (not FA or SP)\n";
     	}
-    	##my	$equellaready = "\"$term $year\$program\$coursename\$faculty\$coursecode2\",CrsName,$coursecode,XList,$xlist,facultyID,$facultyuid,\n";
-    	my $equellaready = '"'.$term.' '.$year."\\".$coursename."\\".$faculty."\\".$coursecode2.'",CrsName,'.$coursecode.',XList,'.$xlist.',facultyID,'.$facultyuid.",\n";
+    	my $equellaready = '"'.$term.' '.$year."\\";
+        if (defined $pflag) {
+            $equellaready .= $program."\\";
+        }
+        $equellaready .= $coursename."\\".$faculty."\\".$coursecode2.'",CrsName,'.$coursecode.',XList,'.$xlist.',facultyID,'.$facultyuid.",\n";
     	print $equellaready;
     }else{
     	die "I don't recognize the values in the first field of the input file";
     }
-
-##    push(@resultarray, @linearray);
 }

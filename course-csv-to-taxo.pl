@@ -5,8 +5,9 @@
 ## handling set to "comma-separated" or the script breaks
 
 ## Usage:
-## ./course-csv-to-taxo.pl course-list.csv > output.csv
-## Then take output.csv & run through EQUELLA upload script
+## ./course-csv-to-taxo.pl course-list.csv [--program] > output.csv
+## -p or --program is optional; if present program info is retained
+## take the output.csv & run through EQUELLA upload script
 ## (not in this repo…yet)
 
 ## if the script isn't working make sure to set permissions

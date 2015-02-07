@@ -8,6 +8,7 @@
         "staging": false,
         "item": false
     },
+    "asi": true,
     "rhino": true,
     "laxcomma": true,
     "eqeqeq": false,

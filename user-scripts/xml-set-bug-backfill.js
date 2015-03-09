@@ -8,12 +8,13 @@
 // the top where mods/name/namePart is filled by finding
 // the item's owner.
 
-var id = currentItem.getOwner()
-var users = user.searchUsers(id)
+var itemID = currentItem.getUuid()
+var userID = currentItem.getOwner()
+var users = user.searchUsers(userID)
 var len = users.size()
 
 for (var i = 0; i < len; i++) {
-    if (users.get(i).getUniqueID() == id) {
+    if (users.get(i).getUniqueID() == userID) {
         var fn = users.get(i).getFirstName()
         var ln = users.get(i).getLastName()
         break
@@ -22,11 +23,14 @@ for (var i = 0; i < len; i++) {
 
 // only set name if a) we have both pieces, b) not set already
 if (ln && fn && !xml.exists('mods/name/namePart')) {
-    xml.set('mods/name/namePart', ln + ", " + fn)
+    var xp = 'mods/name/namePart'
+    var name = ln + ", " + fn
+    xml.set(xp, name)
+    logger.log('Set ' + xp + 'of item ' + itemID + 'to ' + name + '.')
 }
 
 // these are specific to Glass Program collection
-var xp = 'local/viewLevel'
+xp = 'local/viewLevel'
 var type = xml.get('local/courseWorkWrapper/courseWorkType')
 var setting = 'shared with other academic programs for assessment & accreditation purposes only'
 
@@ -38,4 +42,5 @@ if (!xml.exists(xp)) {
     }
 
     xml.set(xp, setting)
+    logger.log('Set ' + xp + 'of item ' + itemID + 'to ' + setting + '.')
 }

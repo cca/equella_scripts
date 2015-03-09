@@ -26,7 +26,7 @@ if (ln && fn && !xml.exists('mods/name/namePart')) {
     var xp = 'mods/name/namePart'
     var name = ln + ", " + fn
     xml.set(xp, name)
-    logger.log('Set ' + xp + 'of item ' + itemID + 'to ' + name + '.')
+    logger.log('Set ' + xp + ' of item ' + itemID + ' to ' + name + '.')
 }
 
 // these are specific to Glass Program collection
@@ -42,5 +42,5 @@ if (!xml.exists(xp)) {
     }
 
     xml.set(xp, setting)
-    logger.log('Set ' + xp + 'of item ' + itemID + 'to ' + setting + '.')
+    logger.log('Set ' + xp + ' of item ' + itemID + ' to ' + setting + '.')
 }

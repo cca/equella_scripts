@@ -8,5 +8,5 @@ var username = user.getUsername();
 
 var fullname = lastname + ", " + firstname;
 
-xml.set('mods/name/namePart',fullname);
-xml.set('mods/name/subNameWrapper/username',username);
+xml.set('mods/name/namePart', fullname);
+xml.set('mods/name/subNameWrapper/username', username);

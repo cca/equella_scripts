@@ -1,4 +1,4 @@
-/* global prompt */
+/* global prompt,document */
 /*
  * Bookmarklet to take a collection ID from the XML of one of its items and
  * output the URL for its contribution wizard. Run `make contrib-wiz` to create

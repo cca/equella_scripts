@@ -1,4 +1,3 @@
-/* global xml,data,user */
 /* jshint undef: true */
 
 // retrieve the data keys from a taxonomy term which is a name
@@ -33,7 +32,7 @@ for (var i = terms.size() - 1; i >= 0; i--) {
 }
 
 set('mods/name/namePart', fullname);
-set('mods/name/subNameWrapper/username', username);
+set('mods/name/subNameWrapper/username', user.getUsername());
 // these come from the taxonomy
 set('mods/name/subNameWrapper/major', major);
 set('local/courseInfo/semester', semester);

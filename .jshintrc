@@ -6,7 +6,9 @@
         "data": false,
         "user": false,
         "staging": false,
-        "item": false
+        "item": false,
+        "currentItem": false,
+        "logger": false
     },
     "asi": true,
     "rhino": true,

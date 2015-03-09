@@ -7,6 +7,8 @@ on alfred_script(q)
  	tell application "System Events" to keystroke "l" using command down
 	-- 124 is right arrow
 	tell application "System Events" to key code 124
+	-- sometimes Chrome's UI doesn't update quick enough; give it time
+	delay 0.1
 	tell application "System Events" to keystroke "<XML>"
 	tell application "System Events" to keystroke return
 end alfred_script

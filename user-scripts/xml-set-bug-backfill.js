@@ -22,21 +22,20 @@ for (var i = 0; i < len; i++) {
 
 // only set name if a) we have both pieces, b) not set already
 if (ln && fn && !xml.exists('mods/name/namePart')) {
-    var name = ln + ", " + fn
-    xml.set('mods/name/namePart', name)
+    xml.set('mods/name/namePart', ln + ", " + fn)
 }
 
 // these are specific to Glass Program collection
-var viewlevel = xml.get('local/viewLevel')
+var xp = 'local/viewLevel'
 var type = xml.get('local/courseWorkWrapper/courseWorkType')
 var setting = 'shared with other academic programs for assessment & accreditation purposes only'
 
 // only set viewLevel if it's not already present
-if (viewLevel == "") {
+if (!xml.exists(xp)) {
     // per collection's scripts these 2 types have different default viewLevel
     if (type == "Senior packet" || type == "Events") {
         setting = 'for internal Glass program use only'
     }
 
-    xml.set('local/viewLevel', setting)
+    xml.set(xp, setting)
 }

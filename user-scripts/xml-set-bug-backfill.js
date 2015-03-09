@@ -14,7 +14,7 @@ var fn = owner.get(0).getFirstName()
 var ln = owner.get(0).getLastName()
 
 // only set name if a) we have both pieces, b) not set already
-if (ln && fn && xml.get('mods/name/namePart') == "") {
+if (ln && fn && !xml.exists('mods/name/namePart')) {
     var name = ln + ", " + fn
     xml.set('mods/name/namePart', name)
 }

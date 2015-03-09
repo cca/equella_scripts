@@ -9,9 +9,16 @@
 // the item's owner.
 
 var id = currentItem.getOwner()
-var owner = user.searchUsers(id)
-var fn = owner.get(0).getFirstName()
-var ln = owner.get(0).getLastName()
+var users = user.searchUsers(id)
+var len = users.size()
+
+for (var i = 0; i < len; i++) {
+    if (users.get(i).getUniqueID() == id) {
+        var fn = users.get(i).getFirstName()
+        var ln = users.get(i).getLastName()
+        break
+    }
+}
 
 // only set name if a) we have both pieces, b) not set already
 if (ln && fn && !xml.exists('mods/name/namePart')) {

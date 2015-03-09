@@ -5,10 +5,10 @@
 on alfred_script(q)
 	-- this moves focus to omnibar in Chrome, most every web browser does same
  	tell application "System Events" to keystroke "l" using command down
+	-- sometimes browser's UI isn't quick enough; give it time
+	delay 0.1
 	-- 124 is right arrow
 	tell application "System Events" to key code 124
-	-- sometimes Chrome's UI doesn't update quick enough; give it time
-	delay 0.1
 	tell application "System Events" to keystroke "<XML>"
 	tell application "System Events" to keystroke return
 end alfred_script

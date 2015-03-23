@@ -2,14 +2,19 @@
 // the user selector only stores the username in metadata
 // but we can use the user script object to retrieve
 // a user's full name and store it in MODS
-var un = xml.get('mods/name/subNameWrapper/username')
+var unxp = 'mods/name/subNameWrapper/username'
+var un = xml.get(unxp)
 
-if (un != "") {
+if (xml.exists(unxp)) {
     var users = user.searchUsers(un) // returns an iterator
-    if (users.size() > 0) {
-        var student = users.get(0)
-        var givenname = student.getFirstName()
-        var surname = student.getLastName()
-        xml.set('mods/name/namePart', givenname + ' ' + surname)
+    var len = users.size()
+
+    for (var i = 0; i < len; i++) {
+        if (un == users.get(0).getUsername()) {
+            var person = users.get(0)
+            var givenname = person.getFirstName()
+            var surname = person.getLastName()
+            xml.set('mods/name/namePart', givenname + ' ' + surname)
+        }
     }
 }

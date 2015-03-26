@@ -5,6 +5,7 @@
 // since students themselves are apparently unaware if they're in a
 // studio course or not.
 
+// abstraction over xml.set to help make a few passages more concise
 function set (path, str) {
 	if (str) {
 		xml.set(path, str)
@@ -24,13 +25,13 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 
 	//script to split course taxonomy into separate metadata nodes
 	var subjectsplit = xml.get('local/courseInfo/courseinfo').split("\\\\")
-	xml.set('local/courseInfo/semester', subjectsplit[0])
+	set('local/courseInfo/semester', subjectsplit[0])
 	// special step for ARCHT division which has an extra layer
 	// in its Course List hierarchy
-	xml.set('local/courseInfo/department', subjectsplit[1])
-	xml.set('local/courseInfo/course', subjectsplit[2])
-	xml.set('local/courseInfo/faculty', subjectsplit[3])
-	xml.set('local/courseInfo/section', subjectsplit[4])
+	set('local/courseInfo/department', subjectsplit[1])
+	set('local/courseInfo/course', subjectsplit[2])
+	set('local/courseInfo/faculty', subjectsplit[3])
+	set('local/courseInfo/section', subjectsplit[4])
 
 	// separate out studio courses from non-studio courses
 	// powers subsequent contribution pages
@@ -49,26 +50,31 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 	// is it in the list of studio courses? set courseCategory then
 	for (var i = 0; i < studioCourses.length; i++) {
 		if (course.indexOf(studioCourses[i]) !== -1) {
-			xml.set('local/courseInfo/courseCategory', 'studio')
+			set('local/courseInfo/courseCategory', 'studio')
 			break
 		}
 	}
 
-	// cover all "Building Technology" programs
-	// script used to just cover one
+	// record special elective programs which appear as prefixes in course names
 	if (course.indexOf('BT:') === 0) {
-		xml.set('local/courseInfo/specialPrograms', 'Building Technology')
+		set('local/courseInfo/specialPrograms', 'Building Technology')
+	} else if (course.indexOf('DM:') === 0) {
+		set('local/courseInfo/specialPrograms', 'Design Media')
+	} else if (course.indexOf('GR:') === 0) {
+		set('local/courseInfo/specialPrograms', 'Grad Elective')
+	} else if (course.indexOf('HT:') === 0) {
+		set('local/courseInfo/specialPrograms', 'History Theory')
+	} else if (course.indexOf('IN:') === 0) {
+		set('local/courseInfo/specialPrograms', 'Interiors')
+	} else if (course.indexOf('UR:') === 0) {
+		set('local/courseInfo/specialPrograms', 'Urbanism')
 	}
-
-	// note: what about DM: and UR: prefixes? What do they indicate?
-	// Manage Resources search to pull up DM courses:
-	// https://vault.cca.edu/access/itemadmin.do?c=WHERE+%2Fxml%2Flocal%2FcourseInfo%2Fcourse+LIKE+%27DM%3A*%27&in=1ca1ba6f-e327-4557-9b7e-25e1bba1b359&q=&sort=rank&dr=AFTER&status=&sdr=AFTER
 
 	// parse out zipped attachments into repeaters for tagging of individual files
 	var iter = xml.list('/local/staging/file').listIterator()
 	while (iter.hasNext()) {
 	    var index = iter.nextIndex()
-	    xml.set('/mods/part[' + index + ']/number', iter.next())
+	    set('/mods/part[' + index + ']/number', iter.next())
 	}
 }
 
@@ -77,6 +83,6 @@ if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Junior review')) {
 	var iter = xml.list('/local/juniorReviewWrapper/stagingWrapper/file').listIterator()
 	while (iter.hasNext()) {
 		var index = iter.nextIndex()
-		xml.set('/local/juniorReviewWrapper/fileWrapper[' + index + ']/file', iter.next())
+		set('/local/juniorReviewWrapper/fileWrapper[' + index + ']/file', iter.next())
 	}
 }

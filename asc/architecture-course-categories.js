@@ -13,7 +13,7 @@ function set (path, str) {
 }
 
 if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
-	//script to grab XList data and set to xml
+	// grab XList data and set to xml
 	var tax = data.getTaxonomyByUuid('1ccf4d37-e086-4ba3-b8d6-cf2647491aa4')
 	var selection = xml.get('local/courseInfo/courseinfo')
 	if (selection.length() > 0) {
@@ -23,7 +23,7 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 		set('local/courseInfo/facultyID', courseTerm.getData('facultyID'))
 	}
 
-	//script to split course taxonomy into separate metadata nodes
+	// split course taxonomy into separate metadata nodes
 	var subjectsplit = xml.get('local/courseInfo/courseinfo').split("\\\\")
 	set('local/courseInfo/semester', subjectsplit[0])
 	// special step for ARCHT division which has an extra layer
@@ -33,28 +33,47 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 	set('local/courseInfo/faculty', subjectsplit[3])
 	set('local/courseInfo/section', subjectsplit[4])
 
-	// separate out studio courses from non-studio courses
+	// separate studio courses from non-studio courses
 	// powers subsequent contribution pages
-	var course = xml.get('local/courseInfo/course')
-	// list of studio courses
+	var courseName = xml.get('local/courseInfo/courseName')
+	// list of studio courses, see spreadsheet provided by ARCH PM on 4/2/15:
+	// https://docs.google.com/a/cca.edu/spreadsheets/d/17RKd-U3z06ykHJFcdX_zuTBW0erUDyo_EvWtB_7s2oc/edit?usp=sharing
 	var studioCourses = [
-		' Studio', // catch all—courses with "studio" in them are a pretty good bet
-		'Form + Space',
-		'Architecture Studio',
-		'Advanced Studio',
-		'Adv Interdisciplinary Studio',
-		"M'Arch Studio",
-		'Architect Summer Studio'
+		'ARCHT-201'
+		, 'ARCHT-202'
+		, 'ARCHT-303'
+		, 'ARCHT-304'
+		, 'ARCHT-507'
+		, 'ARCHT-508'
+		, 'ARCHT-509'
+		, 'MARCH-600' // given to us as 'MARCH-600P' but prolly safer w/o the 'P'
+		, 'MARCH-601'
+		, 'MARCH-602'
+		, 'MARCH-603'
+		, 'MARCH-609'
+		, 'MARCH-607'
+		, 'MARCH-608'
+		, 'INTER-200'
+		, 'INTER-204'
+		, 'INTER-216'
+		, 'INTER-220'
+		, 'INTER-300'
+		, 'INTER-304'
+		, 'INTER-308'
+		, 'INTER-320'
+		, 'INTER-404'
+		, 'INTER-400'
 	]
 
 	// is it in the list of studio courses? set courseCategory then
 	for (var i = 0; i < studioCourses.length; i++) {
-		if (course.indexOf(studioCourses[i]) !== -1) {
+		if (courseName.indexOf(studioCourses[i]) !== -1) {
 			set('local/courseInfo/courseCategory', 'studio')
 			break
 		}
 	}
 
+	var course = xml.get('local/courseInfo/course')
 	// record special elective programs which appear as prefixes in course names
 	if (course.indexOf('BT:') === 0) {
 		set('local/courseInfo/specialPrograms', 'Building Technology')

@@ -39,7 +39,9 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 	// list of studio courses, see spreadsheet provided by ARCH PM on 4/2/15:
 	// https://docs.google.com/a/cca.edu/spreadsheets/d/17RKd-U3z06ykHJFcdX_zuTBW0erUDyo_EvWtB_7s2oc/edit?usp=sharing
 	var studioCourses = [
-		'ARCHT-201'
+		'ARCHT-100' // Form + Space is considered studio b/c of types of work produced
+		// see email from arph on 4/2/15
+		, 'ARCHT-201'
 		, 'ARCHT-202'
 		, 'ARCHT-303'
 		, 'ARCHT-304'
@@ -53,6 +55,7 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 		, 'MARCH-609'
 		, 'MARCH-607'
 		, 'MARCH-608'
+		, 'INTER-100' // cross-list of ARCHT-100, same note as above
 		, 'INTER-200'
 		, 'INTER-204'
 		, 'INTER-216'

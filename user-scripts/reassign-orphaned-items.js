@@ -11,9 +11,14 @@ select all search results, perform action > execute script > paste this in
 // it's missing the whole system-generated "item" subtree
 // so we have to get it via currentItem
 var fullXml = currentItem.getXml()
-// this presumably grabs last edit? unknown
-var xp = 'item/history/edit'
-var lastEditor = fullXml.get(xp)
+// per conversation with arph, "contributed" event records the original owner
+// & we don't have collections where ownership transfers during item's lifecycle
+// unfortunately it's not always available to user scripts
+// so we have to fall back to first edit otherwise
+var cxp = 'item/history/contributed'
+var exp = 'item/history/edit'
+var contributor = fullXml.get(cxp)
+var editor = fullXml.get(exp)
 var id = currentItem.getUuid()
 
 // log msg with SCRIPT prefix so it's easy to find in logs
@@ -22,18 +27,26 @@ function log () {
     var msg = Array.prototype.slice.call(arguments, 0)
     logger.log('SCRIPT: ' + msg.join(' '))
 }
+// accepts username string
+function reassign(username) {
+    if (username) {
+        // verify that we have a valid user account
+        var results = user.searchUsers(editor)
+        if (results.size() > 0) {
+            log('attempting to change owner of', id, 'to', username)
+            // API dox say this "may not save" in certain contexts, great
+            currentItem.setOwner(username)
+        } else {
+            log('unable to find', username, 'when querying users. Related item:', id)
+        }
+    }
+}
 
 // avoid sending an empty user.searchUsers query, which would be sloooow
-if (fullXml.exists(xp)) {
-    // used to verify that lastEditor is in fact a real user
-    var results = user.searchUsers(lastEditor)
-    if (results.size() > 0) {
-        log('attempting to change owner of', id, 'to', lastEditor)
-        // API dox say this "may not save" in certain contexts, great
-        currentItem.setOwner(lastEditor)
-    } else {
-        log('unable to find', lastEditor, 'when querying users. Last editor of item:', id)
-    }
+if (fullXml.exists(cxp)) {
+    reassign(contributor)
+} else if (fullXml.exists(exp)) {
+    reassign(editor)
 } else {
-    log('no', xp, 'node in item XML')
+    log('no', cxp, 'or', exp, 'nodes in item XML')
 }

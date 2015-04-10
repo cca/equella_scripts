@@ -8,8 +8,8 @@ var subjectsplit = xml.get('local/courseInfo/courseinfo').split("\\\\");
 // guard against courseinfo being empty
 // "".split => [""] so we can't test if [].length == 0
 if (subjectsplit[0] != "") {
-    xml.set('local/courseInfo/semester', subjectsplit [0]);
-    xml.set('local/courseInfo/course', subjectsplit [1]);
-    xml.set('local/courseInfo/faculty', subjectsplit [2]);
-    xml.set('local/courseInfo/section', subjectsplit [3]);
+    xml.set('local/courseInfo/semester', subjectsplit[0]);
+    xml.set('local/courseInfo/course', subjectsplit[1]);
+    xml.set('local/courseInfo/faculty', subjectsplit[2]);
+    xml.set('local/courseInfo/section', subjectsplit[3]);
 }

@@ -3,13 +3,35 @@
 // it's very common to ask users to select their section from a COURSE LIST
 // taxonomy structured like so: SEMESTER\COURSE\FACULTY\SECTION
 // this parses that tree out & inserts into pertinent local/courseInfo nodes
-var subjectsplit = xml.get('local/courseInfo/courseinfo').split("\\\\");
+var cxp = 'local/courseInfo/'
+var courseInfo = xml.get(cxp + 'courseinfo')
+var subjectSplit = courseInfo.split("\\\\")
+// change this to the department-specific COURSE LIST taxonomy UUID
+var courseListUuid = ''
+var set = function (path, str) {
+    if (str) {
+		xml.set(path, str)
+	}
+}
 
-// guard against courseinfo being empty
+// guard against empty courseinfo
 // "".split => [""] so we can't test if [].length == 0
-if (subjectsplit[0] != "") {
-    xml.set('local/courseInfo/semester', subjectsplit[0]);
-    xml.set('local/courseInfo/course', subjectsplit[1]);
-    xml.set('local/courseInfo/faculty', subjectsplit[2]);
-    xml.set('local/courseInfo/section', subjectsplit[3]);
+if (subjectSplit[0] !== "") {
+    set(cxp + 'semester', subjectSplit[0])
+    set(cxp + 'course', subjectSplit[1])
+    set(cxp + 'faculty', subjectSplit[2])
+    set(cxp + 'section', subjectSplit[3])
+
+    // guard against us forgetting to input the UUID
+    // you can find courseListUuid using equella-cli:
+    // > eq tax --name 'DEPT - COURSE LIST' | grep uuid
+    if (courseListUuid) {
+        var tax = data.getTaxonomyByUuid(courseListUuid)
+        var courseTerm = tax.getTerm(courseInfo)
+        if (courseTerm !== null) {
+            set(cxp +  'XList', courseTerm.getData('XList'))
+    		set(cxp +  'courseName', courseTerm.getData('CrsName'))
+    		set(cxp +  'facultyID', courseTerm.getData('facultyID'))
+        }
+    }
 }

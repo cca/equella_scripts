@@ -35,4 +35,6 @@ if (xml.exists(xp)) {
     // we use local/accreditation as a human-readable summary
     // makes usage in display templates easier
     xml.set('local/accreditation', assessment.join(' '))
+} else {
+    xml.deleteAll('local/assessmentWrapper')
 }

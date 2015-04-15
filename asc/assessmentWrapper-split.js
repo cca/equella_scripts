@@ -8,29 +8,31 @@
 // taxonomy rather than each node individually, since it's quicker,
 // but we want to record parsed out individual nodes, too.
 
-var assessment = xml.get('local/assessmentWrapper/staging').split("\\\\");
+var xp = 'local/assessmentWrapper/staging'
+var assessment = xml.get(xp).split("\\\\")
 
-// guard against staging being empty string, assessment.length != 0
-if (assessment[0] != '') {
-    // just used for conditions below
-    var type = assessment[1].toLowerCase();
+// guard against staging being empty
+if (xml.exists(xp)) {
+    // assessment type is either 2nd term in the taxonomy path
+    // e.g. Fall 2014\External Review\Photography
+    // or is a data key on the final term
+    // e.g. Spring 2016\CIDA\Interior Design(type: accreditation)
+    // in latter case, we also record 2nd term in path as assessment org
+    var taxo = data.getTaxonomyByUuid('34e45a42-3352-4a70-99bd-2a05da9bebb4')
+    var term = taxo.getTerm(xml.get(xp))
+    var type = term.getData('type')
 
-    xml.set('local/assessmentWrapper/date', assessment[0]);
-    xml.set('local/assessmentWrapper/type', assessment[1]);
-
-    // the taxonomy leaf node has 2 distinct meanings:
-    // could be a CCA program for assessment, ext. reviews, etc.
-    // or an accrediting body (NASAD, etc.) for accreditation
-    if (type.indexOf('external review') != -1 || type.indexOf('assessment') != -1 ) {
-        xml.set('local/assessmentWrapper/program', assessment[2]);
-    } else if (type.indexOf('accreditation') != -1 ) {
-        xml.set('local/assessmentWrapper/organization', assessment[2]);
+    if (type !== null) {
+        xml.set('local/assessmentWrapper/type', type.toLowerCase())
+        xml.set('local/assessmentWrapper/organization', assessment[1])
     } else {
-        // sensible fallback, we assume it's a program activity
-        xml.set('local/assessmentWrapper/program', assessment[2]);
+        xml.set('local/assessmentWrapper/type', assessment[1].toLowerCase())
     }
+
+    xml.set('local/assessmentWrapper/date', assessment[0])
+    xml.set('local/assessmentWrapper/program', assessment[2])
 
     // we use local/accreditation as a human-readable summary
     // makes usage in display templates easier
-    xml.set('local/accreditation', assessment.join(' '));
+    xml.set('local/accreditation', assessment.join(' '))
 }

@@ -16,11 +16,13 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 	// grab XList data and set to xml
 	var tax = data.getTaxonomyByUuid('1ccf4d37-e086-4ba3-b8d6-cf2647491aa4')
 	var selection = xml.get('local/courseInfo/courseinfo')
-	if (selection.length() > 0) {
+	if (selection.length() > 0 && tax) {
 		var courseTerm = tax.getTerm(selection)
-		set('local/courseInfo/XList', courseTerm.getData('XList'))
-		set('local/courseInfo/courseName', courseTerm.getData('CrsName'))
-		set('local/courseInfo/facultyID', courseTerm.getData('facultyID'))
+		if (courseTerm) {
+			set('local/courseInfo/XList', courseTerm.getData('XList'))
+			set('local/courseInfo/courseName', courseTerm.getData('CrsName'))
+			set('local/courseInfo/facultyID', courseTerm.getData('facultyID'))
+		}
 	}
 
 	// split course taxonomy into separate metadata nodes

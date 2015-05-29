@@ -8,9 +8,15 @@ var len = files.size()
 // MODS MIME type element
 var xp = '/mods/physicalDescription/internetMediaType'
 // hash of file extensions to corresponding MIME types
+// complete list: https://www.iana.org/assignments/media-types/media-types.xhtml
 var mimes = {
+    'doc': 'application/msword',
+    'gif': 'image/gif',
     'jpg': 'image/jpeg',
     'jpeg': 'image/jpeg',
+    'mp3': 'audio/mpeg3 ',
+    'mp4': 'video/mp4',
+    'mov': 'video/quicktime',
     'png': 'image/png',
     'pdf': 'application/pdf',
     'tif': 'image/tiff',

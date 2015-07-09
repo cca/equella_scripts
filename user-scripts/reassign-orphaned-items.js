@@ -48,5 +48,5 @@ if (fullXml.exists(cxp)) {
 } else if (fullXml.exists(exp)) {
     reassign(editor)
 } else {
-    log('no', cxp, 'or', exp, 'nodes in item XML')
+    log('no', cxp, 'or', exp, 'nodes in item', id, 'XML')
 }

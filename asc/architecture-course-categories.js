@@ -5,28 +5,38 @@
 // since students themselves are apparently unaware if they're in a
 // studio course or not.
 
-// abstraction over xml.set to help make a few passages more concise
+// abstractions over XML methods to help make a few passages more concise
 function set (path, str) {
 	if (str) {
 		xml.set(path, str)
 	}
 }
 
+function get (path) {
+	return String(xml.get(path))
+}
+
 if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 	// grab XList data and set to xml
 	var tax = data.getTaxonomyByUuid('1ccf4d37-e086-4ba3-b8d6-cf2647491aa4')
-	var selection = xml.get('local/courseInfo/courseinfo')
-	if (selection.length() > 0 && tax) {
+	var selection = get('local/courseInfo/courseinfo')
+	if (selection && tax) {
 		var courseTerm = tax.getTerm(selection)
 		if (courseTerm) {
 			set('local/courseInfo/XList', courseTerm.getData('XList'))
 			set('local/courseInfo/courseName', courseTerm.getData('CrsName'))
-			set('local/courseInfo/facultyID', courseTerm.getData('facultyID'))
+			// add each faculty username as its own node
+			// necessary for notifications to go to out to everyone
+			var ids = courseTerm.getData('facultyID').split(', ')
+			xml.deleteAll('local/courseInfo/facultyID')
+			for (var i =0; i < ids.length; i++) {
+				xml.add('local/courseInfo/facultyID', ids[i])
+			}
 		}
 	}
 
 	// split course taxonomy into separate metadata nodes
-	var subjectsplit = xml.get('local/courseInfo/courseinfo').split("\\\\")
+	var subjectsplit = get('local/courseInfo/courseinfo').split("\\")
 	set('local/courseInfo/semester', subjectsplit[0])
 	// special step for ARCHT division which has an extra layer
 	// in its Course List hierarchy
@@ -37,7 +47,7 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 
 	// separate studio courses from non-studio courses
 	// powers subsequent contribution pages
-	var courseName = xml.get('local/courseInfo/courseName')
+	var courseName = get('local/courseInfo/courseName')
 	// list of studio courses, see spreadsheet provided by ARCH PM on 4/2/15:
 	// https://docs.google.com/a/cca.edu/spreadsheets/d/17RKd-U3z06ykHJFcdX_zuTBW0erUDyo_EvWtB_7s2oc/edit?usp=sharing
 	var studioCourses = [
@@ -78,7 +88,7 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 		}
 	}
 
-	var course = xml.get('local/courseInfo/course')
+	var course = get('local/courseInfo/course')
 	// record special elective programs which appear as prefixes in course names
 	if (course.indexOf('BT:') === 0) {
 		set('local/courseInfo/specialPrograms', 'Building Technology')

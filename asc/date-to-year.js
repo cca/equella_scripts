@@ -8,11 +8,17 @@
 // Note that, unfortunately due to a bug in the way EQUELLA reads back dates
 // into the datepicker form UI, you need a staging area to store the (full
 // length) date and then a destination path which will store the year only.
-var date = xml.get('/path/to/staging');
+var date = String(xml.get('mods/name/subNameWrapper/staging'));
 
 // weird behavior; if EQUELLA doesn't recognize date value it'll set it to
 // "2020" (no month, no day), below we work around that
-if (date != '') {
-    var year = date.substr(0,4);
-    xml.set('/path/to/date', year);
+if (date !== '') {
+    var year = date.substr(0, 4);
+    xml.set('mods/name/subNameWrapper/gradDate', year);
+}
+
+date = String(xml.get('/mods/origininfo/dateCreatedWrapper/staging'));
+if (date !== '') {
+	year = date.substr(0, 4);
+	xml.set('/mods/origininfo/dateCreatedWrapper/dateCreated');
 }

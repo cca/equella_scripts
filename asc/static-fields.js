@@ -13,13 +13,13 @@ var dept = '{{DEPARTMENT}}',
     division = '{{DIVISION}}',
     ID = item.getUuid();
 
-xml.set ('/mods/language/@authority', 'iso639-2b');
-xml.set ('/mods/accessCondition/@type', 'use and reproduction');
-xml.set ('/mods/recordInfo/recordContentSource', 'cc9');
-xml.set ('/mods/recordInfo/recordContentSource/@authority', 'oclc');
-xml.set ('/mods/recordInfo/recordIdentifier', ID);
-xml.set ('/mods/recordInfo/languageOfCataloging', 'eng');
-xml.set ('/mods/accessCondition', 'For rights relating to this resource, please contact the CCA ' + dept + ' Program');
+xml.set('/mods/language/@authority', 'iso639-2b');
+xml.set('/mods/accessCondition/@type', 'use and reproduction');
+xml.set('/mods/recordInfo/recordContentSource', 'cc9');
+xml.set('/mods/recordInfo/recordContentSource/@authority', 'oclc');
+xml.set('/mods/recordInfo/recordIdentifier', ID);
+xml.set('/mods/recordInfo/languageOfCataloging', 'eng');
+xml.set('/mods/accessCondition', 'For rights relating to this resource, please contact the CCA ' + dept + ' Program');
 xml.set('/local/division', division);
 //local/department uses natural language for dept
 xml.set('/local/department', '' + dept);

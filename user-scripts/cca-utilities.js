@@ -1,4 +1,4 @@
-/* global item,xml,logger,currentItem,utils,user */
+/* global exports,item,xml,logger,currentItem,utils,user */
 // user script module of handy methods
 // we name it "CCA" so methods defined below can be imported & used like
 //
@@ -82,9 +82,22 @@ function set (path, str) {
     }
 }
 
+// change name metadata fields from old name to new
+function nameChange(oldName, newName) {
+    // @TODO do we loop over namePart nodes or naively `xml.set` the first one?
+    var list = xml.list('mods/name/namePart')
+
+    for (var i = 0; i < list.size(); i++) {
+        if (list.get(i) == oldName) {
+            xml.set('mods/name[' + (i + 1) + ']/namePart', newName)
+        }
+    }
+}
+
 exports = {
-    'log': log,
-    'reowner': reowner,
     'get': get,
+    'log': log,
+    'nameChange': nameChange,
+    'reowner': reowner,
     'set': set
 }

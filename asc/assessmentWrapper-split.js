@@ -8,33 +8,52 @@
 // taxonomy rather than each node individually, since it's quicker,
 // but we want to record parsed out individual nodes, too.
 
-var xp = 'local/assessmentWrapper/staging'
-var assessment = xml.get(xp).split("\\\\")
+var xp = 'local/assessmentWrapper'
+// adding support for _multiple_ reviews on one item
+var stagings = xml.list(xp + '/staging').listIterator()
+// wipe out the assessment nodes we'll populate below
+xml.deleteAll('local/accreditation')
+xml.deleteAll(xp)
 
 // guard against staging being empty
-if (xml.exists(xp)) {
-    // assessment type is either 2nd term in the taxonomy path
-    // e.g. Fall 2014\External Review\Photography
-    // or is a data key on the final term
-    // e.g. Spring 2016\CIDA\Interior Design(type: accreditation)
+while (stagings.hasNext()) {
+    // text value of staging string, also iterates to next node
+    var assessment = stagings.next()
+    // needed for XPaths below, must run after above
+    var index = stagings.nextIndex()
+    // only need to set this once & only if there's a stagings value
+    xml.set(xp + '/useInReview', 'yes')
+
+    // assessment type is either the 2nd term in the taxonomy path:
+    //     Fall 2014\External Review\Photography
+    // or a data key on the final term:
+    //     Spring 2016\CIDA\Interior Design(type: accreditation)
     // in latter case, we also record 2nd term in path as assessment org
     var taxo = data.getTaxonomyByUuid('34e45a42-3352-4a70-99bd-2a05da9bebb4')
-    var term = taxo.getTerm(xml.get(xp))
-    var type = term.getData('type')
+    var term = taxo.getTerm(assessment)
+    // guard against term not being in taxonomy
+    if (term) {
+        var type = term.getData('type')
+        var pieces = String(assessment).split('\\')
+        // trust me, I've tried a million other ways of doing this, none work
+        // DO NOT waste time with xml.add/set(xp + index), doesn't work
+        // DO NOT waste time with xml.createSubtree(xp), doesn't work
+        // DO NOT waste time creating an XML document with utils.newXmlDocumentFromString
+        // & then adding it with xml.appendChildren
 
-    if (type !== null) {
-        xml.set('local/assessmentWrapper/type', type.toLowerCase())
-        xml.set('local/assessmentWrapper/organization', assessment[1])
-    } else {
-        xml.set('local/assessmentWrapper/type', assessment[1].toLowerCase())
+        if (type !== null) {
+            xml.add(xp + '/type', type.toLowerCase())
+            xml.add(xp + '/organization', pieces[1])
+        } else {
+            xml.add(xp + '/type', pieces[1].toLowerCase())
+        }
+
+        xml.add(xp + '/date', pieces[0])
+        xml.add(xp + '/program', pieces[2])
+        xml.add(xp + '/staging', assessment)
+
+        // we use local/accreditation as a human-readable summary
+        // makes usage in display templates easier
+        xml.add('local/accreditation', pieces.join(' '))
     }
-
-    xml.set('local/assessmentWrapper/date', assessment[0])
-    xml.set('local/assessmentWrapper/program', assessment[2])
-
-    // we use local/accreditation as a human-readable summary
-    // makes usage in display templates easier
-    xml.set('local/accreditation', assessment.join(' '))
-} else {
-    xml.deleteAll('local/assessmentWrapper')
 }

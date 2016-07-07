@@ -1,60 +1,63 @@
 // set title & calculate academic division based on department
 // used in the Expert Scripting > Save Script of the Syllabus Collection
+function get (path) {
+	return String(xml.get(path))
+}
 
 // set title
-var semester = xml.get('local/courseInfo/semester');
-var courseNumber = xml.get('/local/courseInfo/courseName');
-var courseTitle = xml.get('local/courseInfo/course');
+var semester = get('local/courseInfo/semester')
+var courseNumber = get('/local/courseInfo/courseName')
+var courseTitle = get('local/courseInfo/course')
 
-var fullTitle = semester + " | " + courseNumber + " | " + courseTitle;
+var fullTitle = semester + " | " + courseNumber + " | " + courseTitle
 
-xml.set('/mods/titleInfo/title', fullTitle);
+xml.set('/mods/titleInfo/title', fullTitle)
 
-// set division
-if (xml.contains('/local/courseInfo/department', 'ARCHT') ||
-	xml.contains('/local/courseInfo/department', 'INTER') ||
-	xml.contains('/local/courseInfo/department', 'MARCH') ||
-	xml.contains('/local/courseInfo/department', 'MAUDL') ) {
-	xml.set('local/division', 'Architecture Division');
-} else if (xml.contains('/local/courseInfo/department', 'ARTED') ||
-	xml.contains('/local/courseInfo/department', 'DIVRS') ||
-	xml.contains('/local/courseInfo/department', 'INTDS') ) {
-	xml.set('local/division', 'Interdisciplinary Studies');
-} else if (xml.contains('/local/courseInfo/department', 'DESGN') ||
-	xml.contains('/local/courseInfo/department', 'DESST') ||
-	xml.contains('/local/courseInfo/department', 'FASHN') ||
-	xml.contains('/local/courseInfo/department', 'FURNT') ||
-	xml.contains('/local/courseInfo/department', 'ILLUS') ||
-	xml.contains('/local/courseInfo/department', 'INDUS') ||
-	xml.contains('/local/courseInfo/department', 'IXDSN') ||
-	xml.contains('/local/courseInfo/department', 'GRAPH') ) {
-	xml.set('local/division', 'Design Division');
-} else if (xml.contains('/local/courseInfo/department', 'ANIMA') ||
-	xml.contains('/local/courseInfo/department', 'CERAM') ||
-	xml.contains('/local/courseInfo/department', 'COMAR') ||
-	xml.contains('/local/courseInfo/department', 'CRAFT') ||
-	xml.contains('/local/courseInfo/department', 'CRITI') || // college-wide programs?
-	xml.contains('/local/courseInfo/department', 'CURPR') ||
-	xml.contains('/local/courseInfo/department', 'FILMS') ||
-	xml.contains('/local/courseInfo/department', 'FILMG') ||
-	xml.contains('/local/courseInfo/department', 'FINAR') ||
-	xml.contains('/local/courseInfo/department', 'FNART') ||
-	xml.contains('/local/courseInfo/department', 'GLASS') ||
-	xml.contains('/local/courseInfo/department', 'INDIV') ||
-	xml.contains('/local/courseInfo/department', 'METAL') ||
-	xml.contains('/local/courseInfo/department', 'PHOTO') ||
-	xml.contains('/local/courseInfo/department', 'PNTDR') ||
-	xml.contains('/local/courseInfo/department', 'PRINT') ||
-	xml.contains('/local/courseInfo/department', 'SCULP') ||
-	xml.contains('/local/courseInfo/department', 'TEXTL') ) {
-	xml.set('local/division', 'Fine Arts Division');
-} else if (xml.contains('/local/courseInfo/department', 'CORES')) {
-	xml.set('local/division', 'First Year Program');
-} else if (xml.contains('/local/courseInfo/department', 'COMIC') ||
-	xml.contains('/local/courseInfo/department', 'CRTST') ||
-	xml.contains('/local/courseInfo/department', 'VISCR') ||
-	xml.contains('/local/courseInfo/department', 'VISST') ||
-	xml.contains('/local/courseInfo/department', 'WRITE') ||
-	xml.contains('/local/courseInfo/department', 'WRLIT') ) {
-	xml.set('local/division', 'Humanities and Sciences Division');
+// program code map, the structure is
+// program five-letter code: [ human-readable name, division ]
+var map = {
+    'ANIMA': ['Animation', 'Fine Arts'],
+    'ARCHT': ['Architecture', 'Architecture'],
+    'CERAM': ['Ceramics', 'Fine Arts'],
+    'CIMBA': ['Civic Innovation MBA', 'Design'],
+    'COMAR': ['Community Arts', 'Fine Arts'],
+    'COMIC': ['Comics MFA', 'Humanities & Sciences'],
+    'CORES': ['Core Studio/First Year Program', 'Humanities & Sciences'],
+    'CRTST': ['Critical Studies', 'Humanities & Sciences'],
+    'CURPR': ['Curatorial Practice MFA', 'Fine Arts'],
+    'DESGN': ['Design MFA', 'Design'],
+    'DESST': ['Design Strategy MBA', 'Design'],
+    'DIVRS': ['Diversity Studies', 'Humanities & Sciences'],
+    'FASHN': ['Fashion', 'Design'],
+    'FILMG': ['Film MFA', 'Fine Arts'],
+    'FILMS': ['Film', 'Fine Arts'],
+    'FINAR': ['Fine Arts MFA', 'Fine Arts'],
+    'FURNT': ['Furniture', 'Design'],
+    'GLASS': ['Glass', 'Fine Arts'],
+    'GRAPH': ['Graphic Design', 'Design'],
+    'ILLUS': ['Illustration', 'Design'],
+    'INDIV': ['Individualized', 'Fine Arts'],
+    'INDUS': ['Industrial Design', 'Design'],
+    'INTER': ['Interior Design', 'Architecture'],
+    'IXDGR': ['Interaction Design MDes', 'Design'],
+    'IXDSN': ['Interaction Design', 'Design'],
+    'MARCH': ['Architecture MA', 'Architecture'],
+    'METAL': ['Jewelry / Metal Arts', 'Fine Arts'],
+    'PHOTO': ['Photography', 'Fine Arts'],
+    'PNTDR': ['Painting/Drawing', 'Fine Arts'],
+    'PRINT': ['Printmaking', 'Fine Arts'],
+    'SCULP': ['Sculpture', 'Fine Arts'],
+    'SFMBA': ['Strategic Foresight MBA', 'Design'],
+    'TEXTL': ['Textiles', 'Fine Arts'],
+    'UDIST': ['Upper Division Interdisciplinary Studies', ''],
+    'VISCR': ['Visual Critical Studies MA', 'Humanities & Sciences'],
+    'VISST': ['Visual Studies', 'Humanities & Sciences'],
+    'WRITE': ['Writing MFA', 'Humanities & Sciences'],
+    'WRLIT': ['Writing & Literature', 'Humanities & Sciences']
+}
+var dept = get('local/courseInfo/department')
+// we have a department & it's in the map
+if (dept !== '' && map[dept]) {
+    xml.set('local/department', map[dept][0])
+    xml.set('local/division', map[dept][1] + ' Division')
 }

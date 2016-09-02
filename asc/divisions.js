@@ -49,6 +49,7 @@ var map = {
     'PRINT': ['Printmaking (BFA)', 'Fine Arts'],
     'SCULP': ['Sculpture (BFA)', 'Fine Arts'],
     'SFMBA': ['Strategic Foresight (MBA)', 'Design'],
+	'SOCPR': ['Social Practice & Public Forms (MA)', 'Fine Arts']
     'TEXTL': ['Textiles (BFA)', 'Fine Arts'],
     'VISCR': ['Visual & Critical Studies (MA)', 'Humanities & Sciences'],
     'VISST': ['Visual Studies (BFA)', 'Humanities & Sciences'],

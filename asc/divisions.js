@@ -22,6 +22,7 @@ var map = {
     'COMAR': ['Community Arts (BFA)', 'Fine Arts'],
     'COMIC': ['Comics (MFA)', 'Humanities & Sciences'],
     'CORES': ['First Year Program', 'Humanities & Sciences'],
+	'CRAFT': ['Craft Program', 'Fine Arts'],
     'CRTST': ['Critical Studies Program', 'Humanities & Sciences'],
     'CURPR': ['Curatorial Practice (MA)', 'Fine Arts'],
     'DESGN': ['Design (MFA)', 'Design'],

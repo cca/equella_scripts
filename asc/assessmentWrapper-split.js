@@ -57,3 +57,10 @@ while (stagings.hasNext()) {
         xml.add('local/accreditation', pieces.join(' '))
     }
 }
+
+// in the case that a previously-used item is removed from a review
+// we wipe out all the info.
+if (xml.contains(xp + '/useInReview', 'no')) {
+    xml.deleteAll('local/accreditation')
+    xml.deleteAll(xp)
+}

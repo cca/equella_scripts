@@ -82,6 +82,24 @@ function set (path, str) {
     }
 }
 
+// given an external review taxonomy term, add item to it
+// terms look like: Spring 2017\External Review\Sculpture
+function addToReview (term) {
+    var a = term.split('\\')
+        , semester = a[0]
+        , type = a[1]
+        , program = a[2]
+        , xp = 'local/assessmentWrapper/'
+
+    set(xp + 'staging', term)
+    set(xp + 'useInReview', 'yes')
+    set(xp + 'type', type)
+    set(xp + 'program', program)
+    set(xp + 'date', semester)
+    set('local/accreditation', term.replace('\\', ' '))
+    log('added to ' + term)
+}
+
 // change name metadata fields from old name to new
 function nameChange(oldName, newName) {
     // @TODO do we loop over namePart nodes or naively `xml.set` the first one?
@@ -95,6 +113,7 @@ function nameChange(oldName, newName) {
 }
 
 exports = {
+    'addToReview': addToReview,
     'get': get,
     'log': log,
     'nameChange': nameChange,

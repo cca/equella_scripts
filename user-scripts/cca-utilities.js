@@ -96,7 +96,7 @@ function addToReview (term) {
     set(xp + 'type', type)
     set(xp + 'program', program)
     set(xp + 'date', semester)
-    set('local/accreditation', term.replace('\\', ' '))
+    set('local/accreditation', term.replace(/\\/g, ' '))
     log('added to ' + term)
 }
 

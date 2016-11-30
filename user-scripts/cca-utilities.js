@@ -1,10 +1,5 @@
-/* global exports,item,xml,logger,currentItem,utils,user */
+/* global item,xml,logger,currentItem,utils,user */
 // user script module of handy methods
-// we name it "CCA" so methods defined below can be imported & used like
-//
-// var cca = require('cca')
-// cca.log("hey I'm logged in the context of the item I'm operating on!")
-//
 // see the EQUELLA 6.3 Feature Guide PDF for details on how this works
 
 
@@ -110,13 +105,4 @@ function nameChange(oldName, newName) {
             xml.set('mods/name[' + (i + 1) + ']/namePart', newName)
         }
     }
-}
-
-exports = {
-    'addToReview': addToReview,
-    'get': get,
-    'log': log,
-    'nameChange': nameChange,
-    'reowner': reowner,
-    'set': set
 }

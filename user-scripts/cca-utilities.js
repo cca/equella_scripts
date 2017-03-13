@@ -40,7 +40,7 @@ function reowner () {
     var reassign = function (username) {
         if (username) {
             // verify that we have a valid user account
-            var results = user.searchUsers(editor)
+            var results = user.searchUsers(username)
             if (results.size() > 0) {
                 log('attempting to change owner to', username)
                 // API dox say this "may not save" in certain contexts, great

@@ -18,4 +18,4 @@ Probably the biggest gotcha I've found working with EQUELLA's JavaScript is that
 
 # LICENSE
 
-[Apache Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+[ECL Version 2.0](https://opensource.org/licenses/ECL-2.0)

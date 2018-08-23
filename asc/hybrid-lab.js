@@ -1,8 +1,8 @@
 // Hybrid Lab
-var section = xml.get('local/courseInfo/section')
+var section = String(xml.get('local/courseInfo/section'))
 var semester = xml.get('local/courseInfo/semester')
 // sections held in the hybrid lab, Fall 2018
-var hlsections =
+var hlsections = [
     'DESGN-609-01',
     'DESGN-670-05',
     'IXDSN-250-02',

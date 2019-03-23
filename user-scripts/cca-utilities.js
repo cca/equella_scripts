@@ -106,3 +106,22 @@ function nameChange(oldName, newName) {
         }
     }
 }
+
+// given item, return the path to its files on the storage drive
+function fileStorage() {
+    var uuid = currentItem.getUuid()
+    var hash = currentItem.getUuid().hashCode() & 127
+    var version = currentItem.getVersion()
+    var collection_uuid = currentItem.getCollection().getUuid()
+    // collections that use secondary storage (only Industrial Design right now)
+    var sec_storage = {
+        path: "/mnt2/equelladata",
+        collections: ["5b07c041-2353-4712-92d0-a71eed9201da"]
+    }
+
+    if (sec_storage.collections.indexOf(collection_uuid) != -1) {
+        return [sec_storage.path, "Institutions/cca2012/Attachments", hash, uuid, version].join('/')
+    } else {
+        return ["/mnt/equelladata01/Institutions/cca2012/Attachments", hash, uuid, version].join('/')
+    }
+}

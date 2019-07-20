@@ -1,4 +1,5 @@
 // Hybrid Lab
+// NOTE: to reuse this script, need to update to 4-digit course codes
 var section = String(xml.get('local/courseInfo/section'))
 var semester = xml.get('local/courseInfo/semester')
 // sections held in the hybrid lab, Fall 2018

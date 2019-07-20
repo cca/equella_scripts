@@ -82,7 +82,9 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 
 	// is it in the list of studio courses? set courseCategory then
 	for (var i = 0; i < studioCourses.length; i++) {
-		if (courseName.indexOf(studioCourses[i]) !== -1) {
+		// works for 3- & 4-digit (e.g. ARCHT-1000) course codes
+		if (courseName.indexOf(studioCourses[i]) !== -1 ||
+			courseName.substr(0, 9).indexOf(studioCourses[i]) !== -1) {
 			set('local/courseInfo/courseCategory', 'studio')
 			break
 		}

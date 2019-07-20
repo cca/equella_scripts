@@ -34,6 +34,7 @@ var map = {
     'MARCH-603': 'nschwartz',
 }
 var course = String(xml.get('local/courseInfo/courseName'))
-var coordinator = map[course]
+// make this work for 4-digit course codes (ARCHT-2110) added in 2019
+var coordinator = map[course] || map[course.substr(0, 9)]
 // guard against a course not in the mapping (e.g. coordinator is undefined)
 if (coordinator) xml.set('local/notify', coordinator)

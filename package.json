@@ -20,8 +20,8 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-jshint": "^0.10.0",
-    "load-grunt-tasks": "^1.0.0"
+    "grunt": "^1.0",
+    "grunt-contrib-jshint": "^2.1",
+    "load-grunt-tasks": "^5.0.0"
   }
 }

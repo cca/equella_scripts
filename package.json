@@ -23,5 +23,11 @@
     "grunt": "^1.0",
     "grunt-contrib-jshint": "^2.1",
     "load-grunt-tasks": "^5.0.0"
+  },
+  "dependencies": {
+    "async": "^3.1.0",
+    "request": "^2.88.0",
+    "xmldom": "^0.1.27",
+    "xpath": "0.0.27"
   }
 }

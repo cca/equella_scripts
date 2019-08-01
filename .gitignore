@@ -1,1 +1,4 @@
 *.min.js
+syllabus-download/files/*
+!syllabus-download/files/.gitkeep
+syllabus-download/.token

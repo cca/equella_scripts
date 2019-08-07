@@ -1,20 +1,22 @@
-# EQUELLA Scripts
+# openEQUELLA Scripts
 
-Various scripts, mostly server-side JavaScript, used in our EQUELLA instance.
-
-The scripts are categorized by where they're used:
+Various scripts used in VAULT (our openEQUELLA instance). The scripts are categorized by where they're used:
 
 **asc** contains Advanced Scripting Controls used in Contribution Wizards.
 
+**bookmarklets** are browser-side JS meant to aid in copying useful EQUELLA URLs.
+
 **user-scripts** contains bulk metadata update tools meant to be run from the _Manage Resources_ section.
 
-Most of the scripts sitting in the root of this repo are data munging for import or miscellaneous utilities that run outside of EQUELLA.
+**utilities** are scripts for bulk processing that Manage Resources cannot handle such as downloading files, manipulating user groups, or generating taxonomies. They often interact with openEQUELLA via its REST API.
 
 ## Notes
 
-EQUELLA's internal JavaScript engine is most likely Mozilla's [Rhino](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino), for what it's worth. That means modern JavaScript features (e.g. ES5 stuff like `Array#map`) may not be available.
+Note that node is needed for some of the scripts that interact with the API and `npm install` in the root of this project will get you the necessary dependencies.
 
-Probably the biggest gotcha I've found working with EQUELLA's JavaScript is that the return value of `xml.get` on an empty metadata node _is not strictly equal to empty string_ (`xml.get('thisdoesnotexist') !== ""`). That's why conditions through these scripts will employ `!=` or `==` when checking against strings returned by `xml.get`.
+openEQUELLA's internal JavaScript engine is most likely Mozilla's [Rhino](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino), for what it's worth. That means modern JavaScript features (e.g. ES5 stuff like `Array#map`) are not available.
+
+Probably the biggest gotcha I've found working with openEQUELLA's JavaScript is that the return value of `xml.get` on an empty metadata node _is not strictly equal to empty string_ (`xml.get('thisdoesnotexist') !== ""`). That's why conditions through these scripts will employ `!=` or `==` when checking against strings returned by `xml.get`.
 
 # LICENSE
 

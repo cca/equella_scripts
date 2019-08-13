@@ -5,18 +5,15 @@
 // this parses that tree out & inserts into pertinent local/courseInfo nodes
 var cxp = 'local/courseInfo/'
 var courseInfo = xml.get(cxp + 'courseinfo')
-var subjectSplit = courseInfo.split("\\\\")
 // change this to the department-specific COURSE LIST taxonomy UUID
 var courseListUuid = ''
-var set = function (path, str) {
-    if (str) {
-		xml.set(path, str)
-	}
+function set (path, str) {
+    if (str) xml.set(path, str)
 }
 
-// guard against empty courseinfo
-// "".split => [""] so we can't test if [].length == 0
-if (subjectSplit[0] !== "") {
+// careful because xml.get('empty') is not stricly unequal (!==) to empty string
+if (courseInfo != "") {
+    var subjectSplit = courseInfo.split("\\\\")
     set(cxp + 'semester', subjectSplit[0])
     set(cxp + 'course', subjectSplit[1])
     set(cxp + 'faculty', subjectSplit[2])

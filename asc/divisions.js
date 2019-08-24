@@ -28,6 +28,7 @@ var map = {
     'DESGN': ['Design (MFA)', 'Design'],
     'DESST': ['Design Strategy (MBA)', 'Design'],
     'DIVRS': ['Diversity Studies Program', 'Humanities & Sciences'],
+    'EXTED': ['Extension', 'Extension'],
     'FASHN': ['Fashion Design (BFA)', 'Design'],
     'FILMG': ['Film (MFA)', 'Fine Arts'],
     'FILMS': ['Film (BFA)', 'Fine Arts'],

@@ -18,20 +18,31 @@ xml.set('/mods/titleInfo/title', fullTitle)
 var map = {
     'ANIMA': ['Animation (BFA)', 'Fine Arts'],
     'ARCHT': ['Architecture (BArch)', 'Architecture'],
+	'BARCH': ['Architecture (BArch)', 'Architecture'],
     'CERAM': ['Ceramics (BFA)', 'Fine Arts'],
     'COMAR': ['Community Arts (BFA)', 'Fine Arts'],
     'COMIC': ['Comics (MFA)', 'Humanities & Sciences'],
+	// supposedly FYCST now but dept code is still CORES :shrug:
     'CORES': ['First Year Program', 'Humanities & Sciences'],
 	'CRAFT': ['Craft Program', 'Fine Arts'],
+	// NOTE: several depts* had their codes change during the transition to
+	// Workday student in Fall 2019. There's no guarantee that section codes
+	// match department codes in general. The change is why  we have some programs
+	// listed twice and we need to maintain both entries for backwards compatibility.
+	// * Archt BFA, Film BFA, Critical Studies, Diversity Studies, DSMBA
+	'CRTSD': ['Critical Studies Program', 'Humanities & Sciences'],
     'CRTST': ['Critical Studies Program', 'Humanities & Sciences'],
     'CURPR': ['Curatorial Practice (MA)', 'Fine Arts'],
     'DESGN': ['Design (MFA)', 'Design'],
     'DESST': ['Design Strategy (MBA)', 'Design'],
+	'DIVST': ['Diversity Studies Program', 'Humanities & Sciences'],
     'DIVRS': ['Diversity Studies Program', 'Humanities & Sciences'],
+	'DSMBA': ['Design Strategy (MBA)', 'Design'],
     'EXTED': ['Extension', 'Extension'],
     'FASHN': ['Fashion Design (BFA)', 'Design'],
     'FILMG': ['Film (MFA)', 'Fine Arts'],
     'FILMS': ['Film (BFA)', 'Fine Arts'],
+	'FILMU': ['Film (BFA)', 'Fine Arts'],
     'FINAR': ['Fine Arts (MFA)', 'Fine Arts'],
     'FURNT': ['Furniture (BFA)', 'Design'],
 	'FYCST': ['First Year Program', 'Humanities & Sciences'],

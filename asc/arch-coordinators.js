@@ -5,11 +5,14 @@
 
 // ARCHT AD will email updates to this mapping as they change
 var map = {
-    'ARCHT-508': 'amarcus2',
-    'MARCH-608': 'amarcus2',
+    'ARCHT-508': 'ryan.keerns',
+    'BARCH-508': 'ryan.keerns',
+    'MARCH-608': 'ryan.keerns',
 
     'ARCHT-211': 'akudless',
     'ARCHT-311': 'akudless',
+    'BARCH-211': 'akudless',
+    'BARCH-311': 'akudless',
     'INTER-208': 'akudless',
     'INTER-316': 'akudless',
     'MARCH-611': 'akudless',
@@ -17,21 +20,29 @@ var map = {
     'MARCH-623': 'bprice',
     'MARCH-624': 'bprice',
 
-    'ARCHT-220': 'icheng',
+    'BARCH-220': 'icheng',
     'ARCHT-422': 'icheng',
+    'BARCH-422': 'icheng',
     'INTER-222': 'icheng',
     'MARCH-620': 'icheng',
     'MARCH-621': 'icheng',
     'MARCH-622': 'icheng',
 
     'ARCHT-303': 'tanderson',
+    'BARCH-303': 'tanderson',
 
     'ARCHT-507': 'jmassey',
+    'BARCH-507': 'jmassey',
     'MARCH-607': 'jmassey',
 
-    'ARCHT-201': 'ksidell',
+    'ARCHT-201': 'clarkt',
+    'BARCH-201': 'clarkt',
 
-    'MARCH-603': 'nschwartz',
+    // per Neal Schwartz 1/4/19 email he's not the coordinator
+    // 'MARCH-603': 'nschwartz',
+
+    // testing purposes, this is the UUID of "eric1" user
+    'TESTS-101': '13dc7262-16f0-4b6b-b648-be73d2b7d15f'
 }
 var course = String(xml.get('local/courseInfo/courseName'))
 // make this work for 4-digit course codes (ARCHT-2110) added in 2019

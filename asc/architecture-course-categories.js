@@ -16,7 +16,7 @@ function get (path) {
 	return String(xml.get(path))
 }
 
-if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
+if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Course work')) {
 	// grab XList data and set to xml
 	var tax = data.getTaxonomyByUuid('1ccf4d37-e086-4ba3-b8d6-cf2647491aa4')
 	var selection = get('local/courseInfo/courseinfo')
@@ -60,6 +60,15 @@ if (xml.contains('/local/courseWorkWrapper/submissionType', 'Course work')) {
 		, 'ARCHT-507'
 		, 'ARCHT-508'
 		, 'ARCHT-509'
+		// Fall 2019 change & for backwards compatibility we have to list both
+		, 'BARCH-100'
+		, 'BARCH-201'
+		, 'BARCH-202'
+		, 'BARCH-303'
+		, 'BARCH-304'
+		, 'BARCH-507'
+		, 'BARCH-508'
+		, 'BARCH-509'
 		, 'MARCH-600' // given to us as 'MARCH-600P' but prolly safer w/o the 'P'
 		, 'MARCH-601'
 		, 'MARCH-602'

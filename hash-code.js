@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+//jshint node:true
 // useful for finding location of files on server, location is
 // {{data dir}}/Institutions/cca2012/Attachments/${hashCode(uuid)}/${uuid}/${version}
 var hashCode = function(str){
@@ -9,4 +11,9 @@ var hashCode = function(str){
 		hash = hash & hash; // Convert to 32bit integer
 	}
 	return hash & 127;
+}
+
+if (require && require.main == module) {
+	var uuid = process.argv[2]
+	console.log(hashCode(uuid))
 }

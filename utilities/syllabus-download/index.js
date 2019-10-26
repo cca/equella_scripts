@@ -61,6 +61,7 @@ function collectItems (err, resp, data) {
     }
     items = items.concat(data.results)
     total = data.available
+    if (count >= total) downloadFiles(items)
 }
 
 // figure out how many syllabi there are & collect them into items array
@@ -72,9 +73,8 @@ searchRequest.get(`${root}/search/`, (err, response, data) => {
     // these requests will fire off in parallel
     while (count < total) {
         console.log(`Getting syllabi items ${count + 1} through ${count + length}...`)
-        searchRequest.get(`${root}/search/`, { qs: { start: items.length } }, collectItems)
         count += length
-        if (count >= total) downloadFiles(items)
+        searchRequest.get(`${root}/search/`, { qs: { start: items.length } }, collectItems)
     }
 })
 

@@ -1,4 +1,4 @@
-/* global attachments,xml */
+/* global attachments,mime,xml */
 /* use oE's mime object to record the MIME types of attachments
 used in Libraries collection Expert Save Script */
 // returns iterator, not array

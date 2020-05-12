@@ -9,13 +9,13 @@ var uuid = ''
 try {
     // for <XML> pages
     uuid = document.getElementsByTagName('item')[0]
-            .getAttribute('itemdefid')
+            .getAttribute('itemdefid');
 } catch(e) {
     // get collection ID from first breadcrumb's href
     // it's in the query string, like "…?in=C${uuid}&…"
     uuid = document.getElementById('breadcrumb-inner')
             .getElementsByTagName('a')[0]
             .getAttribute('href')
-            .match(/\?in=C(.*?)&/)[1]
+            .match(/\?in=C(.*?)&/)[1];
 }
 void prompt('Use ⌘+C & then Return to copy URL to clipboard.', stem + uuid);

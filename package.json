@@ -4,8 +4,8 @@
   "description": "scripts for working with EQUELLA",
   "main": "none",
   "scripts": {
-    "contrib-wiz": "uglifyjs -c -m bookmarklets/link-to-contrib-wizard.js -o link-to-contrib-wizard.min.js; /bin/echo -n 'javascript:' | cat - link-to-contrib-wizard.min.js | sed -e 's| |%20|g' | pbcopy",
-    "login-link": "uglifyjs -c -m bookmarklets/login-linkify.js -o login-linkify.min.js; /bin/echo -n 'javascript:' | cat - login-linkify.min.js | sed -e 's| |%20|g' | pbcopy"
+    "contrib-wiz": "uglifyjs bookmarklets/link-to-contrib-wizard.js -c -m -o cw.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat cw.min.js)\" | sed -e 's/^/javascript:/' | pbcopy",
+    "login-link": "uglifyjs bookmarklets/login-linkify.js -c -m -o ll.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat ll.min.js)\" | sed -e 's/^/javascript:/' | pbcopy"
   },
   "repository": {
     "type": "git",

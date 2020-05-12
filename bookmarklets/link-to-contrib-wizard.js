@@ -1,8 +1,8 @@
 /* global prompt,document */
 /*
  * Bookmarklet to take a collection ID from the XML of one of its items and
- * output the URL for its contribution wizard. Run `make contrib-wiz` to create
- * it & copy to your clipboard.
+ * output the URL for its contribution wizard. Run `npm run contrib-wiz` to
+ * crreate it & copy to your clipboard.
  */
 var uuid = ''
     , stem = 'https://vault.cca.edu/access/runwizard.do?method=newitem&itemdefUuid=';

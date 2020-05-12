@@ -4,7 +4,8 @@
   "description": "scripts for working with EQUELLA",
   "main": "none",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "contrib-wiz": "uglifyjs -c -m bookmarklets/link-to-contrib-wizard.js -o link-to-contrib-wizard.min.js; /bin/echo -n 'javascript:' | cat - link-to-contrib-wizard.min.js | sed -e 's| |%20|g' | pbcopy",
+    "login-link": "uglifyjs -c -m bookmarklets/login-linkify.js -o login-linkify.min.js; /bin/echo -n 'javascript:' | cat - login-linkify.min.js | sed -e 's| |%20|g' | pbcopy"
   },
   "repository": {
     "type": "git",
@@ -28,7 +29,7 @@
     "async": "^3.1.0",
     "rc": "^1.2.8",
     "request": "^2.88.0",
-    "uglify-js": "^3.6.0",
+    "uglify-js": "^3.9",
     "xmldom": "^0.1.27",
     "xpath": "0.0.27"
   }

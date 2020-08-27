@@ -1,3 +1,4 @@
+// ##### github.com/cca/equella_scripts asc/divisions.js #####
 // set title & calculate academic division based on department
 // used in the Expert Scripting > Save Script of the Syllabus Collection
 function get (path) {
@@ -35,8 +36,9 @@ var map = {
     'CURPR': ['Curatorial Practice (MA)', 'Fine Arts'],
     'DESGN': ['Design (MFA)', 'Design'],
     'DESST': ['Design Strategy (MBA)', 'Design'],
-	'DIVST': ['Diversity Studies Program', 'Humanities & Sciences'],
-    'DIVRS': ['Diversity Studies Program', 'Humanities & Sciences'],
+	// renamed from "Diversity Studies" 2020FA
+	'DIVST': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
+    'DIVRS': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
 	'DSMBA': ['Design Strategy (MBA)', 'Design'],
     'EXTED': ['Extension', 'Extension'],
     'FASHN': ['Fashion Design (BFA)', 'Design'],
@@ -48,6 +50,7 @@ var map = {
 	'FYCST': ['First Year Program', 'Humanities & Sciences'],
     'GLASS': ['Glass (BFA)', 'Fine Arts'],
     'GRAPH': ['Graphic Design (BFA)', 'Design'],
+	// new program code 2021SP formerly VISST Visual Studies
 	'HAAVC': ['History of Art and Visual Culture (BFA)', 'Humanities & Sciences'],
     'ILLUS': ['Illustration (BFA)', 'Design'],
     'INDIV': ['Individualized (BFA)', 'Fine Arts'],
@@ -67,7 +70,8 @@ var map = {
     'SOCPR': ['Social Practice & Public Forms (MA)', 'Fine Arts'],
     'TEXTL': ['Textiles (BFA)', 'Fine Arts'],
     'VISCR': ['Visual & Critical Studies (MA)', 'Humanities & Sciences'],
-    'VISST': ['Visual Studies (BFA)', 'Humanities & Sciences'],
+	// renamed from "Visual Studies" 2020FA, will eventually change program code (see HAAVC)
+    'VISST': ['History of Art & Visual Culture (BFA)', 'Humanities & Sciences'],
     'WRITE': ['Writing (MFA)', 'Humanities & Sciences'],
     'WRLIT': ['Writing & Literature (BFA)', 'Humanities & Sciences']
 }
@@ -77,3 +81,5 @@ if (dept !== '' && map[dept]) {
     xml.set('local/department', map[dept][0])
     xml.set('local/division', map[dept][1] + ' Division')
 }
+
+// ##### END asc/divisions.js script #####

@@ -1,3 +1,4 @@
+// ##### github.com/cca/equella_scripts asc/syllabus-collaborators.js #####
 // add all faculty members listed as instructors
 // to the item as collaborators so they can see/edit it
 var faculties = String(xml.get('local/courseInfo/facultyID')).split(', ')
@@ -13,3 +14,5 @@ for (var i = 0; i < len; i++) {
         currentItem.addSharedOwner(faculties[i])
     }
 }
+
+// ##### END asc/syllabus-collaborators.js script #####

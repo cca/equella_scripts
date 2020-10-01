@@ -4,11 +4,13 @@ Various scripts used in VAULT (our openEQUELLA instance). The scripts are catego
 
 **asc** contains Advanced Scripting Controls used in Contribution Wizards.
 
-**bookmarklets** are browser-side JS meant to aid in copying useful EQUELLA URLs.
+**bookmarklets** are browser-side JS meant to aid in copying useful oE URLs.
+
+**fine-arts-jr-review** is a script for biannual updates to certain data in oE.
 
 **user-scripts** contains bulk metadata update tools meant to be run from the _Manage Resources_ section.
 
-**utilities** are scripts for bulk processing that Manage Resources cannot handle such as downloading files, manipulating user groups, or generating taxonomies. They often interact with openEQUELLA via its REST API.
+**utilities** are scripts for bulk processing that Manage Resources cannot handle such as downloading files, manipulating user groups, or generating taxonomies. They often interact with oE via its REST API.
 
 ## Notes
 

@@ -40,6 +40,7 @@ var map = {
 	'DIVST': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
     'DIVRS': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
 	'DSMBA': ['Design Strategy (MBA)', 'Design'],
+	'ETHNC': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
     'EXTED': ['Extension', 'Extension'],
     'FASHN': ['Fashion Design (BFA)', 'Design'],
     'FILMG': ['Film (MFA)', 'Fine Arts'],
@@ -48,6 +49,8 @@ var map = {
     'FINAR': ['Fine Arts (MFA)', 'Fine Arts'],
     'FURNT': ['Furniture (BFA)', 'Design'],
 	'FYCST': ['First Year Program', 'Humanities & Sciences'],
+	// new as of 2021SP is this a degree-seeking program?
+	'GAMES': ['Games Program', 'Fine Arts'],
     'GLASS': ['Glass (BFA)', 'Fine Arts'],
     'GRAPH': ['Graphic Design (BFA)', 'Design'],
 	// new program code 2021SP formerly VISST Visual Studies
@@ -70,7 +73,7 @@ var map = {
     'SOCPR': ['Social Practice & Public Forms (MA)', 'Fine Arts'],
     'TEXTL': ['Textiles (BFA)', 'Fine Arts'],
     'VISCR': ['Visual & Critical Studies (MA)', 'Humanities & Sciences'],
-	// renamed from "Visual Studies" 2020FA, will eventually change program code (see HAAVC)
+	// renamed from "Visual Studies" 2020FA, program code => HAAVC 2021SP
     'VISST': ['History of Art & Visual Culture (BFA)', 'Humanities & Sciences'],
     'WRITE': ['Writing (MFA)', 'Humanities & Sciences'],
     'WRLIT': ['Writing & Literature (BFA)', 'Humanities & Sciences']

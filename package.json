@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "grunt": "^1.2.1",
+    "grunt": "^1.3.0",
+    "grunt-cli": "^1.3.2",
     "grunt-contrib-jshint": "^2.1",
     "load-grunt-tasks": "^5.1.0"
   },

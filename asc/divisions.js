@@ -49,8 +49,8 @@ var map = {
     'FINAR': ['Fine Arts (MFA)', 'Fine Arts'],
     'FURNT': ['Furniture (BFA)', 'Design'],
 	'FYCST': ['First Year Program', 'Humanities & Sciences'],
-	// new as of 2021SP is this a degree-seeking program?
-	'GAMES': ['Games Program', 'Fine Arts'],
+	// new as of 2021SP @TODO is this a degree-seeking program?
+	'GAMES': ['Game Arts Program', 'Fine Arts'],
     'GLASS': ['Glass (BFA)', 'Fine Arts'],
     'GRAPH': ['Graphic Design (BFA)', 'Design'],
 	// new program code 2021SP formerly VISST Visual Studies

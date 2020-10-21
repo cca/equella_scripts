@@ -46,7 +46,7 @@ def map_major(major):
         'FSCUL.MFA': 'Fine Arts (MFA)',
         'FSOCP.MFA': 'Fine Arts (MFA)',
         'FTEXT.MFA': 'Fine Arts (MFA)',
-        'GAMES.BFA': 'Games (BFA)',
+        'GAMES.BFA': 'Game Arts (BFA)',
         'GLASS.BFA': 'Glass (BFA)',
         'GRAPH.BFA': 'Graphic Design (BFA)',
         'GRAPH.MFA': 'Fine Arts (MFA)',

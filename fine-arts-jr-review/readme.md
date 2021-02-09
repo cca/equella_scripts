@@ -12,7 +12,7 @@ The taxonomy data is pulled into the FAJR contribution wizard to autofill fields
 Transferring data to VAULT looks like this:
 
 - obtain a CSV from Fine Arts [1] & name it fajr.csv
-- run `python fajr_process.py fajr.csv "Fall 2020"` (where "Fall 2020" is the current semester)
+- run `python fajr_process.py --semester "Fall 2020" fajr.csv ` (where "Fall 2020" is the current semester)
 - this adds usernames to the two permissions groups, generates a taxonomy CSV named "taxo.csv", uploads the taxonomy to openEQUELLA, then offers to archive fajr.csv & taxo.csv in a "data" directory
 
 fajr_process.py relies on a configured ".equellarc" file (see [equella-cli](https://github.com/cca/equella_cli) for details) with a configured OAuth token in your user's home directory, while the upload.sh script relies on that as well as the (included) `uptaxo` abstraction over openEQUELLA's command-line tools for updating taxonomies. Inside fajr_process.py there is a mapping of various strings to formatted CCA majors; these must be updated over time as majors are created or changed.

@@ -61,13 +61,10 @@ import equellasoap
 import argparse
 
 parser = argparse.ArgumentParser(description='Upload a taxonomy to VAULT.')
-parser.add_argument('--un', nargs='?', action='store', help='EQUELLA Username')
-parser.add_argument('--pw', nargs='?', action='store', required=True,
-                    help='EQUELLA Password')
-parser.add_argument('--tid', nargs='?', action='store', required=True,
-                    help='Taxonomy ID')
-parser.add_argument('--csv', nargs='?', action='store',
-                    help='Path to taxonomy CSV file')
+parser.add_argument('--un', required=True, help='openEQUELLA Username')
+parser.add_argument('--pw', required=True, help='openEQUELLA Password')
+parser.add_argument('--tid', required=True, help='Taxonomy UUID')
+parser.add_argument('--csv', required=True, help='Path to taxonomy CSV file')
 parser.add_argument('--clear', action='store_true',
                     help='Clear the taxonomy (delete all prior terms)')
 parser.add_argument('--start', default=1, type=int,

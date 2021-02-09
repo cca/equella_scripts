@@ -1,15 +1,25 @@
 """
-Usage: python fajr_process.py input.csv 2019FA
+Usage: python fajr_process.py --semester "Fall 2020" input.csv
 
 Takes CSV of Fine Arts juniors with their ID, names, majors, plus usernames &
-then creates an EQUELLA-ready taxonomy CSV named "taxo.csv".
+then creates an openEQUELLA-ready taxonomy CSV named "taxo.csv". Uses fajr_group
+to add users to user groups and upload.sh to add the taxonomy to VAULT.
 """
 
+import argparse
 import csv
 import os
 import sys
 
 from fajr_group import add_to_fajr_group
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Process CSV from Fine Arts into format ready for import into the "Fine Arts Junior Review students" taxonomy. Creates a "taxo.csv" file and then runs the "upload.sh" script to upload it to VAULT.')
+    parser.add_argument('filename', help='CSV file')
+    parser.add_argument('--semester', '-s', required=True,
+        help='Semester string (in format like "Fall 2020")')
+    return parser.parse_args()
 
 
 def map_major(major):
@@ -88,34 +98,39 @@ def map_major(major):
     else:
         raise Exception('Cannot translate degree code {} into major! Check the mappings.'.format(major))
 
-filename = sys.argv[1]
-semester = sys.argv[2]
-with open(filename) as csvfile:
-    fields = ('id', 'givenname', 'surname', 'major', 'username')
-    reader = csv.DictReader(csvfile, fieldnames=fields)
-    with open('taxo.csv', 'w') as taxofile:
-        writer = csv.writer(taxofile, quoting=csv.QUOTE_ALL)
-        users = []
-        anima_users = []
-        for row in reader:
-            writer.writerow([
-                row['surname'] + ', ' + row['givenname'],
-                'studentID',
-                row['id'],
-                'username',
-                row['username'],
-                'major',
-                map_major(row['major']),
-                'semester',
-                semester,
-            ])
 
-            users.append(row['username'])
-            # ANIMA/FILM get their own group too, this also catches double majors
-            if 'Animation' in row['major'] or 'Film' in row['major']:
-                anima_users.append(row['username'])
+def main(args):
+    with open(args.filename) as csvfile:
+        fields = ('id', 'givenname', 'surname', 'major', 'username')
+        reader = csv.DictReader(csvfile, fieldnames=fields)
+        with open('taxo.csv', 'w') as taxofile:
+            writer = csv.writer(taxofile, quoting=csv.QUOTE_ALL)
+            users = []
+            anima_users = []
+            for row in reader:
+                writer.writerow([
+                    row['surname'] + ', ' + row['givenname'],
+                    'studentID',
+                    row['id'],
+                    'username',
+                    row['username'],
+                    'major',
+                    map_major(row['major']),
+                    'semester',
+                    args.semester,
+                ])
 
-print('Wrote EQUELLA taxonomy file to taxo.csv.')
-add_to_fajr_group(users)
-add_to_fajr_group(anima_users, anima=True)
-os.system('./upload.sh')
+                users.append(row['username'])
+                # ANIMA/FILM get their own group too, this also catches double majors
+                if 'Animation' in row['major'] or 'Film' in row['major']:
+                    anima_users.append(row['username'])
+
+    print('Wrote openEQUELLA taxonomy file to taxo.csv')
+    add_to_fajr_group(users)
+    add_to_fajr_group(anima_users, anima=True)
+    os.system('./upload.sh')
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)

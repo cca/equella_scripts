@@ -35,6 +35,7 @@ var map = {
     'CRTST': ['Critical Studies Program', 'Humanities & Sciences'],
     'CURPR': ['Curatorial Practice (MA)', 'Fine Arts'],
     'DESGN': ['Design (MFA)', 'Design'],
+	// This one should be defunct as of 2021SU, we use DSMBA
     'DESST': ['Design Strategy (MBA)', 'Design'],
 	// renamed from "Diversity Studies" 2020FA
 	'DIVST': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],

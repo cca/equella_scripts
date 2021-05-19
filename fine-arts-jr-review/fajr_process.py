@@ -40,6 +40,7 @@ def map_major(major):
         'CURPR.MA': 'Curatorial Practice (MA)',
         # 'DD2ST': '',
         'DESGN.MFA': 'Design (MFA)',
+        # defunct as of Summer 2021
         'DESST.MBA': 'Design Strategy (MBA)',
         # 'DVCFA': '',
         # 'EXTED': '',

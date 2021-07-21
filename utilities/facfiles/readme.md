@@ -1,4 +1,4 @@
-# Bulk Download Syllabus Files
+# Faculty Files
 
 The purpose of this script is to download all of a particular faculty member's archived syllabi, including co-taught courses, in a given time range. These files are useful during tenure review, for instance. It saves all the syllabi into the "files" directory and names them after the course to which they belond.
 

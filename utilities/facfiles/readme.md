@@ -15,6 +15,8 @@ If running multiple times, remember to clean out the files directory in between.
 
 ## Notes
 
+Any parameter defined in .facfilesrc can also be passed as a command-line parameter, e.g., `node facfiles.js --name 'Eric Phetteplace' --start_term 'Fall 2017'`.
+
 Terms must be in form "Fall 2020", i.e., match this regex "(Spring|Summer|Fall) \d{4}".
 
 We can set either `start_term` or `stop_term` to be `null` (or any falsey value). So we can retrieve _all_ of a faculty member's syllabi by setting both to `null`.

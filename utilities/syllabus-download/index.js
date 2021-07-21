@@ -97,6 +97,9 @@ function getFile (item, callback) {
         item.attachments.forEach((attachment, index) => {
             let req = baseRequest.get(`${root}/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
                 .on('response', res => {
+                    if (res.statusCode != 200) {
+                        return console.error(`${res.statusCode} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item https://vault.cca.edu/item/${item.uuid}/${item.version}`)
+                    }
                     let extension = attachment.filename.split('.').pop()
                     let filename = [section, (index ? ` (${index})` : ''), '.', extension].join('')
                     filename = filename.replace(/[\/\\:]/g, "_")

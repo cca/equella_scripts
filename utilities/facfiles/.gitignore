@@ -1,1 +1,4 @@
 .facfilesrc
+files/*
+~files/.gitkeep
+

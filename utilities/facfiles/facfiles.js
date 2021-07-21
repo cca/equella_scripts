@@ -89,14 +89,14 @@ function getFile (item, callback) {
         ].join(' ')
         // handle multiple attachments, add number to filename
         item.attachments.forEach((attachment, index) => {
-            let req = baseRequest.get(`${options.url}/api/item/${item.uuid}/${item.version}/file/${attachment.filename}`)
+            let req = baseRequest.get(`${options.url}/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
                 .on('response', res => {
                     let extension = attachment.filename.split('.').pop()
                     let filename = [section, (index ? ` (${index})` : ''), '.', extension].join('')
                     filename = filename.replace(/[\/\\:]/g, "_")
                     req.pipe(fs.createWriteStream(path.join('files', filename)))
                 })
-                .on('err', err => {
+                .on('error', err => {
                     console.error(`Error downloading file ${attachment.filename} from item ${options.url}/items/${item.uuid}/${item.version}/`)
                     console.error(err)
                 })

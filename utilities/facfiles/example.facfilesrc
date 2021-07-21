@@ -1,0 +1,7 @@
+{
+    "url": "https://vault.cca.edu",
+    "collection_uuid": "9ec74523-e018-4e01-ab4e-be4dd06cdd68",
+    "token": "insert oauth token here...",
+    "start_term": "Spring 2018",
+    "stop_term": null
+}

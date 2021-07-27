@@ -3,7 +3,10 @@ const fs = require('fs')
 const path = require('path')
 
 const request = require('request')
-const options = require('rc')('retention')
+const defaults = {
+    date: 'auto'
+}
+const options = require('rc')('retention', defaults)
 const Item = require('./item')
 const LENGTH = 50
 
@@ -45,13 +48,14 @@ function collectItems (err, resp, data) {
         console.error(`Error getting syllabi search results. Count was ${all_items.length}.`)
         throw err
     }
+
     all_items = all_items.concat(data.results.map(item => new Item(item, options)))
-    items_to_remove = items_to_remove.concat(all_items.filter(item => item.toBeRemoved))
     total = data.available
-    if (count >= total) {
-        // this implies we're finished?
-        console.log(`Total items: ${all_items.length}`)
-        console.log(`Items to remove: ${items_to_remove.length}`)
+
+    // this implies we're finished
+    if (all_items.length >= total) {
+        items_to_remove = all_items.filter(i => i.toBeRemoved)
+        summarize()
     }
 }
 
@@ -65,6 +69,20 @@ searchRequest.get(`${options.url}/api/search/`, (err, resp, data) => {
     while (count < total) {
         console.log(`Getting items ${count + 1} through ${count + LENGTH}...`)
         count += LENGTH
-        searchRequest.get(`${options.url}/api/search/`, { qs: { start: all_items.length } }, collectItems)
+        // @TODO this will fail on a TLS error for very large (>10000) numbers of items
+        searchRequest.get(`${options.url}/api/search/`, { qs: { start: count } }, collectItems)
     }
 })
+
+function summarize() {
+    console.log(`\nTotal items: ${all_items.length}`)
+    console.log(`Items to remove: ${items_to_remove.length}`)
+    console.log('\nReasons why items were retained')
+    // isOldEnough, isntInExcludedCollection, isntHighRated, hasNoAwards
+    console.log(`${'Not old enough:'.padEnd(25)} ${all_items.filter(i => !i.isOldEnough).length}`)
+    console.log(`${'In excluded collection:'.padEnd(25)} ${all_items.filter(i => !i.isntInExcludedCollection).length}`)
+    console.log(`${'Is highly rated:'.padEnd(25)} ${all_items.filter(i => !i.isntHighRated).length}`)
+    console.log(`${'Won an award:'.padEnd(25)} ${all_items.filter(i => !i.hasNoAwards).length}`)
+
+    // @TODO write items_to_remove to JSON file
+}

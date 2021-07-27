@@ -8,9 +8,8 @@ class Item {
         // take openEQUELLA item JSON and construct object from it
         // Object.entries() returns an array of key/value arrays
         Object.entries(item).forEach(pair => this[pair[0]] = pair[1] )
-        let xml = new xmldom().parseFromString(item.metadata)
 
-        this.xml = xml
+        this.xml = new xmldom().parseFromString(item.metadata)
 
         // "this" is undefined within these array methods
         // we explicitly set it to be the object being built

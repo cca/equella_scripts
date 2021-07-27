@@ -1,0 +1,17 @@
+{
+    "url": "https://vault.cca.edu",
+    "token": "insert oauth token here...",
+    "date": "automatic",
+    "exclude_collections": [
+        "9ec74523-e018-4e01-ab4e-be4dd06cdd68",
+        "6b755832-4070-73d2-77b3-3febcc1f5fad",
+        "e5269fd8-c50c-4d28-8420-bd7351e573bc",
+        "7f0ee0e2-bd15-4182-a83a-1b4c69e181f0",
+        "b8852fc5-4423-4bc7-958f-7ea643a0b438",
+        "e96ccf65-0098-44bb-bec0-6e1cd5466046",
+        "db4e60c6-e001-9ef3-5ce5-479f384026a3",
+        "c34be1f4-c3ea-47d9-b336-e39ad6e926f4",
+        "c99a7b30-b877-494d-8cd2-7d860793ee92",
+        "9bd9dea9-8545-4d73-b151-c108ce38b398"
+    ]
+}

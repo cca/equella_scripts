@@ -21,8 +21,6 @@ The defaults are: `length` 50 (no reason to change this, it is the maximum), `co
 
 ## Setup
 
-If you have node you can simply `npm install` the dependencies.
-
 You need an OAuth access token with the ability to search all collections and see items in all states (draft, live, etc). You can either pass this token on the command line as `--token=${token}` or (much easier) add it to a .contribution-countrc config file (see the included example). Any parameter passed on the command line may be added to the configuration file where it will be the default but can be overridden by CLI parameters.
 
 ## LICENSE

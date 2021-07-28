@@ -35,7 +35,16 @@ const params = {
     showall: true
 }
 
-const searchRequest = request.defaults({ headers: headers, json: true, qs: params })
+const searchRequest = request.defaults({
+    headers: headers,
+    json: true,
+    // In node 12 the HTTP library's maxSockets was set to Infinity but this
+    // breaks our script to high numbers of items because it overwhelms VAULT
+    // with so many parallel requests that a TLS error is thrown.
+    // see https://stackoverflow.com/a/12061013
+    pool: { maxSockets: 10 },
+    qs: params
+})
 
 let total = 0
 let count = 0
@@ -69,7 +78,6 @@ searchRequest.get(`${options.url}/api/search/`, (err, resp, data) => {
     while (count < total) {
         console.log(`Getting items ${count + 1} through ${count + LENGTH}...`)
         count += LENGTH
-        // @TODO this will fail on a TLS error for very large (>10000) numbers of items
         searchRequest.get(`${options.url}/api/search/`, { qs: { start: count } }, collectItems)
     }
 })
@@ -85,4 +93,5 @@ function summarize() {
     console.log(`${'Won an award:'.padEnd(25)} ${all_items.filter(i => !i.hasNoAwards).length}`)
 
     // @TODO write items_to_remove to JSON file
+    // @TODO write all_items to a CSV too? for easiest management?
 }

@@ -1,6 +1,6 @@
 /*jshint esversion: 6, node: true */
-const xpath = require('xpath')
 const xmldom = require('xmldom').DOMParser
+const xpath = require('xpath')
 const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, hasNoAwards]
 
 class Item {
@@ -10,6 +10,7 @@ class Item {
         Object.entries(item).forEach(pair => this[pair[0]] = pair[1] )
 
         this.xml = new xmldom().parseFromString(item.metadata)
+        this.title = xpath.select('string(//mods/titleInfo/title)', this.xml)
 
         // "this" is undefined within these array methods
         // we explicitly set it to be the object being built

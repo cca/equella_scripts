@@ -49,7 +49,6 @@ const searchRequest = request.defaults({
 let total = 0
 let count = 0
 let all_items = []
-let items_to_remove = []
 
 // collect items from a request into global array, set total in case it's changed
 function collectItems (err, resp, data) {
@@ -62,13 +61,10 @@ function collectItems (err, resp, data) {
     total = data.available
 
     // this implies we're finished
-    if (all_items.length >= total) {
-        items_to_remove = all_items.filter(i => i.toBeRemoved)
-        summarize()
-    }
+    if (all_items.length >= total) summarize()
 }
 
-// figure out how many syllabi there are & collect them into items arrays
+// figure out how many items there are & collect them into all_items array
 searchRequest.get(`${options.url}/api/search/`, (err, resp, data) => {
     if (err) throw err
 
@@ -83,6 +79,8 @@ searchRequest.get(`${options.url}/api/search/`, (err, resp, data) => {
 })
 
 function summarize() {
+    let items_to_remove = all_items.filter(i => i.toBeRemoved)
+
     console.log(`\nTotal items: ${all_items.length}`)
     console.log(`Items to remove: ${items_to_remove.length}`)
     console.log('\nReasons why items were retained')

@@ -4,7 +4,7 @@ We remove items from the VAULT digital archive that are older than 6 years old a
 
 ## Procedures (WIP)
 
-1. Identify items for removal
+1. Identify items for removal, `node ret.js`
     1. Items must have been contributed at least six years ago
     2. Items must not have markers of significance (awards, "high" rating)
     3. Items must not be in an important collection (Libraries, Syllabus, Accreditation)

@@ -1,6 +1,3 @@
 *.min.js
-utilities/syllabus-download/files/*
-!utilities/syllabus-download/files/.gitkeep
-utilities/syllabus-download/.token
 .equellarc
 utilities/*.json

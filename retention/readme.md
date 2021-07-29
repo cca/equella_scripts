@@ -15,4 +15,4 @@ We remove items from the VAULT digital archive that are older than 6 years old a
 
 Create a JSON .retentionrc file (see the included example) with VAULT's root URL, an OAuth token with access to the appropriate permissions, a cutoff date (in "YYYY-MM-DD" format, which can be set to "auto" or "automatic" to use six years ago), and an array of collection UUIDs to exclude.
 
-We exclude the Art Collection, Assessment & Accreditation Documents, Exhibitions, Faculty Research, Libraries, Libraries' eResources, Open Access Journal Articles, Press Clips, Syllabus Collection, and Web Assets collections.
+We exclude the Art Collection, Assessment & Accreditation Documents, Exhibitions, Faculty Research, Libraries, Libraries' eResources, Open Access Journal Articles, Press Clips, Syllabus Collection, VAULT Documentation, and Web Assets collections.

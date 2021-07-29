@@ -1,6 +1,8 @@
 /*jshint esversion: 6, node: true */
+const CSVStringify = require('csv-stringify/lib/sync')
 const xmldom = require('xmldom').DOMParser
 const xpath = require('xpath')
+
 const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, hasNoAwards]
 
 class Item {
@@ -19,6 +21,24 @@ class Item {
         this.toBeRemoved = CRITERIA.map(c => this[c.name], this).every(b => b)
         this.toBeRetained = !this.toBeRemoved
         this.reasonsRetained = CRITERIA.filter(c => !this[c.name], this).map(fn => fn.name)
+    }
+
+    static CSVHeaderRow = 'link,title,status,created,modified,owner,collaborators,collection,"to remove","reasons retained"\n';
+
+    toCSV() {
+        // meant to serialize multiple records so it expects an array of arrays
+        return CSVStringify([[
+            this.links.view,
+            this.title,
+            this.status,
+            this.createdDate,
+            this.modifiedDate,
+            this.owner.id,
+            this.collaborators.join(', '),
+            this.collection.uuid, // @TODO better to use collection name
+            this.toBeRemoved,
+            this.reasonsRetained.join(', ')
+        ]])
     }
 }
 

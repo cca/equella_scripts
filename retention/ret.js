@@ -1,4 +1,3 @@
-/*jshint esversion: 6, node: true */
 const fs = require('fs')
 const path = require('path')
 

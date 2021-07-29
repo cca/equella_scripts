@@ -1,4 +1,3 @@
-/*jshint esversion: 6, node: true */
 const CSVStringify = require('csv-stringify/lib/sync')
 const xmldom = require('xmldom').DOMParser
 const xpath = require('xpath')

@@ -14,5 +14,7 @@
     "rhino": true,
     "laxcomma": true,
     "eqeqeq": false,
-    "undef": true
+    "undef": true,
+    "node": true,
+    "esversion": 6
 }

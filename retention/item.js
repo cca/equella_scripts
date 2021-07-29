@@ -23,7 +23,7 @@ class Item {
         this.reasonsRetained = CRITERIA.filter(c => !this[c.name], this).map(fn => fn.name)
     }
 
-    static CSVHeaderRow = 'link,title,status,created,modified,owner,collaborators,collection,"to remove","reasons retained"\n';
+    static CSVHeaderRow = 'link,title,status,created,modified,owner,collaborators,collection,"to remove"\n';
 
     toCSV() {
         // meant to serialize multiple records so it expects an array of arrays
@@ -36,8 +36,7 @@ class Item {
             this.owner.id,
             this.collaborators.join(', '),
             this.collection.uuid, // @TODO better to use collection name
-            this.toBeRemoved,
-            this.reasonsRetained.join(', ')
+            this.toBeRemoved
         ]])
     }
 }

@@ -60,15 +60,15 @@ if (standardNo) {
     var type = get('/mods/genreWrapper/genre')
 
     switch (type) {
-        case 'journal article':
-            xml.set('/mods/relatedItem/identifier/@type', 'issn')
-            break;
-        case 'book chapter':
-            xml.set('/mods/relatedItem/identifier/@type', 'isbn')
-            break;
-        default:
-            // if it falls through, do nothing
-            break;
+    case 'journal article':
+        xml.set('/mods/relatedItem/identifier/@type', 'issn')
+        break;
+    case 'book chapter':
+        xml.set('/mods/relatedItem/identifier/@type', 'isbn')
+        break;
+    default:
+        // if it falls through, do nothing
+        break;
     }
 }
 

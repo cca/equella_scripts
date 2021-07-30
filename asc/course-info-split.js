@@ -27,8 +27,8 @@ if (courseInfo != "") {
         var courseTerm = tax.getTerm(courseInfo)
         if (courseTerm !== null) {
             set(cxp +  'XList', courseTerm.getData('XList'))
-    		set(cxp +  'courseName', courseTerm.getData('CrsName'))
-    		set(cxp +  'facultyID', courseTerm.getData('facultyID'))
+            set(cxp +  'courseName', courseTerm.getData('CrsName'))
+            set(cxp +  'facultyID', courseTerm.getData('facultyID'))
         }
     }
 }

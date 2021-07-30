@@ -1,4 +1,3 @@
-/*global xml,data,item */
 /*
 take course info, split faculty string into individual names
 save username of each faculty member in notifications field

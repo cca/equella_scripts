@@ -2,7 +2,7 @@
 // set title & calculate academic division based on department
 // used in the Expert Scripting > Save Script of the Syllabus Collection
 function get (path) {
-	return String(xml.get(path))
+    return String(xml.get(path))
 }
 
 // set title
@@ -19,48 +19,48 @@ xml.set('/mods/titleInfo/title', fullTitle)
 var map = {
     'ANIMA': ['Animation (BFA)', 'Fine Arts'],
     'ARCHT': ['Architecture (BArch)', 'Architecture'],
-	'BARCH': ['Architecture (BArch)', 'Architecture'],
+    'BARCH': ['Architecture (BArch)', 'Architecture'],
     'CERAM': ['Ceramics (BFA)', 'Fine Arts'],
     'COMAR': ['Community Arts (BFA)', 'Fine Arts'],
     'COMIC': ['Comics (MFA)', 'Humanities & Sciences'],
-	// supposedly FYCST now but dept code is still CORES :shrug:
+    // supposedly FYCST now but dept code is still CORES :shrug:
     'CORES': ['First Year Program', 'Humanities & Sciences'],
-	'CRAFT': ['Craft Program', 'Fine Arts'],
-	// NOTE: several depts* had their codes change during the transition to
-	// Workday student in Fall 2019. There's no guarantee that section codes
-	// match department codes in general. The change is why  we have some programs
-	// listed twice and we need to maintain both entries for backwards compatibility.
-	// * Archt BFA, Film BFA, Critical Studies, Diversity Studies, DSMBA
-	'CRTSD': ['Critical Studies Program', 'Humanities & Sciences'],
+    'CRAFT': ['Craft Program', 'Fine Arts'],
+    // NOTE: several depts* had their codes change during the transition to
+    // Workday student in Fall 2019. There's no guarantee that section codes
+    // match department codes in general. The change is why  we have some programs
+    // listed twice and we need to maintain both entries for backwards compatibility.
+    // * Archt BFA, Film BFA, Critical Studies, Diversity Studies, DSMBA
+    'CRTSD': ['Critical Studies Program', 'Humanities & Sciences'],
     'CRTST': ['Critical Studies Program', 'Humanities & Sciences'],
     'CURPR': ['Curatorial Practice (MA)', 'Fine Arts'],
     'DESGN': ['Design (MFA)', 'Design'],
-	// This one should be defunct as of 2021SU, we use DSMBA
+    // This one should be defunct as of 2021SU, we use DSMBA
     'DESST': ['Design Strategy (MBA)', 'Design'],
-	// renamed from "Diversity Studies" 2020FA
-	'DIVST': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
+    // renamed from "Diversity Studies" 2020FA
+    'DIVST': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
     'DIVRS': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
-	'DSMBA': ['Design Strategy (MBA)', 'Design'],
-	'ETHNC': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
+    'DSMBA': ['Design Strategy (MBA)', 'Design'],
+    'ETHNC': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
     'EXTED': ['Extension', 'Extension'],
     'FASHN': ['Fashion Design (BFA)', 'Design'],
     'FILMG': ['Film (MFA)', 'Fine Arts'],
     'FILMS': ['Film (BFA)', 'Fine Arts'],
-	'FILMU': ['Film (BFA)', 'Fine Arts'],
+    'FILMU': ['Film (BFA)', 'Fine Arts'],
     'FINAR': ['Fine Arts (MFA)', 'Fine Arts'],
     'FURNT': ['Furniture (BFA)', 'Design'],
-	'FYCST': ['First Year Program', 'Humanities & Sciences'],
-	// new as of 2021SP @TODO is this a degree-seeking program?
-	'GAMES': ['Game Arts Program', 'Fine Arts'],
+    'FYCST': ['First Year Program', 'Humanities & Sciences'],
+    // new as of 2021SP @TODO is this a degree-seeking program?
+    'GAMES': ['Game Arts Program', 'Fine Arts'],
     'GLASS': ['Glass (BFA)', 'Fine Arts'],
     'GRAPH': ['Graphic Design (BFA)', 'Design'],
-	// new program code 2021SP formerly VISST Visual Studies
-	'HAAVC': ['History of Art and Visual Culture (BFA)', 'Humanities & Sciences'],
+    // new program code 2021SP formerly VISST Visual Studies
+    'HAAVC': ['History of Art and Visual Culture (BFA)', 'Humanities & Sciences'],
     'ILLUS': ['Illustration (BFA)', 'Design'],
     'INDIV': ['Individualized (BFA)', 'Fine Arts'],
     'INDUS': ['Industrial Design (BFA)', 'Design'],
-	// department for UDIST/DIVST/DIVRS sections, exception to many rules
-	'INTDS': ['Interdisciplinary Studies', 'Interdisciplinary Studies'],
+    // department for UDIST/DIVST/DIVRS sections, exception to many rules
+    'INTDS': ['Interdisciplinary Studies', 'Interdisciplinary Studies'],
     'INTER': ['Interior Design (BFA)', 'Architecture'],
     'IXDGR': ['Interaction Design (MDes)', 'Design'],
     'IXDSN': ['Interaction Design (BFA)', 'Design'],
@@ -74,7 +74,7 @@ var map = {
     'SOCPR': ['Social Practice & Public Forms (MA)', 'Fine Arts'],
     'TEXTL': ['Textiles (BFA)', 'Fine Arts'],
     'VISCR': ['Visual & Critical Studies (MA)', 'Humanities & Sciences'],
-	// renamed from "Visual Studies" 2020FA, program code => HAAVC 2021SP
+    // renamed from "Visual Studies" 2020FA, program code => HAAVC 2021SP
     'VISST': ['History of Art & Visual Culture (BFA)', 'Humanities & Sciences'],
     'WRITE': ['Writing (MFA)', 'Humanities & Sciences'],
     'WRLIT': ['Writing & Literature (BFA)', 'Humanities & Sciences']

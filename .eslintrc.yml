@@ -6,6 +6,7 @@ env:
 extends: 'eslint:recommended'
 globals:
     currentItem: readonly
+    data: readonly
     item: readonly
     jQuery: readonly
     logger: readonly

@@ -19,6 +19,6 @@ if (date !== '') {
 
 date = String(xml.get('/mods/origininfo/dateCreatedWrapper/staging'));
 if (date !== '') {
-	year = date.substr(0, 4);
-	xml.set('/mods/origininfo/dateCreatedWrapper/dateCreated');
+    year = date.substr(0, 4);
+    xml.set('/mods/origininfo/dateCreatedWrapper/dateCreated');
 }

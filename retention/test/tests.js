@@ -8,11 +8,12 @@ const defaults = {
 const options = require('rc')('retention', defaults)
 const Item = require('../item.js')
 const items = {
+    award: require('./fixtures/award.json'),
+    excluded: require('./fixtures/excluded-collection.json'),
+    highRated: require('./fixtures/high-rating.json'),
     old: require('./fixtures/old-item.json'),
     recent: require('./fixtures/recent-item.json'),
-    excluded: require('./fixtures/excluded-collection.json'),
-    // highRatedItem: require('./fixtures/high-rated-item.json'),
-    // awardedItem: require('./fixtures/awarded-item.json'),
+    untitled: require('./fixtures/untitled.json'),
 }
 
 describe('Item', () => {
@@ -30,7 +31,23 @@ describe('Item', () => {
         assert.equal(excluded.isntInExcludedCollection, false)
         assert.equal(excluded.toBeRemoved, false)
     })
+
+    it('should not remove items with rating = "high"', () => {
+        const highRated = new Item(items.highRated, options)
+        assert.equal(highRated.toBeRemoved, false)
+    })
+
+    it('should not remove items that have won awards', () => {
+        const award = new Item(items.award, options)
+        assert.equal(award.toBeRemoved, false)
+    })
+
+    it('should be able to handle items with & without titles', () => {
+        const untitled = new Item(items.untitled, options)
+        const old = new Item(items.old, options)
+        assert.equal(untitled.title, '')
+        assert.ok(old.title)
+    })
 })
 
-// @TODO parse item with no title, title, the 2 other fixtures, CSV serializer,
-// reasonse retained list
+// @TODO CSV serializer, reasons retained list

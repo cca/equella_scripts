@@ -1,10 +1,10 @@
 {
   "uuid": "28e93032-7a82-1caa-8c2e-300f22159dcc",
   "version": 1,
-  "metadata": "<xml><mods><titleInfo><title>Recent Item</title></titleInfo></mods></xml>",
+  "metadata": "<xml><mods><titleInfo><title>Award-winning Item</title></titleInfo></mods><local><award>Number One Best Item Ever</award></local></xml>",
   "status": "live",
-  "createdDate": "2020-01-31T16:02:44.832-08:00",
-  "modifiedDate": "2020-01-31T16:32:37.470-08:00",
+  "createdDate": "2012-01-31T16:02:44.832-08:00",
+  "modifiedDate": "2012-01-31T16:32:37.470-08:00",
   "owner": {
     "id": "cfbe6c26-cf49-c679-bd90-ebdbe22d84f1"
   },

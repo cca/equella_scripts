@@ -1,0 +1,21 @@
+{
+  "uuid": "28e93032-7a82-1caa-8c2e-300f22159dcc",
+  "version": 1,
+  "metadata": "<xml><mods><titleInfo><title>Recent Item in Excluded Collection</title></titleInfo></mods></xml>",
+  "status": "live",
+  "createdDate": "2020-01-31T16:02:44.832-08:00",
+  "modifiedDate": "2020-01-31T16:32:37.470-08:00",
+  "owner": {
+    "id": "cfbe6c26-cf49-c679-bd90-ebdbe22d84f1"
+  },
+  "collaborators": [],
+  "collection": {
+    "uuid": "9ec74523-e018-4e01-ab4e-be4dd06cdd68"
+  },
+  "rating": -1,
+  "thumbnail": "default",
+  "links": {
+    "view": "https://vault.cca.edu/items/28e93032-7a82-1caa-8c2e-300f22159dcc/1/",
+    "self": "https://vault.cca.edu/api/item/28e93032-7a82-1caa-8c2e-300f22159dcc/1/"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "uuid": "28e93032-7a82-1caa-8c2e-300f22159dcc",
+  "version": 1,
+  "metadata": "<xml><mods><titleInfo><title>Comma, in, this, title</title></titleInfo></mods></xml>",
+  "status": "suspended",
+  "createdDate": "2012-01-31T16:02:44.832-08:00",
+  "modifiedDate": "2012-01-31T16:32:37.470-08:00",
+  "owner": {
+    "id": "cfbe6c26-cf49-c679-bd90-ebdbe22d84f1"
+  },
+  "collaborators": [],
+  "collection": {
+    "uuid": "6b755832-4070-73d2-77b3-3febcc1f5fad"
+  },
+  "rating": -1,
+  "thumbnail": "default",
+  "links": {
+    "view": "https://vault.cca.edu/items/28e93032-7a82-1caa-8c2e-300f22159dcc/1/",
+    "self": "https://vault.cca.edu/api/item/28e93032-7a82-1caa-8c2e-300f22159dcc/1/"
+  }
+}

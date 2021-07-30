@@ -32,7 +32,7 @@ el = 'dateCreated'
 // ID of Power Search, first letter will be "P"
 id = 'Pc121f09c-8ea9-4bc9-90bf-8467c37a4ec4'
 
-url = stem + encodeURIComponent(xmltpl).replace('REPLACE', `%3C${el}%3E\$\{${el}\}%3C%2F${el}%3E`) + `&in=${id}&${params}`
+url = stem + encodeURIComponent(xmltpl).replace('REPLACE', `%3C${el}%3E$\{${el}}%3C%2F${el}%3E`) + `&in=${id}&${params}`
 
 pbcopy.stdin.write(url)
 pbcopy.stdin.end()

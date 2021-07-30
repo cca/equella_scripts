@@ -77,7 +77,7 @@ function collectionCount(items) {
         uuids.sort((a, b) => {
             return counts[b].count - counts[a].count
         }).forEach(uuid => {
-           console.log(`${counts[uuid].name.padEnd(40)} \t${counts[uuid].count}`);
+            console.log(`${counts[uuid].name.padEnd(40)} \t${counts[uuid].count}`);
         });
     })
 }

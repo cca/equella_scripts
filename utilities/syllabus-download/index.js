@@ -102,7 +102,7 @@ function getFile (item, callback) {
                     }
                     let extension = attachment.filename.split('.').pop()
                     let filename = [section, (index ? ` (${index})` : ''), '.', extension].join('')
-                    filename = filename.replace(/[\/\\:]/g, "_")
+                    filename = filename.replace(/[/\\:]/g, "_")
                     req.pipe(fs.createWriteStream(path.join('files', filename)))
                 })
                 .on('error', err => {

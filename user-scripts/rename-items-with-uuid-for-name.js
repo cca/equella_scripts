@@ -1,4 +1,3 @@
-/* global xml */
 // a lot of items end up with their UUID as a name if their collection
 // Wizard doesn't use the metadata schema's title node
 // this script iterates over them & sets their title to whatever nodes

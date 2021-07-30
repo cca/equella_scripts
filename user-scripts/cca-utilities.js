@@ -1,4 +1,3 @@
-/* global item,xml,logger,currentItem,utils,user */
 // user script module of handy methods
 // see the EQUELLA 6.3 Feature Guide PDF for details on how this works
 
@@ -7,10 +6,10 @@
 // alongside the item ID & version
 function log () {
     var msg = [
-            'SCRIPT:',
-            'item', item.getUuid() + '/' + item.getVersion()
-            // oh you want to see some JavaScript? here's some JavaScript
-        ].concat(Array.prototype.slice.call(arguments)).join(' ')
+        'SCRIPT:',
+        'item', item.getUuid() + '/' + item.getVersion()
+        // oh you want to see some JavaScript? here's some JavaScript
+    ].concat(Array.prototype.slice.call(arguments)).join(' ')
 
     logger.log(msg)
 }
@@ -36,7 +35,6 @@ function reowner () {
     var exp = 'item/history/edit'
     var contributor = fullXml.get(cxp)
     var editor = fullXml.get(exp)
-    var id = currentItem.getUuid()
     var reassign = function (username) {
         if (username) {
             // verify that we have a valid user account

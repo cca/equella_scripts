@@ -1,4 +1,3 @@
-/* global currentItem,xml,user */
 // after upgrading to EQUELLA 6.3 we saw a bug wherein
 // calls to xml.set in the On-Load Script pane of an ASC
 // wouldn't persist metadata to the item's record. This

@@ -4,6 +4,13 @@ env:
   es2021: true
   node: true
 extends: 'eslint:recommended'
+globals:
+    currentItem: readonly
+    item: readonly
+    jQuery: readonly
+    logger: readonly
+    user: readonly
+    xml: readonly
 parserOptions:
   ecmaVersion: 12
 rules:

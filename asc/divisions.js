@@ -33,7 +33,7 @@ var map = {
     // * Archt BFA, Film BFA, Critical Studies, Diversity Studies, DSMBA
     'CRTSD': ['Critical Studies Program', 'Humanities & Sciences'],
     'CRTST': ['Critical Studies Program', 'Humanities & Sciences'],
-    'CURPR': ['Curatorial Practice (MA)', 'Fine Arts'],
+    'CURPR': ['Curatorial Practice (MA)', 'Humanities & Sciences'],
     'DESGN': ['Design (MFA)', 'Design'],
     // This one should be defunct as of 2021SU, we use DSMBA
     'DESST': ['Design Strategy (MBA)', 'Design'],

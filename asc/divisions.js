@@ -37,11 +37,12 @@ var map = {
     'DESGN': ['Design (MFA)', 'Design'],
     // This one should be defunct as of 2021SU, we use DSMBA
     'DESST': ['Design Strategy (MBA)', 'Design'],
-    // renamed from "Diversity Studies" 2020FA
+    // renamed from "Diversity Studies" 2021FA
     'DIVST': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
     'DIVRS': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
     'DSMBA': ['Design Strategy (MBA)', 'Design'],
-    'ETHNC': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
+    'ETHSM': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
+    'ETHST': ['Critical Ethnic Studies Program', 'Humanities & Sciences'],
     'EXTED': ['Extension', 'Extension'],
     'FASHN': ['Fashion Design (BFA)', 'Design'],
     'FILMG': ['Film (MFA)', 'Fine Arts'],
@@ -75,7 +76,7 @@ var map = {
     'TEXTL': ['Textiles (BFA)', 'Fine Arts'],
     'VISCR': ['Visual & Critical Studies (MA)', 'Humanities & Sciences'],
     // renamed from "Visual Studies" 2020FA, program code => HAAVC 2021SP
-    'VISST': ['History of Art & Visual Culture (BFA)', 'Humanities & Sciences'],
+    'VISST': ['History of Art and Visual Culture (BFA)', 'Humanities & Sciences'],
     'WRITE': ['Writing (MFA)', 'Humanities & Sciences'],
     'WRLIT': ['Writing & Literature (BFA)', 'Humanities & Sciences']
 }

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-//jshint node:true
 // useful for finding location of files on server, location is
 // {{data dir}}/Institutions/cca2012/Attachments/${hashCode(uuid)}/${uuid}/${version}
 var hashCode = function(str){

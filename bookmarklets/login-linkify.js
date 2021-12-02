@@ -1,4 +1,3 @@
-/*jshint browser:true */
 /*
  * Bookmarklet to copy current VAULT page URL as link sent through
  * login redirect. Run `npm run login-link` to create it & copy to

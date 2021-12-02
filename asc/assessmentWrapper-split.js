@@ -9,7 +9,7 @@
 // but we want to record parsed out individual nodes, too.
 
 var xp = 'local/assessmentWrapper'
-// adding support for _multiple_ reviews on one item
+// @TODO support for _multiple_ reviews on one item
 var stagings = xml.list(xp + '/staging').listIterator()
 // wipe out the assessment nodes we'll populate below
 xml.deleteAll('local/accreditation')

@@ -2,11 +2,11 @@
   "name": "equella_scripts",
   "version": "1.0.0",
   "description": "scripts for working with EQUELLA",
-  "main": "none",
   "scripts": {
     "contrib-wiz": "uglifyjs bookmarklets/link-to-contrib-wizard.js -c -m -o cw.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat cw.min.js)\" | sed -e 's/^/javascript:/' | pbcopy",
     "login-link": "uglifyjs bookmarklets/login-linkify.js -c -m -o ll.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat ll.min.js)\" | sed -e 's/^/javascript:/' | pbcopy",
-    "test": "mocha retention/test"
+    "test": "mocha retention/test",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -23,10 +23,6 @@
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
     "eslint": "^7.31.0",
-    "grunt": "^1.3.0",
-    "grunt-cli": "^1.3.2",
-    "grunt-contrib-jshint": "^3.0.0",
-    "load-grunt-tasks": "^5.1.0",
     "mocha": "^9.0.3"
   },
   "dependencies": {

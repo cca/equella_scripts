@@ -1,4 +1,4 @@
-const CSVStringify = require('csv-stringify/lib/sync')
+const CSVStringify = require('csv-stringify/sync').stringify
 const xmldom = require('xmldom').DOMParser
 const xpath = require('xpath')
 

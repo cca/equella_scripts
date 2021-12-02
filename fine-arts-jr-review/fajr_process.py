@@ -65,6 +65,7 @@ def map_major(major):
         'ILLUS.BFA': 'Illustration (BFA)',
         # 'INACT.MFA': '',
         'INDIV.BFA': 'Individualized (BFA)',
+        'Individualized Studies': 'Individualized (BFA)',
         'INDUS.BFA': 'Industrial Design (BFA)',
         'INDUS.MFA': 'Industrial Design (MFA)',
         'INTER.BFA': 'Interior Design (BFA)',
@@ -97,7 +98,7 @@ def map_major(major):
     elif "(double major)" in major:
         return major
     else:
-        raise Exception('Cannot translate degree code {} into major! Check the mappings.'.format(major))
+        raise Exception('Cannot translate degree code "{}" into major! Check the mappings.'.format(major))
 
 
 def main(args):

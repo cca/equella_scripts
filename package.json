@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "eslint": "^7.31.0",
+    "eslint": "^8.3.0",
     "mocha": "^9.0.3"
   },
   "dependencies": {

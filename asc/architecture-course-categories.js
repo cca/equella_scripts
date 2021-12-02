@@ -29,7 +29,7 @@ if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Course work')) {
             // necessary for notifications to go to out to everyone
             var ids = courseTerm.getData('facultyID').split(', ')
             xml.deleteAll('local/courseInfo/facultyID')
-            for (var i =0; i < ids.length; i++) {
+            for (var i = 0; i < ids.length; i++) {
                 xml.add('local/courseInfo/facultyID', ids[i])
             }
         }
@@ -90,6 +90,7 @@ if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Course work')) {
     ]
 
     // is it in the list of studio courses? set courseCategory then
+    // eslint-disable-next-line no-redeclare
     for (var i = 0; i < studioCourses.length; i++) {
         // works for 3- & 4-digit (e.g. ARCHT-1000) course codes
         if (courseName.indexOf(studioCourses[i]) !== -1 ||
@@ -116,10 +117,10 @@ if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Course work')) {
     }
 
     // parse out zipped attachments into repeaters for tagging of individual files
-    var iter = xml.list('/local/staging/file').listIterator()
-    while (iter.hasNext()) {
-        var index = iter.nextIndex()
-        set('/mods/part[' + index + ']/number', iter.next())
+    var staging = xml.list('/local/staging/file').listIterator()
+    while (staging.hasNext()) {
+        var index = staging.nextIndex()
+        set('/mods/part[' + index + ']/number', staging.next())
     }
 }
 
@@ -127,7 +128,7 @@ if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Course work')) {
 if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Junior review')) {
     var iter = xml.list('/local/juniorReviewWrapper/stagingWrapper/file').listIterator()
     while (iter.hasNext()) {
-        var index = iter.nextIndex()
-        set('/local/juniorReviewWrapper/fileWrapper[' + index + ']/file', iter.next())
+        var idx = iter.nextIndex()
+        set('/local/juniorReviewWrapper/fileWrapper[' + idx + ']/file', iter.next())
     }
 }

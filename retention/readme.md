@@ -8,7 +8,7 @@ We remove items from the VAULT digital archive that are older than 6 years old a
     1. Items must have been contributed at least six years ago
     2. Items must not have markers of significance (awards, "high" rating)
     3. Items must not be in an important collection (Libraries, Syllabus, Accreditation)
-2. Reach out to item owners with instructions on downloading their works (@TODO: write and publish this document, probably on Portal?)
+2. Reach out to item owners with instructions on downloading their works
 3. Wait six months and then bulk remove the identified items
 
 ## Configuration

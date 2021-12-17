@@ -1,5 +1,4 @@
-// this scripts splits the course taxonomy into separate metadata nodes
-//
+// this script splits the course taxonomy into separate metadata nodes
 // it's very common to ask users to select their section from a COURSE LIST
 // taxonomy structured like so: SEMESTER\COURSE\FACULTY\SECTION
 // this parses that tree out & inserts into pertinent local/courseInfo nodes

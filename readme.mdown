@@ -8,7 +8,7 @@ Various scripts used in VAULT (our openEQUELLA instance). The scripts are catego
 
 **fine-arts-jr-review** is a script for biannual updates to certain data in oE.
 
-**retention** scripts are tools for applying the VAULT Retention Policy.
+**retention** scripts are tools for applying the [VAULT Retention Policy](https://portal.cca.edu/essentials/technology-services/web-services/vault/vault-retention-policy/).
 
 **user-scripts** contains bulk metadata update tools meant to be run from the _Manage Resources_ section.
 

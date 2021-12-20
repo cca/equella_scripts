@@ -5,13 +5,13 @@ Download all items matching a search into a CSV with selected metadata nodes inc
 ```sh
 >  # example of downloading from a specific collection
 > node index --collections=5e6a957b-80d4-4dee-9081-7186586fbbe5
-> # getting Hamaguchi items from within Libraries collection, only 2nd part is necessary
-> node index --collections=6b755832-4070-73d2-77b3-3febcc1f5fad --where="/xml/mods/relatedItem/title = 'Hamaguchi Study Print Collection'"
+> # getting Hamaguchi items from within Libraries collection
+> node index --where="/xml/mods/relatedItem/title = 'Hamaguchi Study Print Collection'"
 ```
 
 Any of the parameters you can pass to the openEQUELLA Search API route are accepted on the command line: https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
 
-Secondly, write a JSON map of XML paths to CSV column headers. An example, "metadata-map.json", is included and it covers the basics, but the XML collections can differ so it needs to be adapted.
+Secondly, write a JSON map of XML paths to CSV column headers. An example, "metadata-map.json", is included and it covers the basics, but the metadata of our collections can differ so it needs to be adapted.
 
 ## To Do / Questions
 

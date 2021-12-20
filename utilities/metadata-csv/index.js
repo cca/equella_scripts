@@ -76,7 +76,7 @@ function writeCSV(items) {
         'Collaborators',
         'Collection'
     ].concat(Object.values(metadataMap))
-    console.log(CSVStringify([header]))
+    console.log(CSVStringify([header]).trim())
 
     items.forEach(item => {
         let xml = new xmldom().parseFromString(item.metadata)
@@ -97,7 +97,7 @@ function writeCSV(items) {
             item.collection.uuid
         ].concat(strings)
         // stringify expects an array of row arrays
-        console.log(CSVStringify([row]))
+        console.log(CSVStringify([row]).trim())
     })
 }
 

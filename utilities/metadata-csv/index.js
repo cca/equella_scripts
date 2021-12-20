@@ -12,7 +12,7 @@ const xpath = require('xpath')
 
 let defaults = {
     count: 200,
-    info: 'attachment,detail,metadata',
+    info: 'attachment,basic,detail,metadata',
     length: 50,
     metadataMap: "./metadata-map.json",
     order: "modified",
@@ -88,7 +88,7 @@ function writeCSV(items) {
         })
         let row = [
             item.links.view,
-            item.title,
+            item.name,
             item.status,
             item.createdDate,
             item.modifiedDate,

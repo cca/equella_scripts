@@ -101,7 +101,7 @@ function writeOutput(items) {
     })
 
     const JSONFile = path.join('data', `${TODAY}-all.json`)
-    fs.writeFile(JSONFile, JSON.stringify(items.map(i => i.toJSON())), err => {
+    fs.writeFile(JSONFile, JSON.stringify(items.map(i => i.toJSON()), null, 2), err => {
         if (err) throw err
         console.log(`Wrote JSON of all items to ${JSONFile}`)
     })

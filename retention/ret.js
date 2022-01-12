@@ -87,16 +87,22 @@ function summarize() {
     console.log(`${'Is highly rated:'.padEnd(25)} ${all_items.filter(i => !i.isntHighRated).length}`)
     console.log(`${'Won an award:'.padEnd(25)} ${all_items.filter(i => !i.hasNoAwards).length}\n`)
 
-    createOutputFile(items_to_remove)
+    writeOutput(items_to_remove)
 }
 
-function createOutputFile(items) {
+function writeOutput(items) {
     const TODAY = new Date().toISOString().substring(0, 10)
 
     // write all_items to a CSV, for import into Google Sheets
-    let CSVFile = path.join('data', `${TODAY}-all.csv`)
-    fs.writeFile(CSVFile, Item.CSVHeaderRow + items.map(i => i.toCSV()).join(''), (err) => {
+    const CSVFile = path.join('data', `${TODAY}-all.csv`)
+    fs.writeFile(CSVFile, Item.CSVHeaderRow + items.map(i => i.toCSV()).join(''), err => {
         if (err) throw err
         console.log(`Wrote CSV of all items to ${CSVFile}`)
+    })
+
+    const JSONFile = path.join('data', `${TODAY}-all.json`)
+    fs.writeFile(JSONFile, JSON.stringify(items.map(i => i.toJSON())), err => {
+        if (err) throw err
+        console.log(`Wrote JSON of all items to ${JSONFile}`)
     })
 }

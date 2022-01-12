@@ -62,4 +62,9 @@ describe('Item', () => {
         // ends in a newline
         assert.equal(csv.match(/\n$/)[0], '\n')
     })
+
+    it('should serialize to JSON', () => {
+        assert.ok(JSON.stringify(items.commaInTitle.toJSON()))
+        assert.ok(JSON.stringify(items.recentAndExcluded.toJSON()))
+    })
 })

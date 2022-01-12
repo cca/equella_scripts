@@ -8,7 +8,7 @@ class Item {
     constructor(item, options) {
         // take openEQUELLA item JSON and construct object from it
         // Object.entries() returns an array of key/value arrays
-        Object.entries(item).forEach(pair => this[pair[0]] = pair[1] )
+        Object.entries(item).forEach(pair => this[pair[0]] = pair[1])
 
         this.xml = new xmldom().parseFromString(item.metadata)
         this.title = xpath.select('string(//mods/titleInfo/title)', this.xml)
@@ -39,6 +39,17 @@ class Item {
             this.collection.uuid, // @TODO better to use collection name
             this.toBeRemoved
         ]])
+    }
+
+    // JSON.stringify(Item) doesn't work because of the XML object
+    toJSON() {
+        let obj = {}
+        Object.entries(this).forEach(pair => obj[pair[0]] = pair[1])
+        // delete obj.CSVHeaderRow
+        // delete obj.toCSV
+        // delete obj.toJSON
+        obj.xml = obj.xml.toString()
+        return obj
     }
 }
 

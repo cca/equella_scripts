@@ -7,6 +7,7 @@ const defaults = {
 }
 const options = require('rc')('retention', defaults)
 const Item = require('../item.js')
+const contact = require('../contact')
 const items = {
     award: new Item(require('./fixtures/award.json'), options),
     commaInTitle: new Item(require('./fixtures/comma-in-title.json'), options),
@@ -66,5 +67,17 @@ describe('Item', () => {
     it('should serialize to JSON', () => {
         assert.ok(JSON.stringify(items.commaInTitle.toJSON()))
         assert.ok(JSON.stringify(items.recentAndExcluded.toJSON()))
+    })
+})
+
+describe('Contact', () => {
+    it('group multiple items by the same owner', () => {
+        // award owned by ephetteplace, other 2 owned by same UUID user
+        const list = [items.award.toJSON(), items.recent.toJSON(), items.recentAndExcluded.toJSON()]
+        const itemsGroupedByOwner = contact.groupByOwner(list)
+        assert.ok(itemsGroupedByOwner)
+        assert.equal(itemsGroupedByOwner[items.award.owner.id].length, 1)
+        assert.equal(itemsGroupedByOwner[items.award.owner.id][0].uuid, items.award.toJSON().uuid)
+        assert.equal(itemsGroupedByOwner[items.recent.owner.id].length, 2)
     })
 })

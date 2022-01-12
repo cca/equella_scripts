@@ -3,7 +3,7 @@ const path = require('path')
 
 const request = require('request')
 const xpath = require('xpath')
-const xmldom = require('xmldom').DOMParser
+const xmldom = require('@xmldom/xmldom').DOMParser
 const async = require('async')
 const options = require('rc')('facfiles')
 const LENGTH = 50

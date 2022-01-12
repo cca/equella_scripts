@@ -1,5 +1,5 @@
 const CSVStringify = require('csv-stringify/sync').stringify
-const xmldom = require('xmldom').DOMParser
+const xmldom = require('@xmldom/xmldom').DOMParser
 const xpath = require('xpath')
 
 const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, hasNoAwards]

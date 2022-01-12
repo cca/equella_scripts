@@ -7,7 +7,7 @@ const qs = require("qs")
 
 const CSVStringify = require('csv-stringify/sync').stringify
 const request = require("request")
-const xmldom = require('xmldom').DOMParser
+const xmldom = require('@xmldom/xmldom').DOMParser
 const xpath = require('xpath')
 
 let defaults = {

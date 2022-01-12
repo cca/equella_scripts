@@ -14,5 +14,7 @@
         "c99a7b30-b877-494d-8cd2-7d860793ee92",
         "9bd9dea9-8545-4d73-b151-c108ce38b398",
         "a5ccf44c-de97-4b47-ae31-428216b182d6"
-    ]
+    ],
+    "smtp_user": "email@example.com",
+    "smpt_pass": "sup3r S3CRET pAssw0rd"
 }

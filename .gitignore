@@ -1,3 +1,4 @@
 *.min.js
 .equellarc
+.testretentionrc
 utilities/*.json

@@ -1,5 +1,13 @@
+const fs = require('fs')
 const nodemailer = require('nodemailer')
-const options = require('rc')('retention')
+let options = require('rc')('retention')
+const Item = require('./item')
+
+// tests run from root with a different rc file
+// so if we're testing, we load the test configuration
+if (options._[0] === 'retention/test') {
+    options = JSON.parse(fs.readFileSync('.testretentionrc'))
+}
 
 // see https://nodemailer.com/usage/using-gmail/
 // @TODO we probably want to use Mailgun instead of Gmail
@@ -25,9 +33,11 @@ function groupByOwner(items) {
 }
 
 function mailUser(username, items) {
+    // @TODO we will have to skip UUID users somewhere...
     let items_html = "<ul>"
-    items_html += items.reduce((output, item) => {
-        output += `<li><a href="${item.links.view}">${item.title}</a>`
+    items_html += items.reduce((accumulator, item) => {
+        accumulator += `<li><a href="${item.links.view}">${item.title}</a>`
+        return accumulator
     }, '')
     items_html += "</ul>"
 
@@ -40,16 +50,14 @@ function mailUser(username, items) {
         html: `<p>Hello,</p><p>[ insert VAULT retention info here ].</p><p>List of items:</p>${items_html}`
     }
 
-    console.log(`Emailing ${username} about their ${items.length} items to be removed.`)
+    if (options.verbose || options.v) {
+        console.log(`Emailing ${username} about their ${items.length} items to be removed.`)
+    }
 
-    transporter.sendMail(msg, (err, info) => {
-        if (err) console.error(err)
-        // @TODO don't need to log all this info
-        console.log(info)
-    })
+    return transporter.sendMail(msg)
 }
 
-function main() {
+async function main() {
     if (!options.file) {
         throw Error("Error: must specify a JSON file of items.")
     }
@@ -57,14 +65,23 @@ function main() {
     // @TODO we need a way to do this piecemeal rather than send out
     // thousands of emails at once, either by splitting up the input
     // files or having a limit parameter in this file
-    const items = require(options.file)
-    const itemsGroupedByOwner = groupByOwner(items)
-    Object.keys(itemsGroupedByOwner).forEach(owner => {
-        mailUser(owner, itemsGroupedByOwner[owner])
-    })
+    let items = JSON.parse(fs.readFileSync(options.file, { encoding: 'utf-8' }))
+    if (Array.isArray(items)) {
+        items = items.map(i => new Item(i, options))
+        let itemsGroupedByOwner = groupByOwner(items)
+        Object.keys(itemsGroupedByOwner).forEach(async owner => {
+            let result = await mailUser(owner, itemsGroupedByOwner[owner])
+            console.log(result)
+        })
+    } else {
+        // just a single item
+        let result = await mailUser(items.owner.id, [new Item(items, options)])
+        console.log(result)
+    }
 }
 
 exports.groupByOwner = groupByOwner
+exports.mailUser = mailUser
 
 if (require.main === module) {
     main()

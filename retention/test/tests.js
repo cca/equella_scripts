@@ -1,11 +1,11 @@
 /* globals describe,it */
 const assert = require('assert')
+const fs = require('fs')
 
-const defaults = {
-    date: '2015-07-01',
-    exclude_collections: ["9ec74523-e018-4e01-ab4e-be4dd06cdd68"]
-}
-const options = require('rc')('retention', defaults)
+// NOTE: requires a separate config file for tests that's
+// _in the root_ of this project (since `npm test` runs from root)
+// see example.testretentionrc & fill in token & SMTP credentials
+const options = require('rc')('testretention')
 const Item = require('../item.js')
 const contact = require('../contact')
 const items = {
@@ -79,5 +79,24 @@ describe('Contact', () => {
         assert.equal(itemsGroupedByOwner[items.award.owner.id].length, 1)
         assert.equal(itemsGroupedByOwner[items.award.owner.id][0].uuid, items.award.toJSON().uuid)
         assert.equal(itemsGroupedByOwner[items.recent.owner.id].length, 2)
+    })
+
+    it('sends an email to the owner', async () => {
+        let result = await contact.mailUser(items.award.owner.id, [items.award.toJSON()])
+        // nodemailer result looks like
+        // {
+        //     accepted: [ 'ephetteplace@cca.edu' ],
+        //     rejected: [],
+        //     envelopeTime: 231,
+        //     messageTime: 739,
+        //     messageSize: 512,
+        //     response: '250 2.0.0 OK  1642091984 z24sm9037572pjq.17 - gsmtp',
+        //     envelope: { from: 'vault@cca.edu', to: [ 'ephetteplace@cca.edu' ] },
+        //     messageId: '<6b43ec3b-6a16-16db-6ccb-1f5324984827@cca.edu>'
+        // }
+        assert.equal(items.award.owner.id + "@cca.edu", result.accepted[0])
+        // response codes that start with a "2" generally indicate success
+        // https://en.wikipedia.org/wiki/List_of_SMTP_server_return_codes
+        assert.equal('2', result.response.substring(0, 1))
     })
 })

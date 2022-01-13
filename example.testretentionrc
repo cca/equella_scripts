@@ -1,0 +1,10 @@
+{
+    "url": "https://vault.cca.edu",
+    "token": "111111....",
+    "date": "2015-07-01",
+    "exclude_collections": [
+        "9ec74523-e018-4e01-ab4e-be4dd06cdd68"
+    ],
+    "smtp_user": "email@example.com",
+    "smtp_pass": "SuperSecretPassword"
+}

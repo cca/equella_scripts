@@ -55,7 +55,12 @@ function mailUser(username, items) {
         replyTo: "vault@cca.edu",
         to: `${username}@cca.edu`,
         subject: "VAULT Retention Test",
-        html: `<p>Hello,</p><p>[ insert VAULT retention info here ].</p><p>List of items:</p>${items_html}`
+        html: `<p>Hello,</p>
+        <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. You can <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items must be downloaded one-by-one, we apologize for any inconvenience this causes.</p>
+        <p>List of items to be removed:</p>${items_html}
+        <p>Sincerely,<br>CCA Libraries<br>https://libraries.cca.edu&nbsp;|&nbsp;vault@cca.edu</p>
+        <p><img height="48px" width="197px" src="https://www.cca.edu/sites/default/files/images/cca-logotype-394.png" style="border:0px;vertical-align:middle"></p>
+        <p>1111 8th St | San Francisco, CA | 94107</p><p><i>CCA is situated on the traditional unceded lands of the Ohlone peoples.</i></p>`
     }
 
     if (options.verbose || options.v) {

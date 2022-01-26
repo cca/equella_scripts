@@ -25,6 +25,14 @@ function groupByOwner(items) {
     let output = {}
     items.forEach(item => {
         if (Object.prototype.hasOwnProperty.call(output, item.owner.id)) {
+            // some items have no owner (because the account was deleted)
+            // https://vault.cca.edu/items/0729ca6a-7469-480e-82aa-8facc1e7e2aa/1/
+            if (item.owner.id.trim() === "") {
+                if (options.verbose || options.v) {
+                    console.log(`Item ${item.links.view} has no owner, no notification email will be sent.`)
+                }
+                return null
+            }
             return output[item.owner.id].push(item)
         }
         output[item.owner.id] = [item]

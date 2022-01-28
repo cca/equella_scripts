@@ -1,35 +1,32 @@
 const fs = require('fs')
+const https = require('https')
 
-const request = require('request')
+const fetch = require('node-fetch')
 const options = require('rc')('retention')
 
+const agent = new https.Agent({
+    keepAlive: true,
+    maxSockets: 10
+})
 const headers = {
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
 }
-const http = request.defaults({
-    headers: headers,
-    // In node 12 the HTTP library's maxSockets was set to Infinity but this
-    // breaks our script to high numbers of items because it overwhelms VAULT
-    // with so many parallel requests that a TLS error is thrown.
-    // see https://stackoverflow.com/a/12061013
-    pool: { maxSockets: 10 },
-})
 
 function deleteItem(item) {
     // @TODO handle locked items
     // https://vault.cca.edu/apidocs.do#operations-tag-Item_locks
     // https://vault.cca.edu/apidocs.do#operations-Items-deleteItem
-    http.del(`${options.url}/api/item/${item.uuid}/${item.version}`, { headers: headers }, (err, resp, body) => {
-        if (err) {
-            console.error(`Error deleting item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
-            console.error(err)
-        } else {
-            if (options.verbose || options.v) {
+    return fetch(`${options.url}/api/item/${item.uuid}/${item.version}`, { agent: agent, headers: headers, method: 'DELETE' })
+        .then(res => {
+            if (res.ok && (options.verbose || options.v)) {
                 console.log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
             }
-        }
-    })
+        })
+        .catch(err => {
+            console.error(`Error deleting item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+            console.error(err)
+        })
 }
 
 function main() {

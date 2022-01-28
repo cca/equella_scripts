@@ -2,12 +2,15 @@
 const assert = require('assert')
 const fs = require('fs')
 
+const fetch = require('node-fetch')
+
 // NOTE: requires a separate config file for tests that's
 // _in the root_ of this project (since `npm test` runs from root)
 // see example.testretentionrc & fill in token & SMTP credentials
 const options = require('rc')('testretention')
 const Item = require('../item.js')
 const contact = require('../contact')
+const del = require('../del')
 const items = {
     award: new Item(require('./fixtures/award.json'), options),
     commaInTitle: new Item(require('./fixtures/comma-in-title.json'), options),
@@ -19,7 +22,7 @@ const items = {
     untitled: new Item(require('./fixtures/untitled.json'), options),
 }
 
-describe('Item', () => {
+describe('Identify items', () => {
     it('should mark for removal items that are old enough', () => {
         assert.equal(items.old.isOldEnough, true)
         assert.equal(items.old.toBeRemoved, true)
@@ -70,7 +73,7 @@ describe('Item', () => {
     })
 })
 
-describe('Contact', () => {
+describe('Contact owner', () => {
     it('group multiple items by the same owner', () => {
         // award owned by ephetteplace, other 2 owned by same UUID user
         const list = [items.award.toJSON(), items.recent.toJSON(), items.recentAndExcluded.toJSON()]
@@ -98,5 +101,62 @@ describe('Contact', () => {
         // response codes that start with a "2" generally indicate success
         // https://en.wikipedia.org/wiki/List_of_SMTP_server_return_codes
         assert.equal('2', result.response.substring(0, 1))
+    })
+})
+
+// lock a test item, then test unlocking and deleting it
+describe('Delete item', () => {
+    let headers = {
+        'Accept': 'application/json',
+        'X-Authorization': 'access_token=' + options.token
+    }
+    // note that the del methods expect an item hash, not a URL
+    let testItem = { uuid: options.test_item_uuid, version: 1 }
+
+    it('unlocks the item if it is locked', done => {
+        // first we lock a test item (defined in .testretentionrc)
+        fetch(
+            `${options.url}/api/item/${options.test_item_uuid}/1/lock`,
+            { headers: headers, method: 'POST' }
+        ).then(res => {
+            console.log('locking item response:', res)
+            // @TODO cannot chain off of the method's response like this
+            del.unlockItem(testItem)
+                .then(res => {
+                    assert.ok(res.ok)
+                    console.log('unlocking item response', res)
+                    done()
+                }).catch(err => {
+                    console.error(err)
+                    assert.fail("Failed to unlock the test item.")
+                    done()
+                })
+        }).catch(done)
+    })
+
+    it('deletes the unlocked item', done => {
+        // @TODO cannot chain off of the method's response like this
+        del.deleteItem(testItem)
+            .then(res => {
+                console.log('deleting item response', res)
+                assert.ok(res.ok)
+                // restore the item so we can continue using it in tests
+                // https://vault.cca.edu/apidocs.do#operations-Item_actions-restore
+                fetch(
+                    `${options.url}/api/item/${options.test_item_uuid}/1/action/restore`,
+                    { headers: headers, method: 'POST' }
+                ).then(res => {
+                    console.log('restoring item response', res)
+                    if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
+                }).catch(err => {
+                    console.error("Error restoring the deleted test item.", err)
+                })
+                // we don't need to wait for the above to return to restore the item
+                done()
+            }).catch(err => {
+                console.error(err)
+                assert.fail("Failed to delete the test item.")
+                done()
+            })
     })
 })

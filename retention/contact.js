@@ -11,6 +11,7 @@ if (options._[0] === 'retention/test') {
 
 // see https://nodemailer.com/usage/using-gmail/
 // @TODO we probably want to use Mailgun instead of Gmail
+// https://app.mailgun.com/app/sending/domains/sandboxf71b89c221c948118ac2542dd1bc019d.mailgun.org
 let transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,

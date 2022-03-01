@@ -100,17 +100,21 @@ def map_major(major):
         raise Exception('Cannot translate degree code "{}" into major! Check the mappings.'.format(major))
 
 
-def create_taxonomy(csvfile):
+def process_data(csvfile):
+    fields = set(['id', 'name', 'username', 'major'])
     with open(csvfile) as fh:
-        fields = ('id', 'givenname', 'surname', 'major', 'username')
-        reader = csv.DictReader(fh, fieldnames=fields)
+        reader = csv.DictReader(fh)
         with open('taxo.csv', 'w') as taxofile:
             writer = csv.writer(taxofile, quoting=csv.QUOTE_ALL)
             users = []
-            anima_users = []
+            animafilm_users = []
             for row in reader:
+                if not fields.issubset(row.keys()):
+                    print("Error! The student data CSV must have these fields with the exact same names: id, name, username, & major. None of the fields are nullable.")
+                    exit(1)
+
                 writer.writerow([
-                    row['surname'] + ', ' + row['givenname'],
+                    row['name'],
                     'studentID',
                     row['id'],
                     'username',
@@ -124,15 +128,16 @@ def create_taxonomy(csvfile):
                 users.append(row['username'])
                 # ANIMA/FILM get their own group too, this also catches double majors
                 if 'Animation' in row['major'] or 'Film' in row['major']:
-                    anima_users.append(row['username'])
+                    animafilm_users.append(row['username'])
 
     print('Wrote openEQUELLA taxonomy file to taxo.csv')
+    return users, animafilm_users
 
 
 def main(args):
-    create_taxonomy(args.filename)
+    users, animafilm_users = process_data(args.filename)
     add_to_fajr_group(users)
-    add_to_fajr_group(anima_users, anima=True)
+    add_to_fajr_group(animafilm_users, anima=True)
     os.system('./upload.sh')
 
 

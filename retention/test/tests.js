@@ -113,41 +113,48 @@ describe('Delete item', () => {
     // note that the del methods expect an item hash, not a URL
     let testItem = { uuid: options.test_item_uuid, version: 1 }
 
-    it('unlocks the item if it is locked', done => {
+    before(async () => {
         // first we lock a test item (defined in .testretentionrc)
-        fetch(
+        await fetch(
             `${options.url}/api/item/${options.test_item_uuid}/1/lock`,
             { headers: headers, method: 'POST' }
         ).then(res => {
-            del.unlockItem(testItem)
-                .then(res => {
-                    assert.ok(res.ok)
-                    done()
-                }).catch(err => {
-                    console.error(err)
-                    done()
-                    assert.fail("Failed to unlock the test item.")
-                })
-        }).catch(done)
+            if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
+        }).catch(err => {
+            console.error("Error locking the test item.", err)
+        })
+    })
+
+    it('unlocks the item if it is locked', () => {
+        return del.unlockItem(testItem)
+            .then(res => {
+                assert.ok(res.ok)
+            }).catch(err => {
+                console.error(err)
+                assert.fail("Failed to unlock the test item.")
+            })
     })
 
     it('deletes the unlocked item', () => {
         return del.deleteItem(testItem)
             .then(res => {
                 assert.ok(res.ok)
-                // restore the item so we can continue using it in tests
-                // https://vault.cca.edu/apidocs.do#operations-Item_actions-restore
-                fetch(
-                    `${options.url}/api/item/${options.test_item_uuid}/1/action/restore`,
-                    { headers: headers, method: 'POST' }
-                ).then(res => {
-                    if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
-                }).catch(err => {
-                    console.error("Error restoring the deleted test item.", err)
-                })
             }).catch(err => {
                 console.error(err)
                 assert.fail("Failed to delete the test item.")
             })
+    })
+
+    after(async () => {
+        // restore the item so we can continue using it in tests
+        // https://vault.cca.edu/apidocs.do#operations-Item_actions-restore
+        await fetch(
+            `${options.url}/api/item/${options.test_item_uuid}/1/action/restore`,
+            { headers: headers, method: 'POST' }
+        ).then(res => {
+            if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
+        }).catch(err => {
+            console.error("Error restoring the deleted test item.", err)
+        })
     })
 })

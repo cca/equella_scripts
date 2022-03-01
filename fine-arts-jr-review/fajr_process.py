@@ -12,13 +12,12 @@ import os
 import sys
 
 from fajr_group import add_to_fajr_group
+from semester import semester
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Process CSV from Fine Arts into format ready for import into the "Fine Arts Junior Review students" taxonomy. Creates a "taxo.csv" file and then runs the "upload.sh" script to upload it to VAULT.')
     parser.add_argument('filename', help='CSV file')
-    parser.add_argument('--semester', '-s', required=True,
-        help='Semester string (in format like "Fall 2020")')
     return parser.parse_args()
 
 
@@ -101,10 +100,10 @@ def map_major(major):
         raise Exception('Cannot translate degree code "{}" into major! Check the mappings.'.format(major))
 
 
-def main(args):
-    with open(args.filename) as csvfile:
+def create_taxonomy(csvfile):
+    with open(csvfile) as fh:
         fields = ('id', 'givenname', 'surname', 'major', 'username')
-        reader = csv.DictReader(csvfile, fieldnames=fields)
+        reader = csv.DictReader(fh, fieldnames=fields)
         with open('taxo.csv', 'w') as taxofile:
             writer = csv.writer(taxofile, quoting=csv.QUOTE_ALL)
             users = []
@@ -119,7 +118,7 @@ def main(args):
                     'major',
                     map_major(row['major']),
                     'semester',
-                    args.semester,
+                    semester(),
                 ])
 
                 users.append(row['username'])
@@ -128,6 +127,10 @@ def main(args):
                     anima_users.append(row['username'])
 
     print('Wrote openEQUELLA taxonomy file to taxo.csv')
+
+
+def main(args):
+    create_taxonomy(args.filename)
     add_to_fajr_group(users)
     add_to_fajr_group(anima_users, anima=True)
     os.system('./upload.sh')

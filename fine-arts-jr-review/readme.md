@@ -23,7 +23,7 @@ You can also prefix commands with `poetry run` rather than entering the venv.
 Transferring data to VAULT looks like this:
 
 - obtain a CSV [1] & name it fajr.csv
-- run `./fajr-process.py fajr.csv "Fall 2019"` (where "Fall 2019" is the current semester)
+- run `./fajr-process.py fajr.csv
 - this adds usernames to the two permissions groups & generates a taxonomy CSV named "taxo.csv", then runs `./upload.sh` to upload the taxonomy to EQUELLA
 - afterwards the upload script offers to archive fajr.csv & taxo.csv in a "data" directory
 

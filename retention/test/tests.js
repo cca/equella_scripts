@@ -84,7 +84,9 @@ describe('Contact owner', () => {
         assert.equal(itemsGroupedByOwner[items.recent.owner.id].length, 2)
     })
 
-    it('sends an email to the owner', async () => {
+    it('sends an email to the owner', async function () {
+        // email is _very_ slow so we use https://mochajs.org/#timeouts
+        this.timeout(10000)
         let result = await contact.mailUser(items.award.owner.id, [items.award.toJSON()])
         // nodemailer result looks like
         // {

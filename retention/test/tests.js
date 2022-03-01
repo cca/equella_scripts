@@ -1,6 +1,5 @@
 /* globals describe,it */
 const assert = require('assert')
-const fs = require('fs')
 
 const fetch = require('node-fetch')
 
@@ -73,6 +72,7 @@ describe('Identify items', () => {
     })
 })
 
+// @TODO this still doesn't work, need to fix the async test
 describe('Contact owner', () => {
     it('group multiple items by the same owner', () => {
         // award owned by ephetteplace, other 2 owned by same UUID user
@@ -119,26 +119,21 @@ describe('Delete item', () => {
             `${options.url}/api/item/${options.test_item_uuid}/1/lock`,
             { headers: headers, method: 'POST' }
         ).then(res => {
-            console.log('locking item response:', res)
-            // @TODO cannot chain off of the method's response like this
             del.unlockItem(testItem)
                 .then(res => {
                     assert.ok(res.ok)
-                    console.log('unlocking item response', res)
                     done()
                 }).catch(err => {
                     console.error(err)
-                    assert.fail("Failed to unlock the test item.")
                     done()
+                    assert.fail("Failed to unlock the test item.")
                 })
         }).catch(done)
     })
 
-    it('deletes the unlocked item', done => {
-        // @TODO cannot chain off of the method's response like this
-        del.deleteItem(testItem)
+    it('deletes the unlocked item', () => {
+        return del.deleteItem(testItem)
             .then(res => {
-                console.log('deleting item response', res)
                 assert.ok(res.ok)
                 // restore the item so we can continue using it in tests
                 // https://vault.cca.edu/apidocs.do#operations-Item_actions-restore
@@ -146,17 +141,13 @@ describe('Delete item', () => {
                     `${options.url}/api/item/${options.test_item_uuid}/1/action/restore`,
                     { headers: headers, method: 'POST' }
                 ).then(res => {
-                    console.log('restoring item response', res)
                     if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
                 }).catch(err => {
                     console.error("Error restoring the deleted test item.", err)
                 })
-                // we don't need to wait for the above to return to restore the item
-                done()
             }).catch(err => {
                 console.error(err)
                 assert.fail("Failed to delete the test item.")
-                done()
             })
     })
 })

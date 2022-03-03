@@ -7,7 +7,8 @@ let options = require('rc')('equella', cli_defaults)
 
 if (options.help || options.h) {
     console.log('usage: node add-to-group --uuid 1234 --users users.json [ --add|replace|clear ]')
-    console.log('\tadd users from a JSON array file to an internal VAULT group')
+
+    console.log('\n\tadd users from a JSON array file to an internal VAULT group')
 
     console.log('\n\tYou can find a group\'s UUID in the VAULT admin console or with equella-cli')
     console.log('\te.g. try running "eq group --name $GROUP_NAME" & finding the ID in the result.')

@@ -4,20 +4,13 @@ const path = require('path')
 const request = require('request')
 const defaults = { date: 'auto' }
 const options = require('rc')('retention', defaults)
+options.date = require('./autodate')(options.date)
 const Item = require('./item')
 const LENGTH = 50
 
 const headers = {
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
-}
-
-if (options.date.match('auto')) {
-    let d = new Date()
-    d.setYear(d.getFullYear() - 6)
-    options.date = d.toISOString().substring(0, 10)
-} else if (!options.date.match(/\d{4}-\d{2}-\d{2}/)) {
-    throw Error('date value in .retentionrc is not in ISO 8601 (YYYY-MM-DD) format.')
 }
 
 // see https://openequella.github.io/guides/RestAPIGuide.html#items-aka-resources

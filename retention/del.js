@@ -60,25 +60,25 @@ function main() {
 
     items.forEach(item => unlockItem(item).then(res => {
         if (res.ok && options.verbose) {
-                console.log(`Successfully unlocked item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+            console.log(`Successfully unlocked item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+        }
+    }).then(res => {
+        deleteItem(item).then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP status: ${res.status} ${res.statusText}`)
+            } else if (options.verbose) {
+                console.log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
             }
-        }).then(res => {
-            deleteItem(item).then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP status: ${res.status} ${res.statusText}`)
-                } else if (options.verbose) {
-                    console.log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
-                }
-            }).catch(err => {
-                // deleteItem error
-                console.error(`Error deleting item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
-            })
         }).catch(err => {
-            // unlockItem error
-            // we're happy that this only catches networking errors, not non-2XX HTTP responses,
-            // because when you try to unlock an already-unlocked item you get a 404
-            console.error(`Error unlocking item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
+            // deleteItem error
+            console.error(`Error deleting item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
         })
+    }).catch(err => {
+        // unlockItem error
+        // we're happy that this only catches networking errors, not non-2XX HTTP responses,
+        // because when you try to unlock an already-unlocked item you get a 404
+        console.error(`Error unlocking item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
+    })
     )
 }
 

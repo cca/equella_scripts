@@ -2,6 +2,10 @@
 const assert = require('assert')
 
 const fetch = require('node-fetch')
+const https = require('https')
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: false,
+})
 
 // NOTE: requires a separate config file for tests that's
 // _in the root_ of this project (since `npm test` runs from root)
@@ -115,6 +119,7 @@ describe('Delete item', () => {
         'Accept': 'application/json',
         'X-Authorization': 'access_token=' + options.token
     }
+    let httpOpts = { headers: headers, method: 'POST', agent: httpsAgent }
     // note that the del methods expect an item hash, not a URL
     let testItem = { uuid: options.test_item_uuid, version: 1 }
 
@@ -122,7 +127,7 @@ describe('Delete item', () => {
         // first we lock a test item (defined in .testretentionrc)
         await fetch(
             `${options.url}/api/item/${options.test_item_uuid}/1/lock`,
-            { headers: headers, method: 'POST' }
+            httpOpts
         ).then(res => {
             if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
         }).catch(err => {
@@ -155,7 +160,7 @@ describe('Delete item', () => {
         // https://vault.cca.edu/apidocs.do#operations-Item_actions-restore
         await fetch(
             `${options.url}/api/item/${options.test_item_uuid}/1/action/restore`,
-            { headers: headers, method: 'POST' }
+            httpOpts
         ).then(res => {
             if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
         }).catch(err => {

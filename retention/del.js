@@ -15,7 +15,8 @@ options.verbose = options.v || options.verbose
 // specify an HTTP agent so we can set maxSockets to < Infinity
 const agent = new https.Agent({
     keepAlive: true,
-    maxSockets: 10
+    maxSockets: 10,
+    rejectUnauthorized: false,
 })
 const headers = {
     'Accept': 'application/json',

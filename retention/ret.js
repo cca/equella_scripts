@@ -2,8 +2,7 @@ const fs = require('fs')
 const path = require('path')
 
 const request = require('request')
-const defaults = { date: 'auto' }
-const options = require('rc')('retention', defaults)
+const options = require('rc')('retention', {})
 options.date = require('./autodate')(options.date)
 const Item = require('./item')
 const LENGTH = 50

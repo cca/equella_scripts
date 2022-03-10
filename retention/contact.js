@@ -42,7 +42,12 @@ function groupByOwner(items) {
 }
 
 function mailUser(username, items) {
-    // @TODO we will have to skip UUID users somewhere...
+    // skip internal users, no need to email them
+    if (items[0].internalOwner) {
+        console.log(`Skipping internal user with UUID ${username}`)
+        return false
+    }
+
     let items_html = "<ul>"
     items_html += items.reduce((accumulator, item) => {
         accumulator += `<li><a href="${item.links.view}">${item.title}</a>`
@@ -72,8 +77,10 @@ function mailUser(username, items) {
 }
 
 async function main() {
-    if (!options.file) {
-        throw Error("Error: must specify a JSON file of items.")
+    let items_file = options.file || options.f
+    if (!items_file) {
+        console.error('Error: please supply a file of items to delete with the --file or -f flag.')
+        process.exit(1)
     }
 
     // @TODO we need a way to do this piecemeal rather than send out

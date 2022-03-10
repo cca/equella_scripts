@@ -44,7 +44,7 @@ function deleteItem(item) {
 function main() {
     let items_file = options.file || options.f
     if (typeof items_file !== 'string') {
-        console.error("Error: please supply a file of items to delete with the --file or -f flag.")
+        console.error('Error: please supply a file of items to delete with the --file or -f flag.')
         process.exit(1)
     }
 

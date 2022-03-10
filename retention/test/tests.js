@@ -1,4 +1,4 @@
-/* globals describe,it */
+/* globals describe,it,before,after */
 const assert = require('assert')
 
 const fetch = require('node-fetch')
@@ -11,8 +11,8 @@ const Item = require('../item.js')
 const contact = require('../contact')
 const del = require('../del')
 const items = {
-    award: new Item(require('./fixtures/award.json'), options),
-    commaInTitle: new Item(require('./fixtures/comma-in-title.json'), options),
+    award: new Item(require('./fixtures/award.json'), options), // owned by ephetteplace
+    commaInTitle: new Item(require('./fixtures/comma-in-title.json'), options), // owned by internal user
     excluded: new Item(require('./fixtures/excluded-collection.json'), options),
     highRated: new Item(require('./fixtures/high-rating.json'), options),
     old: new Item(require('./fixtures/old-item.json'), options),
@@ -22,6 +22,11 @@ const items = {
 }
 
 describe('Identify items', () => {
+    it('should identify items owned by internal users', () => {
+        assert.equal(items.award.internalOwner, false)
+        assert.equal(items.commaInTitle.internalOwner, true)
+    })
+
     it('should mark for removal items that are old enough', () => {
         assert.equal(items.old.isOldEnough, true)
         assert.equal(items.old.toBeRemoved, true)
@@ -72,7 +77,6 @@ describe('Identify items', () => {
     })
 })
 
-// @TODO this still doesn't work, need to fix the async test
 describe('Contact owner', () => {
     it('group multiple items by the same owner', () => {
         // award owned by ephetteplace, other 2 owned by same UUID user
@@ -106,7 +110,6 @@ describe('Contact owner', () => {
     })
 })
 
-// lock a test item, then test unlocking and deleting it
 describe('Delete item', () => {
     let headers = {
         'Accept': 'application/json',

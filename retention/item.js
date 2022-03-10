@@ -3,6 +3,7 @@ const xmldom = require('@xmldom/xmldom').DOMParser
 const xpath = require('xpath')
 
 const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, hasNoAwards]
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
 class Item {
     constructor(item, options) {
@@ -17,6 +18,7 @@ class Item {
         // we explicitly set it to be the object being built
         CRITERIA.forEach(fn => this[fn.name] = fn(this, options), this)
 
+        this.internalOwner = !!this.owner.id.match(UUID_REGEX)
         this.toBeRemoved = CRITERIA.map(c => this[c.name], this).every(b => b)
         this.toBeRetained = !this.toBeRemoved
         this.reasonsRetained = CRITERIA.filter(c => !this[c.name], this).map(fn => fn.name)
@@ -45,9 +47,6 @@ class Item {
     toJSON() {
         let obj = {}
         Object.entries(this).forEach(pair => obj[pair[0]] = pair[1])
-        // delete obj.CSVHeaderRow
-        // delete obj.toCSV
-        // delete obj.toJSON
         obj.xml = obj.xml.toString()
         return obj
     }

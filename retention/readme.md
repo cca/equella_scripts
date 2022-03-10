@@ -8,7 +8,7 @@ We remove items from the VAULT digital archive that are older than 6 years old a
     1. Items must have been contributed at least six years ago
     2. Items must not have markers of significance (awards, "high" rating)
     3. Items must not be in an important collection (Libraries, Syllabus, Accreditation)
-2. Reach out to item owners with instructions on downloading their works, `node contact -f items.json` (**WIP**)
+2. Reach out to item owners with instructions on downloading their works, `node contact -f items.json` (see notes below about email configuration)
 3. Wait six months and then bulk remove the identified items, `node del -f items.json`
 
 ## Configuration
@@ -17,4 +17,8 @@ Create a JSON .retentionrc file (see the included example) with VAULT's root URL
 
 We exclude the Art Collection, Assessment & Accreditation Documents, Exhibitions, Faculty Research, Libraries, Libraries' eResources, Open Access Journal Articles, Press Clips, Syllabus Collection, VAULT Documentation, and Web Assets collections.
 
-For email, we need to authenticate with the Gmail SMTP client. In order to work with two-factor authentication, this means creating an application-specific password. See nodemailer's [instructions for using Gmail](https://nodemailer.com/usage/using-gmail/). We may want to use our [Mailgun](https://app.mailgun.com/) account instead, since we cannot use the vault@cca.edu delegated account otherwise.
+For email, we need to authenticate an SMTP client. In the config file, use `smtp_user`, `smtp_pass`, and `transporter` settings, where transporter can be either google/gmail or mailgun. If `transporter` is not defined, email JSON is printed to stdout.
+
+Our institutional Gmail accounts require two-factor authentication, so authenticating involves creating an application-specific password. See nodemailer's [instructions for using Gmail](https://nodemailer.com/usage/using-gmail/). Moodle uses [Mailgun](https://app.mailgun.com/), which provides a free testing domain. Go to Dashboard > Sending domains > SMTP to find the credentials. Note that we have to add the recipient's email address to our "Authorized Recipients" to use the testing domain.
+
+There's also a [nodemailer-mailgun-transport](https://www.npmjs.com/package/nodemailer-mailgun-transport) package if using the Mailgun REST API seems better than SMTP for some reason.

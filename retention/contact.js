@@ -9,18 +9,32 @@ if (options._[0] === 'retention/test') {
     options = JSON.parse(fs.readFileSync('.testretentionrc'))
 }
 
-// see https://nodemailer.com/usage/using-gmail/
-// @TODO we probably want to use Mailgun instead of Gmail
-// https://app.mailgun.com/app/sending/domains/sandboxf71b89c221c948118ac2542dd1bc019d.mailgun.org
-let transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: options.smtp_user,
-        pass: options.smtp_pass
-    }
-})
+// https://nodemailer.com/transports/stream/ for testing
+let transporter = nodemailer.createTransport({ jsonTransport: true })
+if (options.transporter == 'mailgun') {
+    // https://app.mailgun.com/app/sending/domains/sandboxf71b89c221c948118ac2542dd1bc019d.mailgun.org
+    transporter = nodemailer.createTransport({
+        host: 'smtp.mailgun.org',
+        port: 587,
+        // ran into an SSL error when sending emails via test domain
+        secure: false,
+        auth: {
+            user: options.smtp_user,
+            pass: options.smtp_pass
+        }
+    })
+} else if (options.transporter == 'google' || options.transport == 'gmail') {
+    // see https://nodemailer.com/usage/using-gmail/
+    transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: options.smtp_user,
+            pass: options.smtp_pass
+        }
+    })
+}
 
 function groupByOwner(items) {
     let output = {}
@@ -62,7 +76,7 @@ function mailUser(username, items) {
         to: `${username}@cca.edu`,
         subject: "VAULT Retention Test",
         html: `<p>Hello,</p>
-        <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. You can <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items must be downloaded one-by-one, we apologize for any inconvenience this causes.</p>
+        <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. If you want to retain your works, you can <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items can only be downloaded one at a time. We apologize for any inconvenience.</p>
         <p>List of items to be removed:</p>${items_html}
         <p>Sincerely,<br>CCA Libraries<br>https://libraries.cca.edu&nbsp;|&nbsp;vault@cca.edu</p>
         <p><img height="48px" width="197px" src="https://www.cca.edu/sites/default/files/images/cca-logotype-394.png" style="border:0px;vertical-align:middle"></p>
@@ -86,7 +100,7 @@ async function main() {
     // @TODO we need a way to do this piecemeal rather than send out
     // thousands of emails at once, either by splitting up the input
     // files or having a limit parameter in this file
-    let items = JSON.parse(fs.readFileSync(options.file, { encoding: 'utf-8' }))
+    let items = JSON.parse(fs.readFileSync(items_file, { encoding: 'utf-8' }))
     if (Array.isArray(items)) {
         items = items.map(i => new Item(i, options))
         let itemsGroupedByOwner = groupByOwner(items)
@@ -105,5 +119,5 @@ exports.groupByOwner = groupByOwner
 exports.mailUser = mailUser
 
 if (require.main === module) {
-    main()
+    main().catch(e => { throw e })
 }

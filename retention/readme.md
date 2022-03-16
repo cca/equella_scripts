@@ -13,9 +13,41 @@ We remove items from the VAULT digital archive that are older than 6 years old a
 
 ## Configuration
 
-Create a JSON .retentionrc file (see the included example) with VAULT's root URL, an OAuth token with access to the appropriate permissions, a cutoff date (in "YYYY-MM-DD" format, which can left null to default to six years ago), and an array of collection UUIDs to exclude.
+Create a JSON .retentionrc file (see example.retentionrc or code block below) with VAULT's root URL, an OAuth token with access to the appropriate permissions, an optional cutoff date (in "YYYY-MM-DD" format, which can left null to default to six years ago), and an array of collection UUIDs to exclude.
 
-We exclude the Art Collection, Assessment & Accreditation Documents, Dashboard thumbnail images, Exhibitions, Faculty Research, Lecture Series / Speaker Release, Libraries, Libraries' eResources, License Agreements, Open Access Journal Articles, Press Clips, Syllabus Collection, VAULT Documentation, and Web Assets collections.
+```json
+{
+    "url": "https://vault.cca.edu",
+    "token": "{ UUID token here }",
+    "exclude_collections": [
+        "9ec74523-e018-4e01-ab4e-be4dd06cdd68", // Syllabus collection
+        "6b755832-4070-73d2-77b3-3febcc1f5fad", // Libraries
+        "e5269fd8-c50c-4d28-8420-bd7351e573bc", // Assessment & Accreditation
+        "7f0ee0e2-bd15-4182-a83a-1b4c69e181f0", // Exhibitions
+        "b8852fc5-4423-4bc7-958f-7ea643a0b438", // Art Collection
+        "e96ccf65-0098-44bb-bec0-6e1cd5466046", // Faculty Research
+        "db4e60c6-e001-9ef3-5ce5-479f384026a3", // Libraries' eResources
+        "c34be1f4-c3ea-47d9-b336-e39ad6e926f4", // Open Access Journal Articles
+        "c99a7b30-b877-494d-8cd2-7d860793ee92", // Press Clips
+        "9bd9dea9-8545-4d73-b151-c108ce38b398", // Web Assets
+        "a5ccf44c-de97-4b47-ae31-428216b182d6", // VAULT Documentation
+        "a272752b-db5b-4381-9a91-9a0febc1739a", // Dashboard thumbnails
+        "905e9e64-2d7c-4922-994c-bb467f52f9b2", // License Agreements
+        "5b05c15b-d835-49d4-a061-fdc60c7ab623"  // Lecture Series / Speaker Release
+    ],
+    // mailgun
+    "smtp_user": "postmaster@sandboxf71b89c221c948118ac2542dd1bc019d.mailgun.org",
+    "smtp_pass": "{ really long password }",
+    "transporter": "mailgun",
+    // Google SMTP
+    // "smtp_user": "ephetteplace@cca.edu",
+    // "smtp_pass": "{ one-time password }",
+    // "transporter": "google",
+    "verbose": true
+}
+```
+
+We exclude the collections listed above. See the [Collections Categorized for Migration](https://docs.google.com/spreadsheets/d/1rD3nUSFjLp_0VhKYdTZb1SoUZZbxdScpJ9BXRCWJua0/edit) spreadsheet for more details.
 
 For email, we need to authenticate an SMTP client. In the config file, use `smtp_user`, `smtp_pass`, and `transporter` settings, where transporter can be either google/gmail or mailgun. If `transporter` is not defined, email JSON is printed to stdout.
 

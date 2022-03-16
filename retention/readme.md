@@ -15,7 +15,7 @@ We remove items from the VAULT digital archive that are older than 6 years old a
 
 Create a JSON .retentionrc file (see the included example) with VAULT's root URL, an OAuth token with access to the appropriate permissions, a cutoff date (in "YYYY-MM-DD" format, which can left null to default to six years ago), and an array of collection UUIDs to exclude.
 
-We exclude the Art Collection, Assessment & Accreditation Documents, Dashboard thumbnail images, Exhibitions, Faculty Research, Libraries, Libraries' eResources, License Agreements, Open Access Journal Articles, Press Clips, Syllabus Collection, VAULT Documentation, and Web Assets collections.
+We exclude the Art Collection, Assessment & Accreditation Documents, Dashboard thumbnail images, Exhibitions, Faculty Research, Lecture Series / Speaker Release, Libraries, Libraries' eResources, License Agreements, Open Access Journal Articles, Press Clips, Syllabus Collection, VAULT Documentation, and Web Assets collections.
 
 For email, we need to authenticate an SMTP client. In the config file, use `smtp_user`, `smtp_pass`, and `transporter` settings, where transporter can be either google/gmail or mailgun. If `transporter` is not defined, email JSON is printed to stdout.
 

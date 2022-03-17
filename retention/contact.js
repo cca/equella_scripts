@@ -36,6 +36,14 @@ if (options.transporter == 'mailgun') {
     })
 }
 
+/**
+ * Return items in an { owner: [list of their items...]} hash
+ *
+ * @param   {Item[]}  items
+ *
+ * @return  {Object}         owners mapped to an array of their items
+ * i.e. { "me": [Item1, Item2], "you": [Item3] }
+ */
 function groupByOwner(items) {
     let output = {}
     items.forEach(item => {

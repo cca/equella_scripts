@@ -23,6 +23,17 @@ const headers = {
     'X-Authorization': 'access_token=' + options.token
 }
 
+/**
+ * unlock VAULT item if it's locked
+ *
+ * the fetch request will return a 400 HTTP response if the item
+ * is not locked (which will be the case most of the time) but
+ * we can just ignore it, no harm has been done
+ *
+ * @param   {Item}  item
+ *
+ * @return  {Promise}        fetch HTTP request promise from VAULT API
+ */
 function unlockItem(item) {
     // https://vault.cca.edu/apidocs.do#operations-tag-Item_locks
     // we don't care if the item is locked or not, we're going to delete it anyways
@@ -34,6 +45,13 @@ function unlockItem(item) {
     )
 }
 
+/**
+ * delete VAULT item
+ *
+ * @param   {Item}  item
+ *
+ * @return  {Promise}        fetch HTTP request promise from VAULT API
+ */
 function deleteItem(item) {
     // https://vault.cca.edu/apidocs.do#operations-Items-deleteItem
     return fetch(

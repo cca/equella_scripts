@@ -55,6 +55,14 @@ function groupByOwner(items) {
     return output
 }
 
+/**
+ * Email a user the list of their items to be removed.
+ *
+ * @param   {String}  username
+ * @param   {Item[]}  items     items to be removed
+ *
+ * @return  {Promise}           Promise from nodemailer
+ */
 function mailUser(username, items) {
     // skip internal users, no need to email them
     if (items[0].internalOwner) {
@@ -62,6 +70,7 @@ function mailUser(username, items) {
         return false
     }
 
+    items = items.filter(i => i.status === 'live')
     let items_html = "<ul>"
     items_html += items.reduce((accumulator, item) => {
         accumulator += `<li><a href="${item.links.view}">${item.title}</a>`
@@ -84,7 +93,7 @@ function mailUser(username, items) {
     }
 
     if (options.verbose || options.v) {
-        console.log(`Emailing ${username} about their ${items.length} items to be removed.`)
+        console.log(`Emailing ${username} about their ${items.length} live items to be removed.`)
     }
 
     return transporter.sendMail(msg)

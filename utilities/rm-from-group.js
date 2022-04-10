@@ -9,7 +9,7 @@ if (options.help || options.h) {
 
     console.log('\n\tYou can find a group\'s UUID in the VAULT admin console or with equella-cli')
     console.log('\te.g. try running "eq group --name $GROUP_NAME" & finding the ID in the result.')
-    console.log('\tTry: node rm-from-group --group (eq group --name NAME | jq -r .uuid) --user USER')
+    console.log('\tTry: node rm-from-group --group (eq group --name NAME | jq -r .id) --user USER')
 
     console.log('\n\tTo remove internal users, use their UUID. To remove LDAP users, use their username.')
     process.exit(0)

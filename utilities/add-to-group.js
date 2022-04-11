@@ -6,9 +6,10 @@ let cli_defaults = { add: true }
 let options = require('rc')('equella', cli_defaults)
 
 if (options.help || options.h) {
-    console.log('usage: node add-to-group --uuid 1234 --users users.json [ --add|replace|clear ]')
+    console.log('usage: node add-to-group --uuid 1234 --users [ users.json | user1,user2 ] [ --add | --replace | --clear ]')
 
     console.log('\n\tadd users from a JSON array file to an internal VAULT group')
+    console.log('\tor supply a comma-separated list of usernames')
 
     console.log('\n\tYou can find a group\'s UUID in the VAULT admin console or with equella-cli')
     console.log('\te.g. try running "eq group --name $GROUP_NAME" & finding the ID in the result.')
@@ -39,18 +40,25 @@ function getGroup (callback) {
     req.get({}, (err, resp) => {
         if (err) return callback(err)
         group = resp.body
-        console.log('group: ', group)
+        if (options.debug) console.log('group: ', group)
         return callback()
     })
 }
 
-function getUsersFile(callback) {
-    fs.readFile(options.users, (err, buffer) => {
-        if (err) return callback(err)
-        users = JSON.parse(buffer.toString())
-        console.log('users: ', users)
+function getUsers(callback) {
+    if (options.users.match(/\.json$/)) {
+        // users.json file
+        fs.readFile(options.users, (err, buffer) => {
+            if (err) return callback(err)
+            users = JSON.parse(buffer.toString())
+            if (options.debug) console.log('users: ', users)
+            return callback()
+        })
+    } else {
+        // comma-separated string 'user1,user2'
+        users = options.users.split(',')
         return callback()
-    })
+    }
 }
 
 function updateGroup(err, results) {
@@ -64,7 +72,7 @@ function updateGroup(err, results) {
         })
     }
 
-    console.log('new group: ', group)
+    if (options.debug) console.log('new group: ', group)
     req.put({json: group}, (err, resp) => {
         if (err) {
             throw err
@@ -76,4 +84,4 @@ function updateGroup(err, results) {
 }
 
 // flow: get group data, get users from file, combine & PUT data back to VAULT
-async.parallel([getGroup, getUsersFile], updateGroup)
+async.parallel([getGroup, getUsers], updateGroup)

@@ -11,3 +11,5 @@ To run the script:
 - run `node index` to download the files
 
 If running repeated times, you may want to clean out the files directory in between. The script is meant to be flexible enough to extract multiple years of syllabi from multiple departments. To get _all_ syllabi, you could simply remove the `where` parameter from the initial API requests.
+
+If you're downloading hundreds of syllabi at a time, you can split them up into smaller batches by editing the `semesters` variable so the multiple requests to VAULT don't time out.

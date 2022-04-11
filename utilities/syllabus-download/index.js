@@ -15,19 +15,19 @@ const root = 'https://vault.cca.edu/api'
 // parameters for filtering
 const collections = ['9ec74523-e018-4e01-ab4e-be4dd06cdd68'] // ID for Syllabus Coll
 const length = 50 // maximum no. of items we can get in an API request
-const programs = ['TEXTL']
-// the utilities/semesters.js script can generate this list easily
+const programs = ['ETHSM', 'ETHST', 'DIVSM', 'DIVST', 'DIVRS']
+// the utilities/semesters.js script can generate this list
 const semesters = [
+    "Spring 2022",
+    "Fall 2021",
+    "Summer 2021",
+    "Spring 2021",
+    "Fall 2020",
+    "Summer 2020",
+    "Spring 2020",
     "Fall 2019",
     "Summer 2019",
-    "Spring 2019",
-    "Fall 2018",
-    "Summer 2018",
-    "Spring 2018",
-    "Fall 2017",
-    "Summer 2017",
-    "Spring 2017",
-    "Fall 2016",
+    "Spring 2019"
 ]
 
 // combine multiple programs into one XPath-like "where" clause
@@ -44,10 +44,20 @@ let params = {
     info: 'metadata,attachment',
     length: length,
     where: where_clause,
+    // if necessary you can limit the number of items to check
+    // by adding a freetext query here
+    // q: "Summer 2020",
 }
 
-let baseRequest = request.defaults({ headers: headers, json: true })
-let searchRequest = baseRequest.defaults({ qs: params })
+let baseRequest = request.defaults({
+    headers: headers,
+    json: true,
+    pool: { maxSockets: 10 },
+})
+let searchRequest = baseRequest.defaults({
+    qs: params,
+    pool: { maxSockets: 10 },
+})
 
 let total = 0
 let count = 0

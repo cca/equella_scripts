@@ -1,4 +1,3 @@
-/* global xml,data,user */
 /* jshint undef: true */
 
 // retrieve the data keys from a taxonomy term which is a name
@@ -53,8 +52,8 @@ for (var i = terms1.size() - 1; i >= 0; i--) {
     }
 }
 
-for (var i = terms2.size() - 1; i >= 0; i--) {
-    var term = terms2.get(i)
+for (i = terms2.size() - 1; i >= 0; i--) {
+    term = terms2.get(i)
 
     if (term.getTerm() == writtenname) {
         writeMetadata(term)

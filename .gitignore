@@ -1,4 +1,5 @@
 *.min.js
+.eslintcache
 .equellarc
 .testretentionrc
 utilities/*.json

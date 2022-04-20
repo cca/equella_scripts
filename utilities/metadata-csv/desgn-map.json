@@ -1,0 +1,12 @@
+{
+    "/mods/name/namePart": "Creator(s)",
+    "/mods/origininfo/dateCreatedWrapper/dateCreated": "Year",
+    "/local/courseWorkWrapper/courseWorkType": "Submission Type",
+    "/local/courseWorkWrapper/courseWorkTypeSpecific": "Program Portfolio Type",
+    "/local/accreditation": "External Review",
+    "/local/courseInfo/semester": "Semester",
+    "/local/courseInfo/section": "Section",
+    "/local/courseInfo/course": "Course Title",
+    "/local/courseInfo/faculty": "Instructor(s)",
+    "/mods/abstract": "Description"
+}

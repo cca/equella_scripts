@@ -1,4 +1,5 @@
 {
 	"root": "https://vault.cca.edu/api",
-	"token": "..."
+	"token": "...",
+	"debug": false
 }

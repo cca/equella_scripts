@@ -33,7 +33,15 @@ let items = []
 function debug(msg) {
     if (options.debug) console.error(msg)
 }
-const metadataMap = require(options.metadataMap)
+// only doing this to silence eslint
+let metadataMap = null
+try {
+    metadataMap = require(options.metadataMap)
+} catch (e) {
+    console.error(e)
+    console.error("Do you have a metadata-map.json file or reference one with the --metadataMap flag?")
+    process.exit(1)
+}
 
 function getItems(start=0) {
     if (items.length < options.count) {

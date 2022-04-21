@@ -43,6 +43,7 @@ if (require.main === module) {
     }
 
     let items = JSON.parse(fs.readFileSync(file))
+    items = groupByOwner(items)
     let chunks = chunk(items, options.size)
     chunks.forEach((items, index) => {
         let filename = path.join('data', `items-${index + 1}.json`)

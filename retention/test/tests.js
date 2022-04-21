@@ -13,6 +13,7 @@ const httpsAgent = new https.Agent({
 const options = require('rc')('testretention')
 const Item = require('../item.js')
 const contact = require('../contact')
+const chunk = require('../chunk')
 const del = require('../del')
 const items = {
     award: new Item(require('./fixtures/award.json'), options), // owned by ephetteplace
@@ -78,6 +79,37 @@ describe('Identify items', () => {
     it('should serialize to JSON', () => {
         assert.ok(JSON.stringify(items.commaInTitle.toJSON()))
         assert.ok(JSON.stringify(items.recentAndExcluded.toJSON()))
+    })
+})
+
+describe('Chunk items', () => {
+    it('should chunk items into sets of specific lengths', () => {
+        let gi = {
+            "one": [1, 2, 3],
+            "two": [4, 5],
+            "thr": [6],
+            "fou": [7, 8],
+            "fiv": [9, 10, 11],
+            "six": [12, 13, 14],
+            "sev": [15]
+        }
+        assert.deepEqual(
+            chunk(gi, 2),
+            [
+                [ gi["one"], gi["two"] ],
+                [ gi["thr"], gi["fou"] ],
+                [ gi["fiv"], gi["six"] ],
+                [ gi["sev"] ]
+            ]
+        )
+        assert.deepEqual(
+            chunk(gi, 3),
+            [
+                [ gi["one"], gi["two"], gi["thr"] ],
+                [ gi["fou"], gi["fiv"], gi["six"] ],
+                [ gi["sev"] ]
+            ]
+        )
     })
 })
 

@@ -2,7 +2,7 @@ const CSVStringify = require('csv-stringify/sync').stringify
 const xmldom = require('@xmldom/xmldom').DOMParser
 const xpath = require('xpath')
 
-const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, hasNoAwards]
+const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, isntPPD, hasNoAwards]
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
 class Item {
@@ -74,6 +74,10 @@ function isntInExcludedCollection(item, options) {
 
 function isntHighRated(item, options) {
     return !xpath.select('string(//local/rating)', item.xml).toLowerCase().match('high')
+}
+
+function isntPPD(item, options) {
+    return !xpath.select('string(//local/courseWorkWrapper/courseWorkType)', item.xml).toLowerCase().match('program portfolio document')
 }
 
 function hasNoAwards(item, options) {

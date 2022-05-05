@@ -73,10 +73,11 @@ function summarize() {
     console.log(`\nTotal items: ${all_items.length}`)
     console.log(`Items to remove: ${items_to_remove.length}`)
     console.log('\nReasons why items were retained')
-    // isOldEnough, isntInExcludedCollection, isntHighRated, hasNoAwards
+    // isOldEnough, isntInExcludedCollection, isntHighRated, isntPPD, hasNoAwards
     console.log(`${'Not old enough:'.padEnd(25)} ${all_items.filter(i => !i.isOldEnough).length}`)
     console.log(`${'In excluded collection:'.padEnd(25)} ${all_items.filter(i => !i.isntInExcludedCollection).length}`)
     console.log(`${'Is highly rated:'.padEnd(25)} ${all_items.filter(i => !i.isntHighRated).length}`)
+    console.log(`${'Is PPD:'.padEnd(25)} ${all_items.filter(i => !i.isntPPD).length}`)
     console.log(`${'Won an award:'.padEnd(25)} ${all_items.filter(i => !i.hasNoAwards).length}\n`)
 
     writeOutput(items_to_remove)

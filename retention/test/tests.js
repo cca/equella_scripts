@@ -21,6 +21,7 @@ const items = {
     excluded: new Item(require('./fixtures/excluded-collection.json'), options),
     highRated: new Item(require('./fixtures/high-rating.json'), options),
     old: new Item(require('./fixtures/old-item.json'), options),
+    ppd: new Item(require('./fixtures/ppd.json'), options),
     recent: new Item(require('./fixtures/recent-item.json'), options),
     recentAndExcluded: new Item(require('./fixtures/recent-and-excluded.json'), options),
     untitled: new Item(require('./fixtures/untitled.json'), options),
@@ -47,6 +48,11 @@ describe('Identify items', () => {
     it('should not remove items with rating = "high"', () => {
         assert.equal(items.highRated.isntHighRated, false)
         assert.equal(items.highRated.toBeRemoved, false)
+    })
+
+    it('should not remove program portfolio documents (PPD)', () => {
+        assert.equal(items.ppd.isntPPD, false)
+        assert.equal(items.ppd.toBeRemoved, false)
     })
 
     it('should not remove items that have won awards', () => {

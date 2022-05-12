@@ -95,7 +95,7 @@ function mailUser(username, items) {
         html: `<p>Hello,</p>
         <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. If you want to retain your works, you can <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items can only be downloaded one at a time. We apologize for any inconvenience.</p>
         <p>List of items to be removed:</p>${items_html}
-        <p>You can access all your VAULT contributions, including drafts and superceded "archive" versions, on the <b><a href="https://vault.cca.edu/logon.do?.page=access/myresources.do">My Resources</a></b> page.</p>
+        <p>You can access all your VAULT contributions, including unfinished drafts and superceded "archive" versions, on the <b><a href="https://vault.cca.edu/logon.do?.page=access/myresources.do">My Resources</a></b> page.</p>
         <p>Sincerely,<br>CCA Libraries<br>https://libraries.cca.edu&nbsp;|&nbsp;vault@cca.edu</p>
         <p><img height="48px" width="197px" src="https://www.cca.edu/sites/default/files/images/cca-logotype-394.png" style="border:0px;vertical-align:middle"></p>
         <p>1111 8th St | San Francisco, CA | 94107</p><p><i>CCA is situated on the traditional unceded lands of the Ohlone peoples.</i></p>`
@@ -115,9 +115,6 @@ async function main() {
         process.exit(1)
     }
 
-    // @TODO we need a way to do this piecemeal rather than send out
-    // thousands of emails at once, either by splitting up the input
-    // files or having a limit parameter in this file
     let items = JSON.parse(fs.readFileSync(items_file, { encoding: 'utf-8' }))
     if (Array.isArray(items)) {
         items = items.map(i => new Item(i, options))

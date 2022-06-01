@@ -4,5 +4,9 @@
     "/mods/physicalDescription/formBroad": "Work Type (broad)",
     "/mods/physicalDescription/formSpecific": "Work Type (specific)",
     "/mods/physicalDescription/extent": "Dimensions",
-    "/mods/abstract": "Description"
+    "/mods/abstract": "Description",
+    "/mods/location/physicalLocation": "Campus",
+    "/mods/location/copyInformation/sublocation": "Building",
+    "/mods/location/copyInformation/sublocationDetail": "Area",
+    "/mods/location/copyInformation/shelfLocator": "Drawer"
 }

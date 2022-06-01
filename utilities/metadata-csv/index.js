@@ -11,10 +11,10 @@ const xmldom = require('@xmldom/xmldom').DOMParser
 const xpath = require('xpath')
 
 let defaults = {
-    count: 200,
+    count: Infinity,
     info: 'attachment,basic,detail,metadata',
     length: 50,
-    metadataMap: "./metadata-map.json",
+    metadataMap: "metadata-map.json",
     order: "modified",
     q: "",
 }
@@ -36,7 +36,7 @@ function debug(msg) {
 // only doing this to silence eslint
 let metadataMap = null
 try {
-    metadataMap = require(options.metadataMap)
+    metadataMap = require(`./${options.metadataMap}`)
 } catch (e) {
     console.error(e)
     console.error("Do you have a metadata-map.json file or reference one with the --metadataMap flag?")

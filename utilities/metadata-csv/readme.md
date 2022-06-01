@@ -6,7 +6,7 @@ Download all items matching a search into a CSV with selected metadata nodes inc
 >  # example of downloading from a specific collection
 > node index --collections=5e6a957b-80d4-4dee-9081-7186586fbbe5 --metadataMap map.json > coll.csv
 > # getting Hamaguchi items from within Libraries collection
-> node index --where="/xml/mods/relatedItem/title = 'Hamaguchi Study Print Collection'" > hamaguchi.csv
+> node index --metadataMap hamaguchi-map.json --where="/xml/mods/relatedItem/title = 'Hamaguchi Study Print Collection'" > hamaguchi.csv
 ```
 
 Any of the parameters you can pass to the openEQUELLA Search API route are accepted on the command line: https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0

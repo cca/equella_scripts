@@ -2,6 +2,7 @@ const fs = require('fs')
 const nodemailer = require('nodemailer')
 let options = require('rc')('retention')
 const Item = require('./item')
+const log = require('./log')
 
 // tests run from root with a different rc file
 // so if we're testing, we load the test configuration
@@ -23,7 +24,7 @@ if (options.transporter == 'mailgun') {
             pass: options.smtp_pass
         }
     })
-} else if (options.transporter == 'google' || options.transport == 'gmail') {
+} else if (options.transporter == 'google' || options.transporter == 'gmail') {
     // see https://nodemailer.com/usage/using-gmail/
     transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -52,7 +53,8 @@ function groupByOwner(items) {
             // https://vault.cca.edu/items/0729ca6a-7469-480e-82aa-8facc1e7e2aa/1/
             if (item.owner.id.trim() === "") {
                 if (options.verbose || options.v) {
-                    console.log(`Item ${item.links.view} has no owner, no notification email will be sent.`)
+                    log(item.links.view)
+                    log('Item has no owner, no notification email will be sent.')
                 }
                 return null
             }
@@ -74,35 +76,37 @@ function groupByOwner(items) {
 function mailUser(username, items) {
     // skip internal users, no need to email them
     if (items[0].internalOwner) {
-        console.log(`Skipping internal user with UUID ${username}`)
+        log(`Skipping internal user with UUID ${username}`)
+        log(`They own ${items.length} items`)
         return false
     }
 
     items = items.filter(i => i.status === 'live')
-    let items_html = "<ul>"
+    let items_html = '<ul>'
     items_html += items.reduce((accumulator, item) => {
         accumulator += `<li><a href="${item.links.view}">${item.title}</a>`
         return accumulator
     }, '')
-    items_html += "</ul>"
+    items_html += '</ul>'
 
     // Gmail will show the "from" address as the logged in user
     let msg = {
         from: "vault@cca.edu",
         replyTo: "vault@cca.edu",
         to: `${username}@cca.edu`,
-        subject: "VAULT Retention Test",
+        subject: "Items will be removed from CCA VAULT in 6 months",
         html: `<p>Hello,</p>
         <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. If you want to retain your works, you can <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items can only be downloaded one at a time. We apologize for any inconvenience.</p>
         <p>List of items to be removed:</p>${items_html}
         <p>You can access all your VAULT contributions, including unfinished drafts and superceded "archive" versions, on the <b><a href="https://vault.cca.edu/logon.do?.page=access/myresources.do">My Resources</a></b> page.</p>
+        <p>For more information about this process, read <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/vault-retention-policy/">the VAULT retention policy</a> on Portal.</p>
         <p>Sincerely,<br>CCA Libraries<br>https://libraries.cca.edu&nbsp;|&nbsp;vault@cca.edu</p>
         <p><img height="48px" width="197px" src="https://www.cca.edu/sites/default/files/images/cca-logotype-394.png" style="border:0px;vertical-align:middle"></p>
         <p>1111 8th St | San Francisco, CA | 94107</p><p><i>CCA is situated on the traditional unceded lands of the Ohlone peoples.</i></p>`
     }
 
     if (options.verbose || options.v) {
-        console.log(`Emailing ${username} about their ${items.length} live items to be removed.`)
+        log(`Emailing ${username} about their ${items.length} live items to be removed.`)
     }
 
     return transporter.sendMail(msg)
@@ -117,16 +121,26 @@ async function main() {
 
     let items = JSON.parse(fs.readFileSync(items_file, { encoding: 'utf-8' }))
     if (Array.isArray(items)) {
-        items = items.map(i => new Item(i, options))
-        let itemsGroupedByOwner = groupByOwner(items)
-        Object.keys(itemsGroupedByOwner).forEach(async owner => {
-            let result = await mailUser(owner, itemsGroupedByOwner[owner])
-            console.log(result)
-        })
+        // are the items already grouped by owner?
+        if (Array.isArray(items[0])) {
+            log(`Emailing the ${items.length} owners of items in file ${items_file}`)
+            items.forEach(async ownedItems => {
+                let result = await mailUser(ownedItems[0]['owner']['id'], ownedItems.map(i => new Item(i, options)))
+                log(result)
+            })
+        } else {
+            log(`Emailing the owners of the ${items.length} items in file ${items_file}`)
+            items = items.map(i => new Item(i, options))
+            let itemsGroupedByOwner = groupByOwner(items)
+            Object.keys(itemsGroupedByOwner).forEach(async owner => {
+                let result = await mailUser(owner, itemsGroupedByOwner[owner])
+                log(result)
+            })
+        }
     } else {
-        // just a single item
+        // just a single item, typically for testing
         let result = await mailUser(items.owner.id, [new Item(items, options)])
-        console.log(result)
+        log(result)
     }
 }
 

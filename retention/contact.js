@@ -2,6 +2,7 @@ const fs = require('fs')
 const nodemailer = require('nodemailer')
 let options = require('rc')('retention')
 const Item = require('./item')
+const sleep = require('./sleep')
 const log = require('./log')
 
 // tests run from root with a different rc file
@@ -133,6 +134,7 @@ async function main() {
             items.forEach(async ownedItems => {
                 let result = await mailUser(ownedItems[0]['owner']['id'], ownedItems.map(i => new Item(i, options)))
                 if (result) log(result)
+                sleep(2000)
             })
         } else {
             log(`Emailing the owners of the ${items.length} items in file ${items_file}`)
@@ -141,6 +143,7 @@ async function main() {
             Object.keys(itemsGroupedByOwner).forEach(async owner => {
                 let result = await mailUser(owner, itemsGroupedByOwner[owner])
                 if (result) log(result)
+                sleep(2000)
             })
         }
     } else {

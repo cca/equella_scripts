@@ -71,13 +71,19 @@ function groupByOwner(items) {
  * @param   {String}  username
  * @param   {Item[]}  items     items to be removed
  *
- * @return  {Promise}           Promise from nodemailer
+ * @return  {Promise|Boolean}   Promise from nodemailer or False if no mail was sent
+ *
  */
 function mailUser(username, items) {
     // skip internal users, no need to email them
     if (items[0].internalOwner) {
         log(`Skipping internal user with UUID ${username}`)
         log(`They own ${items.length} items`)
+        return false
+    }
+
+    if (username.trim() == "") {
+        log(`Empty username for ${items.length} items; skipping email`)
         return false
     }
 
@@ -126,7 +132,7 @@ async function main() {
             log(`Emailing the ${items.length} owners of items in file ${items_file}`)
             items.forEach(async ownedItems => {
                 let result = await mailUser(ownedItems[0]['owner']['id'], ownedItems.map(i => new Item(i, options)))
-                log(result)
+                if (result) log(result)
             })
         } else {
             log(`Emailing the owners of the ${items.length} items in file ${items_file}`)
@@ -134,13 +140,13 @@ async function main() {
             let itemsGroupedByOwner = groupByOwner(items)
             Object.keys(itemsGroupedByOwner).forEach(async owner => {
                 let result = await mailUser(owner, itemsGroupedByOwner[owner])
-                log(result)
+                if (result) log(result)
             })
         }
     } else {
         // just a single item, typically for testing
         let result = await mailUser(items.owner.id, [new Item(items, options)])
-        log(result)
+        if (result) log(result)
     }
 }
 

@@ -147,7 +147,7 @@ async function main() {
     } else {
         // just a single item, typically for testing
         let result = await mailUser(items.owner.id, [new Item(items, options)])
-        if (result) log(result)
+        log(result)
     }
 }
 
@@ -155,5 +155,15 @@ exports.groupByOwner = groupByOwner
 exports.mailUser = mailUser
 
 if (require.main === module) {
-    main().catch(e => console.error(e))
+    main().catch(e => console.error(e)).finally(() => {
+        const items_file = options.file || options.f
+            , path = require('path')
+            , basename = path.basename(items_file);
+        fs.rename(
+            items_file,
+            items_file.replace(basename, `x${basename}`),
+            (err) => {
+                console.error(err)
+            })
+    })
 }

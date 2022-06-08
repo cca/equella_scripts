@@ -60,3 +60,12 @@ For email, we need to authenticate an SMTP client. In the config file, use `smtp
 Our institutional Gmail accounts require two-factor authentication, so authenticating involves creating an application-specific password. See nodemailer's [instructions for using Gmail](https://nodemailer.com/usage/using-gmail/). Google will block excessive email with a misleading response, `421 4.3.0 Temporary System Problem.  Try again later (10).` (see [example](https://github.com/cca/equella_scripts/issues/11#issuecomment-1149277857)) so we pause two seconds in between each message.
 
 Moodle uses [Mailgun](https://app.mailgun.com/), which provides a free testing domain. Go to Dashboard > Sending domains > SMTP to find the credentials. Note that we have to add the recipient's email address to our "Authorized Recipients" to use the testing domain. There's also a [nodemailer-mailgun-transport](https://www.npmjs.com/package/nodemailer-mailgun-transport) package if using the Mailgun REST API seems better than SMTP for some reason.
+
+Many users' emails will "bounce back" as invalid addresses because they've been deleted for one reason or another. Included in this project is an "email-bouncebacks.js" [Google Apps Script](https://script.google.com) which programmatically logs those missing addresses and archives the email threads. To use it:
+
+- Create a new Apps Script project
+- Paste the code in & save it
+- Open the **Execution log**
+- **Run** the code
+  - The first time the script runs, it will ask for permission to connect to Gmail
+- Copy the logs & save them somewhere (e.g. data/email-bounces.log)

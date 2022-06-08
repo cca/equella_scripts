@@ -7,6 +7,7 @@ extends: 'eslint:recommended'
 globals:
     currentItem: readonly
     data: readonly
+    GmailApp: readonly
     item: readonly
     jQuery: readonly
     logger: readonly

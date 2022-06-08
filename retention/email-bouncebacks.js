@@ -14,12 +14,12 @@ function getBouncebackEmails() {
     messages.filter(m => m.getFrom().match('mailer-daemon@googlemail.com')).forEach(m => {
       var matches = m.getBody().match(/<b>(.*@cca\.edu)<\/b>/)
       if (matches) {
+        // mark as read & archive the thread
+        thread.markRead() && thread.moveToArchive()
         return console.log(`Email bounceback for address ${matches[1]}`)
       } else {
         console.log('Unable to find CCA email address in message.')
       }
     })
-    // mark as read & archive the thread
-    thread.markRead() && thread.moveToArchive()
   })
 }

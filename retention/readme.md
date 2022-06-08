@@ -2,7 +2,7 @@
 
 We remove items from the VAULT digital archive that are older than 6 years old and not deemed to have everlasting institutional value. See the [VAULT retention policy](https://docs.google.com/document/d/1kbWYS_Xa0hXvEU7YCrMLULuTco6RdhKdLY-qWBVky5o/edit#) for policy details.
 
-## Procedures (WIP)
+## Procedures
 
 1. Identify items for removal, `node ret`
     1. Items must have been contributed at least six years ago
@@ -11,7 +11,8 @@ We remove items from the VAULT digital archive that are older than 6 years old a
 2. (Optional) Compile summary statistics, `node summarize -f items.json`
 3. Break items into reasonably sized sets of emails, `node chunk.js -f items.json`
 4. Reach out to item owners with instructions on downloading their works, `node contact -f items-1.json` (see notes below about email configuration)
-    1. Repeat this step for each "chunk" of items
+    1. The script logs to stdout, so realistically we run it like `node contact -f data/items-1.json | tee -a data/log.txt` so we can record the logs
+    2. Repeat this step for each "chunk" of items
 5. Wait six months and then bulk remove the identified items, `node del -f items.json`
 
 ## Configuration
@@ -52,8 +53,10 @@ Create a JSON .retentionrc file (see example.retentionrc or code block below) wi
 
 We exclude the collections listed above. See the [Collections Categorized for Migration](https://docs.google.com/spreadsheets/d/1rD3nUSFjLp_0VhKYdTZb1SoUZZbxdScpJ9BXRCWJua0/edit) spreadsheet for more details.
 
+## Email
+
 For email, we need to authenticate an SMTP client. In the config file, use `smtp_user`, `smtp_pass`, and `transporter` settings, where transporter can be either google/gmail or mailgun. If `transporter` is not defined, email JSON is printed to stdout.
 
-Our institutional Gmail accounts require two-factor authentication, so authenticating involves creating an application-specific password. See nodemailer's [instructions for using Gmail](https://nodemailer.com/usage/using-gmail/). Moodle uses [Mailgun](https://app.mailgun.com/), which provides a free testing domain. Go to Dashboard > Sending domains > SMTP to find the credentials. Note that we have to add the recipient's email address to our "Authorized Recipients" to use the testing domain.
+Our institutional Gmail accounts require two-factor authentication, so authenticating involves creating an application-specific password. See nodemailer's [instructions for using Gmail](https://nodemailer.com/usage/using-gmail/). Google will block excessive email with a misleading response, `421 4.3.0 Temporary System Problem.  Try again later (10).` (see [example](https://github.com/cca/equella_scripts/issues/11#issuecomment-1149277857)) so we pause two seconds in between each message.
 
-There's also a [nodemailer-mailgun-transport](https://www.npmjs.com/package/nodemailer-mailgun-transport) package if using the Mailgun REST API seems better than SMTP for some reason.
+Moodle uses [Mailgun](https://app.mailgun.com/), which provides a free testing domain. Go to Dashboard > Sending domains > SMTP to find the credentials. Note that we have to add the recipient's email address to our "Authorized Recipients" to use the testing domain. There's also a [nodemailer-mailgun-transport](https://www.npmjs.com/package/nodemailer-mailgun-transport) package if using the Mailgun REST API seems better than SMTP for some reason.

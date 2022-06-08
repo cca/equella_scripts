@@ -78,14 +78,11 @@ function groupByOwner(items) {
 function mailUser(username, items) {
     // skip internal users, no need to email them
     if (items[0].internalOwner) {
-        log(`Skipping internal user with UUID ${username}`)
-        log(`They own ${items.length} items`)
-        return false
+        return `Skipping ${items.length} items owned by internal user with UUID ${username}.`
     }
 
     if (username.trim() == "") {
-        log(`Empty username for ${items.length} items; skipping email`)
-        return false
+        return `Empty username for ${items.length} items; skipping email.`
     }
 
     items = items.filter(i => i.status === 'live')
@@ -131,20 +128,21 @@ async function main() {
         // are the items already grouped by owner?
         if (Array.isArray(items[0])) {
             log(`Emailing the ${items.length} owners of items in file ${items_file}`)
-            items.forEach(async ownedItems => {
+            for (const ownedItems of items) {
                 let result = await mailUser(ownedItems[0]['owner']['id'], ownedItems.map(i => new Item(i, options)))
-                if (result) log(result)
-                sleep(2000)
-            })
+                log(result)
+                await sleep(2000)
+            }
         } else {
             log(`Emailing the owners of the ${items.length} items in file ${items_file}`)
             items = items.map(i => new Item(i, options))
-            let itemsGroupedByOwner = groupByOwner(items)
-            Object.keys(itemsGroupedByOwner).forEach(async owner => {
+            const itemsGroupedByOwner = groupByOwner(items)
+            const owners = Object.keys(itemsGroupedByOwner)
+            for (const owner of owners) {
                 let result = await mailUser(owner, itemsGroupedByOwner[owner])
-                if (result) log(result)
-                sleep(2000)
-            })
+                log(result)
+                await sleep(2000)
+            }
         }
     } else {
         // just a single item, typically for testing
@@ -157,5 +155,5 @@ exports.groupByOwner = groupByOwner
 exports.mailUser = mailUser
 
 if (require.main === module) {
-    main().catch(e => { throw e })
+    main().catch(e => console.error(e))
 }

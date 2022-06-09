@@ -116,25 +116,24 @@ function mailUser(username, items) {
     return transporter.sendMail(msg)
 }
 
-async function main() {
-    let items_file = options.file || options.f
-    if (!items_file) {
+async function main(file) {
+    if (!file) {
         console.error('Error: please supply a file of items to delete with the --file or -f flag.')
         process.exit(1)
     }
 
-    let items = JSON.parse(fs.readFileSync(items_file, { encoding: 'utf-8' }))
+    let items = JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' }))
     if (Array.isArray(items)) {
         // are the items already grouped by owner?
         if (Array.isArray(items[0])) {
-            log(`Emailing the ${items.length} owners of items in file ${items_file}`)
+            log(`Emailing the ${items.length} owners of items in file ${file}`)
             for (const ownedItems of items) {
                 let result = await mailUser(ownedItems[0]['owner']['id'], ownedItems.map(i => new Item(i, options)))
                 log(result)
                 await sleep(2000)
             }
         } else {
-            log(`Emailing the owners of the ${items.length} items in file ${items_file}`)
+            log(`Emailing the owners of the ${items.length} items in file ${file}`)
             items = items.map(i => new Item(i, options))
             const itemsGroupedByOwner = groupByOwner(items)
             const owners = Object.keys(itemsGroupedByOwner)
@@ -155,15 +154,14 @@ exports.groupByOwner = groupByOwner
 exports.mailUser = mailUser
 
 if (require.main === module) {
-    main().catch(e => console.error(e)).finally(() => {
-        const items_file = options.file || options.f
-            , path = require('path')
-            , basename = path.basename(items_file);
-        fs.rename(
-            items_file,
-            items_file.replace(basename, `x${basename}`),
-            (err) => {
-                console.error(err)
-            })
+    const items_file = options.file || options.f
+    main(items_file).catch(e => console.error(e)).finally(() => {
+        const path = require('path')
+            , basename = path.basename(items_file)
+            , new_name = items_file.replace(basename, `x${basename}`);
+        fs.rename(items_file, new_name, (err) => {
+            if (err) throw err
+            log(`Renamed ${items_file} to ${new_name}`)
+        })
     })
 }

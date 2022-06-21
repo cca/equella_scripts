@@ -86,6 +86,9 @@ function mailUser(username, items) {
     }
 
     items = items.filter(i => i.status === 'live')
+    if (items.length === 0) {
+        return `Skipping ${username} - none of their items to be removed are published.`
+    }
     let items_html = '<ul>'
     items_html += items.reduce((accumulator, item) => {
         accumulator += `<li><a href="${item.links.view}">${item.title}</a>`

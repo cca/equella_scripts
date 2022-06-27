@@ -6,16 +6,15 @@ const xpath = require('xpath')
 const xmldom = require('@xmldom/xmldom').DOMParser
 const async = require('async')
 
-const token = fs.readFileSync('.token').toString().trim()
+const options = require('rc')('equella', {})
 const headers = {
     'Accept': 'application/json',
-    'X-Authorization': 'access_token=' + token,
+    'X-Authorization': 'access_token=' + options.token,
 }
-const root = 'https://vault.cca.edu/api'
 // parameters for filtering
 const collections = ['9ec74523-e018-4e01-ab4e-be4dd06cdd68'] // ID for Syllabus Coll
 const length = 50 // maximum no. of items we can get in an API request
-const programs = ['ETHSM', 'ETHST', 'DIVSM', 'DIVST', 'DIVRS']
+const programs = options.programs ? options.programs.split(',') : []
 // the utilities/semesters.js script can generate this list
 const semesters = [
     "Spring 2022",
@@ -46,7 +45,7 @@ let params = {
     where: where_clause,
     // if necessary you can limit the number of items to check
     // by adding a freetext query here
-    // q: "Summer 2020",
+    q: options.q || '',
 }
 
 let baseRequest = request.defaults({
@@ -74,7 +73,7 @@ function collectItems (err, resp, data) {
 }
 
 // figure out how many syllabi there are & collect them into items array
-searchRequest.get(`${root}/search/`, (err, response, data) => {
+searchRequest.get(`${options.root}/api/search/`, (err, response, data) => {
     if (err) throw err
 
     collectItems(null, null, data)
@@ -83,7 +82,7 @@ searchRequest.get(`${root}/search/`, (err, response, data) => {
     while (count < total) {
         console.log(`Getting syllabi items ${count + 1} through ${count + length}...`)
         count += length
-        searchRequest.get(`${root}/search/`, { qs: { start: items.length } }, collectItems)
+        searchRequest.get(`${options.root}/api/search/`, { qs: { start: items.length } }, collectItems)
     }
 })
 
@@ -104,10 +103,10 @@ function getFile (item, callback) {
         ].join(' ')
         // handle multiple attachments, add number to filename
         item.attachments.forEach((attachment, index) => {
-            let req = baseRequest.get(`${root}/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
+            let req = baseRequest.get(`${options.root}/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
                 .on('response', res => {
                     if (res.statusCode != 200) {
-                        return console.error(`${res.statusCode} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item https://vault.cca.edu/item/${item.uuid}/${item.version}`)
+                        return console.error(`${res.statusCode} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${options.root}/item/${item.uuid}/${item.version}`)
                     }
                     let extension = attachment.filename.split('.').pop()
                     let filename = [section, (index ? ` (${index})` : ''), '.', extension].join('')
@@ -115,7 +114,7 @@ function getFile (item, callback) {
                     req.pipe(fs.createWriteStream(path.join('files', filename)))
                 })
                 .on('error', err => {
-                    console.error(`Error downloading file ${attachment.filename} from item https://vault.cca.edu/items/${item.uuid}/${item.version}/`)
+                    console.error(`Error downloading file ${attachment.filename} from item ${options.root}/items/${item.uuid}/${item.version}/`)
                     console.error(err)
                 })
         })

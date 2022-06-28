@@ -1,0 +1,5 @@
+{
+    "root": "https://vault.cca.edu",
+    "token": "uuid string here...",
+    "verbose": true
+}

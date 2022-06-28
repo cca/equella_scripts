@@ -6,9 +6,8 @@ const fetch = require('node-fetch')
 const filenamify = require('filenamify')
 const xpath = require('xpath')
 const xmldom = require('@xmldom/xmldom').DOMParser
-const async = require('async')
 const defaults = {
-    // obviously need attachment & metadata
+    // obviously need attachment & metadata info
     // "basic" is a nicety, gives item.name
     // "detail" gives owner, dates, collaborators, & some other unneeded item properties
     info: 'attachment,basic,detail,metadata',
@@ -102,20 +101,22 @@ function writeItemDirs(items) {
 
 function getAttachments(item, dir) {
     debug(`Downloading attachments for item ${item.links.view}`)
+
     item.attachments.forEach(attachment => {
         debug(`Downloading "${attachment.filename}" from item ${item.links.view}`)
+
         fetch(`${options.root}/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
             .then(res => {
-                console.log(res)
                 if (res.status != 200) {
                     return console.error(`${res.statusCode} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)
                 }
-                let fn = filenamify(attachment.filename, {replacement: '_'})
+
                 // @TODO avoid collisions with reserved data filenames (metadata.xml, item.json, index.html)
+                let fn = filenamify(attachment.filename, {replacement: '_'})
                 res.body.pipe(fs.createWriteStream(path.join(dir, fn)))
             })
             .catch('error', e => {
-                console.error(`Error downloading file ${attachment.filename} from item ${options.url}/items/${item.uuid}/${item.version}/`)
+                console.error(`Error downloading file ${attachment.filename} from item ${item.links.view}`)
                 handleErr(e)
             })
     })
@@ -137,7 +138,7 @@ function escapeHTML(s) {
         '<': '&lt;',
         '>': '&gt;',
         "'": '&#39;',
-        '"': '&quot;'
+        '"': '&quot;',
     }[tag]))
 }
 
@@ -179,20 +180,23 @@ search().then(r => r.json())
         let total = data.available
         let items = data.results
         console.log(`Found ${total} search results`)
+
         if (total === items.length) {
             //  all items were in the first "page" of search results
             writeItemDirs(items)
         } else {
             // we need data for the items not in the first page of results
             debug('Iterating through search results pages to get all item data')
+
             for (var i = data.results.length; i < total; i += options.length) {
                 search(i).then(r => r.json())
                     .then(data => {
                         items = items.concat(data.results)
                         debug(`We have data for ${items.length} of ${total} total items`)
+
                         if (items.length === total) {
                             // we've got all the items data, now create their export dirs
-                            debug('We have data for all items')
+                            debug('We have data for all items now')
                             writeItemDirs(items)
                         }
                     }).catch(handleErr)

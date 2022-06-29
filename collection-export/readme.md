@@ -1,6 +1,6 @@
-# Collection Archive
+# Collection Export
 
-Download all (or a subset) of items from a VAULT collection. Each item becomes its own folders in the "data" directory with all its files, XML metadata, JSON data from the openEQUELLA API, and (optionally) a list of extract text fields (e.g. the title and VAULT URL of the item).
+Download all (or a subset) of items from a VAULT collection. Each item becomes its own folders in the "data" directory with all its files, XML metadata, JSON data from the openEQUELLA API, and a list of extracted metadata fields in HTML (e.g. the title and VAULT URL of the item).
 
 ## Setup
 

@@ -75,6 +75,11 @@ function main() {
             process.exit(1)
         }
         items = items.results
+    } else if (Array.isArray(items[0])) {
+        // handled items grouped by owner (arrays of arrays)
+        let unpacked_items = []
+        items.forEach(a => unpacked_items = unpacked_items.concat(a))
+        items = unpacked_items
     }
 
     items.forEach(item => unlockItem(item).then(res => {

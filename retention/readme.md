@@ -6,14 +6,15 @@ We remove items from the VAULT digital archive that are older than 6 years old a
 
 1. Identify items for removal, `node ret`
     1. Items must have been contributed at least six years ago
-    2. Items must not have markers of significance (awards, "high" rating, program portfolios)
-    3. Items must not be in an important collection (Libraries, Syllabus, Accreditation)
-2. (Optional) Compile summary statistics, `node summarize -f items.json`
-3. Break items into reasonably sized sets of emails, `node chunk.js -f items.json`
-4. Reach out to item owners with instructions on downloading their works, `node contact -f items-1.json` (see notes below about email configuration)
+    1. Items must not have markers of significance (awards, "high" rating, program portfolios)
+    1. Items must not be in an important collection (Libraries, Syllabus, Accreditation)
+1. (Optional) Compile summary statistics, `node summarize -f items.json`
+1. (Optional) Add more collection and user info to the JSON, `node embeddata.js -f items.json`
+1. Break items into reasonably sized sets of emails, `node chunk.js -f items.json`
+1. Reach out to item owners with instructions on downloading their works, `node contact -f items-1.json` (see notes below about email configuration)
     1. The script logs to stdout, so realistically we run it like `node contact -f data/items-1.json | tee -a data/log.txt` so we can record the logs
-    2. Repeat this step for each "chunk" of items
-5. Wait six months and then bulk remove the identified items, `node del -f items.json`
+    1. Repeat this step for each "chunk" of items
+1. Wait six months and then bulk remove the identified items, `node del -f items.json`
 
 ## Configuration
 

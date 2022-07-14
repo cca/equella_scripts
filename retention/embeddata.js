@@ -10,6 +10,11 @@ const https = require('https')
 
 const fetch = require('node-fetch')
 let options = require('rc')('retention')
+// tests run from root with a different rc file
+// so if we're testing, we load the test configuration
+if (options._[0] && options._[0].indexOf('retention/test') != -1) {
+    options = JSON.parse(fs.readFileSync('.testretentionrc'))
+}
 
 // specify an HTTP agent so we can set maxSockets to < Infinity
 const agent = new https.Agent({
@@ -22,7 +27,7 @@ const headers = {
     'X-Authorization': 'access_token=' + options.token
 }
 const fetch_options = { headers: headers, agent: agent }
-const collections_file = 'data/collections.json'
+const collections_file = `${__dirname}/data/collections.json`
 
 function writeCollections(data) {
     fs.writeFile(collections_file, JSON.stringify(data, null, 2), (err) => {
@@ -57,44 +62,60 @@ function embedUser(user, item) {
 }
 
 function embed(item) {
-    if (options.debug) console.log(`Embedding data in item ${item.uuid} no. ${embedded_items.length}`)
+    if (options.debug) console.log(`Embedding data in item ${item.uuid}`)
 
     item.collection.name = collections.find(c => c.uuid === item.collection.uuid).name
 
-    let user = users.find(u => u.uniqueID === item.owner.id)
+    if (item.owner.id == "") {
+        embedded_items.push(item)
+        return finish()
+    }
+    // look in cache for user
+    let user = users.find(u => u.id === item.owner.id)
     if (user) {
         item = embedUser(user, item)
         embedded_items.push(item)
         return finish()
     } else {
+        if (options.debug) console.log(`No user found in cache for ${item.owner.id}`)
         // get user data from API and cache it in the users object
-        fetch(`${options.url}/api/userquery/userinfobackup?uniqueId=${item.owner.id}`, fetch_options)
+        let url = `${options.url}/api/userquery/search?q=${item.owner.id}&groups=false&roles=false`
+        let uuid_regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+        // for internal users
+        if (item.owner.id.match(uuid_regex)) {
+            url = `${options.url}/api/usermanagement/local/user/${item.owner.id}`
+        }
+        fetch(url, fetch_options)
             .then(resp => {
-                if (resp.status === 204) {
+                if (resp.status === 204 || resp.status === 404) {
                     return null
                 }
                 return resp.json()
             })
-            .then(user => {
-                if (user) {
+            .then(data => {
+                if (data && Array.isArray(data.users)) {
+                    let user = data.users.find(u => u.id === item.owner.id)
                     users.push(user)
                     item = embedUser(user, item)
-                    embedded_items.push(item)
-                    return finish()
+                } else if (data && data.id) {
+                    delete data.links
+                    users.push(data)
+                    item = embedUser(data, item)
                 } else {
                     console.log(`Unable to find user ${item.owner.id} in VAULT.`)
                 }
+                embedded_items.push(item)
+                return finish()
             }).catch(e => {
                 console.error(`Error requesting user info for ${item.owner.id}`)
                 console.error(e)
-                embedded_items.push(item)
                 return finish()
             })
     }
 }
 
 function finish() {
-    if (embedded_items.length === items.length) {
+    if (embedded_items.length === items.length && !!items_file) {
         console.log('Done embedding data in items, overwriting the original file')
         fs.writeFile(items_file, JSON.stringify(items, null, 2), (err) => {
             if (err) {
@@ -125,4 +146,9 @@ if (require.main === module) {
         process.exit(1)
     }
     main(items_file)
+}
+
+module.exports = {
+    "getCollections": getCollections,
+    "embedUser": embedUser
 }

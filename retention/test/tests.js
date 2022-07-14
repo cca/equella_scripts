@@ -15,6 +15,7 @@ const Item = require('../item.js')
 const contact = require('../contact')
 const chunk = require('../chunk')
 const del = require('../del')
+const { embedUser, getCollections } = require('../embeddata')
 const items = {
     award: new Item(require('./fixtures/award.json'), options), // owned by ephetteplace
     commaInTitle: new Item(require('./fixtures/comma-in-title.json'), options), // owned by internal user
@@ -204,5 +205,25 @@ describe('Delete item', () => {
         }).catch(err => {
             console.error("Error restoring the deleted test item.", err)
         })
+    })
+})
+
+describe('Embed extra info in the item', () => {
+    it('retrieves collections data', async () => {
+        let collections = await getCollections()
+        assert.ok(collections.length > 0)
+        assert.ok(collections[0].name)
+        assert.ok(collections[0].uuid)
+    })
+
+    it('embeds user info into the item data', () => {
+        let user = {
+            "id": "12341234",
+            "firstName": "given",
+            "lastName": "sur"
+        }
+        let item = embedUser(user, items.highRated)
+        assert.equal(item.owner.firstName, user.firstName)
+        assert.equal(item.owner.fullName, `${user.firstName} ${user.lastName}`)
     })
 })

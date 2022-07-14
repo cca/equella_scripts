@@ -61,10 +61,10 @@ searchRequest.get(`${options.url}/api/search/`, (err, response, data) => {
     if (err) throw err
 
     collectItems(null, null, data)
-    console.log(`${total} total syllabi for ${options.name}`)
+    console.log(`${total} syllabi search results for ${options.name}`)
     // these requests fire off in parallel
     while (count < total) {
-        console.log(`Getting syllabi items ${count + 1} through ${count + LENGTH}...`)
+        console.log(`Getting syllabi items ${count + 1} through ${total < count + LENGTH ? total : count + LENGTH}...`)
         count += LENGTH
         searchRequest.get(`${options.url}/api/search/`, { qs: { start: items.length } }, collectItems)
     }
@@ -80,7 +80,7 @@ function getFile (item, callback) {
     let semester = xpath.select('string(//local/courseInfo/semester)', xml)
     let faculty = xpath.select('string(//local/courseInfo/faculty)', xml)
 
-    if (inTimeRange(semester) && faculty.match(options.name)) {
+    if (inTimeRange(semester) && !faculty.indexOf(options.name)) {
         let section = [
             semester,
             xpath.select('string(//local/courseInfo/section)', xml),

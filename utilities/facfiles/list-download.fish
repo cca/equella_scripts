@@ -9,7 +9,7 @@ for name in (cat $file)
     # download all available syllabi
     node facfiles.js --name "$name" --start_term 'Fall 2018' --stop_term 'Spring 2022'
     # put them into their own directory
-    mv -v files/* "faculty/$name.zip"
-    # clear out the files directory for next time
-    rm files/*
+    set dirname (echo $name | tr -d '\\/()[]{}*?!')
+    mkdir -p "faculty/$dirname"
+    mv -v files/* "faculty/$dirname"
 end

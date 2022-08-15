@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const request = require('request')
 const fs = require('fs')
 const async = require('async')
@@ -6,7 +7,7 @@ let cli_defaults = { add: true }
 let options = require('rc')('equella', cli_defaults)
 
 if (options.help || options.h) {
-    console.log('usage: node add-to-group --uuid 1234 --users [ users.json | user1,user2 ] [ --add | --replace | --clear ]')
+    console.log('usage: node add-to-group --group 1234 --users [ users.json | user1,user2 ] [ --add | --replace | --clear ]')
 
     console.log('\n\tadd users from a JSON array file to an internal VAULT group')
     console.log('\tor supply a comma-separated list of usernames')
@@ -23,12 +24,12 @@ let headers = {
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
 }
-let url = `https://vault.cca.edu/api/usermanagement/local/group/${options.uuid}`
+let url = `https://vault.cca.edu/api/usermanagement/local/group/${options.group}`
 let req_options = { headers: headers, json: true, url: url }
 let req = request.defaults(req_options)
 
-if (!options.uuid) {
-    console.error('Must provide a group UUID either with --uuid parameter or in an .equellarc file.')
+if (!options.group) {
+    console.error('Must provide a group UUID either with --group parameter or in an .equellarc file.')
     process.exit(1)
 }
 

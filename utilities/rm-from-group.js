@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const request = require('request')
 
 let options = require('rc')('equella', {})

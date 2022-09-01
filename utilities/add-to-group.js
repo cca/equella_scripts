@@ -40,7 +40,11 @@ let users = []
 function getGroup (callback) {
     req.get({}, (err, resp) => {
         if (err) return callback(err)
+
         group = resp.body
+        // EQUELLA API errors return an object like this
+        if (group.error) throw Error(`${group.code} ${group.error}: ${group.error_description}`)
+
         if (options.debug) console.log('group: ', group)
         return callback()
     })

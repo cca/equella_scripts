@@ -35,6 +35,8 @@ http.get({}, (err, resp) => {
     handleError(err)
 
     let group = resp.body
+    // EQUELLA API errors return an object like this
+    if (group.error) throw Error(`${group.code} ${group.error}: ${group.error_description}`)
 
     if (options.verbose) console.log('group: ', group)
 

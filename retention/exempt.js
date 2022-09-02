@@ -85,7 +85,5 @@ fs.readFile(file, { encoding: 'utf-8' }, (err, data) => {
         fs.writeFile(file, JSON.stringify(items, null, 2), err => handleErr(err))
     }
 
-    if (options.debug) {
-        console.log(`${counts.exempt} exempt items out of ${counts.total} total items in ${file}.`)
-    }
+    console.log(`${counts.exempt} exempt items out of ${counts.total} total items in ${file}.`)
 })

@@ -108,7 +108,7 @@ function getAttachments(item, dir) {
         http(`/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
             .then(res => {
                 if (res.status != 200) {
-                    return console.error(`${res.statusCode} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)
+                    return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)
                 }
 
                 // @TODO avoid collisions with reserved data filenames (metadata.xml, item.json, index.html)

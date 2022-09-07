@@ -83,7 +83,10 @@ function createItemDir(item, callback) {
     // @TODO handle potential collisions with --name option
     fs.mkdir(dirname, (err) => {
         if (err) handleErr(err)
-        callback(dirname)
+        fs.mkdir(path.join(dirname, 'metadata'), (err) => {
+            if (err) handleErr(err)
+            callback(dirname)
+        })
     })
 }
 
@@ -111,7 +114,6 @@ function getAttachments(item, dir) {
                     return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)
                 }
 
-                // @TODO avoid collisions with reserved data filenames (metadata.xml, item.json, index.html)
                 let fn = filenamify(attachment.filename, {replacement: '_'})
                 res.body.pipe(fs.createWriteStream(path.join(dir, fn)))
             })
@@ -124,12 +126,12 @@ function getAttachments(item, dir) {
 
 function writeXML(item, dir) {
     debug(`Writing XML metadata for item ${item.links.view}`)
-    fs.writeFile(path.join(dir, 'metadata.xml'), item.metadata, handleErr)
+    fs.writeFile(path.join(dir, 'metadata', 'metadata.xml'), item.metadata, handleErr)
 }
 
 function writeJSON(item, dir) {
     debug(`Writing JSON data for item ${item.links.view}`)
-    fs.writeFile(path.join(dir, 'item.json'), JSON.stringify(item, null, 2), handleErr)
+    fs.writeFile(path.join(dir, 'metadata', 'item.json'), JSON.stringify(item, null, 2), handleErr)
 }
 
 function escapeHTML(s) {
@@ -169,8 +171,7 @@ function itemToHTML(item) {
 
 function writeHTML(item, dir) {
     debug(`Writing HTML info for item ${item.links.view}`)
-    // is index.html too common a filename? Choose something else to reduce collisions?
-    fs.writeFile(path.join(dir, 'index.html'), itemToHTML(item), handleErr)
+    fs.writeFile(path.join(dir, 'metadata', 'index.html'), itemToHTML(item), handleErr)
 }
 
 debug('Searching for items with these parameters:', params)

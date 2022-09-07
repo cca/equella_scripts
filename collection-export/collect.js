@@ -105,7 +105,7 @@ function getAttachments(item, dir) {
     item.attachments.forEach(attachment => {
         debug(`Downloading "${attachment.filename}" from item ${item.links.view}`)
 
-        fetch(`${options.root}/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
+        http(`/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
             .then(res => {
                 if (res.status != 200) {
                     return console.error(`${res.statusCode} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)

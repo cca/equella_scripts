@@ -13,8 +13,9 @@ Download all (or a subset) of items from a VAULT collection. Each item becomes i
 
 ```sh
 # most search parameters can be passed to the script to select which items
-# a collection is required
+# a collection or item is required
 node collect --collection $UUID
+node collect --item $UUID
 # example of a more complicated search
 node collect --collection $UUID --status DRAFT,ARCHIVE --modifiedBefore 2020-01-01
 # download items into folders that use the items' titles

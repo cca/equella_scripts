@@ -16,8 +16,8 @@ const defaults = {
 const options = require('rc')('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
 
-if (!options.collection || !options.collection.match(UUIDRegex)) {
-    console.error('Error: must provide a collection UUID.')
+if ((!options.collection || !options.collection.match(UUIDRegex)) && (!options.item || !options.item.match(UUIDRegex))) {
+    console.error('Error: must provide either a collection or item UUID.')
     process.exit(1)
 }
 
@@ -68,6 +68,10 @@ async function http(url, opts={}) {
 }
 
 async function search(offset=0) {
+    if (options.item) {
+        debug(`Exporting individual item with UUID ${options.item}`)
+        return http(`/api/item/${options.item}`)
+    }
     params.start = offset
     debug(`Searching with offset ${offset}`)
     return http(`/api/search/?${new URLSearchParams(params)}`)
@@ -91,7 +95,7 @@ function createItemDir(item, callback) {
 }
 
 function writeItemDirs(items) {
-    console.log('Creating export directories for items...')
+    console.log('Creating export directories...')
     items.forEach(i => {
         createItemDir(i, dir => {
             getAttachments(i, dir)
@@ -174,13 +178,19 @@ function writeHTML(item, dir) {
     fs.writeFile(path.join(dir, 'metadata', 'index.html'), itemToHTML(item), handleErr)
 }
 
-debug('Searching for items with these parameters:', params)
+if (!options.item) debug('Searching for items with these parameters:', params)
 
 search().then(r => r.json())
     .then(data => {
-        let total = data.available
-        let items = data.results
-        console.log(`Found ${total} search results`)
+        let total, items;
+        if (options.item) {
+            total = 1
+            items = data
+        } else {
+            total = data.available
+            items = data.results
+            console.log(`Found ${total} search results`)
+        }
 
         if (total === items.length) {
             //  all items were in the first "page" of search results

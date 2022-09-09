@@ -110,15 +110,22 @@ function getAttachments(item, dir) {
     debug(`Downloading attachments for item ${item.links.view}`)
 
     item.attachments.forEach(attachment => {
-        debug(`Downloading "${attachment.filename}" from item ${item.links.view}`)
+        let filename = attachment.filename || attachment.folder
+        let basename = path.basename(filename)
+        debug(`Downloading "${basename}" from item ${item.links.view}`)
 
-        http(`/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`)
+        // handle filesnames with path separators in them that must be preserved
+        // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
+        filename = filename.split('/')
+        filename.pop()
+        filename = [...filename, basename].join('/')
+        http(`/api/item/${item.uuid}/${item.version}/file/${filename}`)
             .then(res => {
                 if (res.status != 200) {
                     return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)
                 }
 
-                let fn = filenamify(attachment.filename, {replacement: '_'})
+                let fn = filenamify(filename, {replacement: '_'})
                 res.body.pipe(fs.createWriteStream(path.join(dir, fn)))
             })
             .catch('error', e => {

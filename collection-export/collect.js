@@ -119,7 +119,7 @@ function getAttachments(item, dir) {
         filename = filename.split('/')
         filename.pop()
         filename = [...filename, basename].join('/')
-        http(`/api/item/${item.uuid}/${item.version}/file/${filename}`)
+        http(`/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(filename)}`)
             .then(res => {
                 if (res.status != 200) {
                     return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)

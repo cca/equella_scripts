@@ -118,8 +118,8 @@ function getAttachments(item, dir) {
         // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
         filename = filename.split('/')
         filename.pop()
-        filename = [...filename, basename].join('/')
-        http(`/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(filename)}`)
+        filename = [...filename, encodeURIComponent(basename)].join('/')
+        http(`/api/item/${item.uuid}/${item.version}/file/${filename}`)
             .then(res => {
                 if (res.status != 200) {
                     return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)

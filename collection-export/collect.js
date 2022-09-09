@@ -106,19 +106,17 @@ function writeItemDirs(items) {
     })
 }
 
-function getAttachments(item, dir) {
+function getAttachments(item, itemDir) {
     debug(`Downloading attachments for item ${item.links.view}`)
 
     item.attachments.forEach(attachment => {
-        let filename = attachment.filename || attachment.folder
-        let basename = path.basename(filename)
-        debug(`Downloading "${basename}" from item ${item.links.view}`)
-
         // handle filesnames with path separators in them that must be preserved
         // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
-        filename = filename.split('/')
-        filename.pop()
-        filename = [...filename, encodeURIComponent(basename)].join('/')
+        let { dir, base } = path.parse(attachment.filename || attachment.folder)
+        base = encodeURIComponent(base)
+        let filename = dir ? `${dir}/${base}` : base
+        debug(`Downloading "${base}" from item ${item.links.view}`)
+
         http(`/api/item/${item.uuid}/${item.version}/file/${filename}`)
             .then(res => {
                 if (res.status != 200) {
@@ -126,7 +124,7 @@ function getAttachments(item, dir) {
                 }
 
                 let fn = filenamify(filename, {replacement: '_'})
-                res.body.pipe(fs.createWriteStream(path.join(dir, fn)))
+                res.body.pipe(fs.createWriteStream(path.join(itemDir, fn)))
             })
             .catch('error', e => {
                 console.error(`Error downloading file ${attachment.filename} from item ${item.links.view}`)

@@ -3,6 +3,7 @@ const path = require('path')
 
 const fetch = require('node-fetch')
 const filenamify = require('filenamify')
+const md5 = require('md5-file')
 const xpath = require('xpath')
 const xmldom = require('@xmldom/xmldom').DOMParser
 const defaults = {
@@ -118,6 +119,33 @@ function getAttachments(item, itemDir) {
 
                 let fn = filenamify(filename, {replacement: '_'})
                 res.body.pipe(fs.createWriteStream(path.join(itemDir, fn)))
+
+                res.body.on('err', handleErr)
+
+                // check downloaded attachment against size recorded in attachments metadata
+                res.body.on('end', () => {
+                    if (attachment.md5sum) {
+                        md5(path.join(itemDir, fn)).then(hash => {
+                            if (hash === attachment.md5sum) {
+                                debug(`Attachment ${base} from item ${item.links.view} finished downloading & has a matching md5sum.`)
+                            } else {
+                                console.error(`Error: md5sum mismatch. Attachment ${base} from item ${item.links.view} finished downloading & md5sum validation failed.\nLocal: ${hash}\tVAULT: ${attachment.md5sum}`)
+                            }
+                        }).catch(handleErr)
+                    } else if (attachment.size) {
+                        fs.stat(path.join(itemDir, fn), (err, stats) => {
+                            if (err) handleErr(err)
+
+                            if (attachment.size === stats.size) {
+                                debug(`Attachment ${base} from item ${item.links.view} finished downloading & has same file size locally as in VAULT.`)
+                            } else if (attachment.size * 0.95 <= stats.size && attachment.size * 1.05 >= stats.size) {
+                                debug(`Attachment ${base} from item ${item.links.view} finished downloading & is roughly the same size as it was in VAULT.`)
+                            } else {
+                                console.error(`Error: file size discrepancy. Attachment ${base} from item ${item.links.view} finished downloading & is a significantly different size.\nLocal: ${stats.size}\tVAULT: ${attachment.size}`)
+                            }
+                        })
+                    }
+                })
             })
             .catch('error', e => {
                 console.error(`Error downloading file ${attachment.filename} from item ${item.links.view}`)

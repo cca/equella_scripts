@@ -31,6 +31,7 @@
     "csv-stringify": "^6.0.4",
     "filenamify": "4.3",
     "luxon": "^2.4.0",
+    "md5-file": "^5.0.0",
     "node-fetch": "^2.6.7",
     "nodemailer": "^6.7.2",
     "rc": "^1.2.8",

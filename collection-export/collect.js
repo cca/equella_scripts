@@ -106,42 +106,42 @@ function getAttachments(item, itemDir) {
     item.attachments.forEach(attachment => {
         // handle filesnames with path separators in them that must be preserved
         // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
-        let { dir, base } = path.parse(attachment.filename || attachment.folder)
-        base = encodeURIComponent(base)
-        let filename = dir ? `${dir}/${base}` : base
-        debug(`Downloading "${base}" from item ${item.links.view}`)
+        let filename = path.parse(attachment.filename || attachment.folder)
+        filename.encodedBase = encodeURIComponent(filename.base)
+        filename.url = filename.dir ? `${filename.dir}/${filename.encodedBase}` : filename.encodedBase
+        filename.full = filenamify(attachment.filename, { replacement: '_' })
+        debug(`Downloading "${filename.base}" from item ${item.links.view}`)
 
-        http(`/api/item/${item.uuid}/${item.version}/file/${filename}`)
+        http(`/api/item/${item.uuid}/${item.version}/file/${filename.url}`)
             .then(res => {
                 if (res.status != 200) {
-                    return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment with filename "${attachment.filename}" for item ${item.links.view}`)
+                    return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment "${filename.base}" for item ${item.links.view}`)
                 }
 
-                let fn = filenamify(filename, {replacement: '_'})
-                res.body.pipe(fs.createWriteStream(path.join(itemDir, fn)))
+                res.body.pipe(fs.createWriteStream(path.join(itemDir, filename.full)))
 
                 res.body.on('err', handleErr)
 
                 // check downloaded attachment against size recorded in attachments metadata
                 res.body.on('end', () => {
-                    if (attachment.md5sum) {
-                        md5(path.join(itemDir, fn)).then(hash => {
-                            if (hash === attachment.md5sum) {
-                                debug(`Attachment ${base} from item ${item.links.view} finished downloading & has a matching md5sum.`)
+                    if (attachment.md5) {
+                        md5(path.join(itemDir, filename.full)).then(hash => {
+                            if (hash === attachment.md5) {
+                                debug(`Attachment "${filename.base}" from item ${item.links.view} finished downloading & has a matching md5sum.`)
                             } else {
-                                console.error(`Error: md5sum mismatch. Attachment ${base} from item ${item.links.view} finished downloading & md5sum validation failed.\nLocal: ${hash}\tVAULT: ${attachment.md5sum}`)
+                                console.error(`Error: md5sum mismatch. Attachment "${filename.base}" from item ${item.links.view} finished downloading & md5sum validation failed.\nLocal: ${hash}\tVAULT: ${attachment.md5}`)
                             }
                         }).catch(handleErr)
                     } else if (attachment.size) {
-                        fs.stat(path.join(itemDir, fn), (err, stats) => {
+                        fs.stat(path.join(itemDir, filename.full), (err, stats) => {
                             if (err) handleErr(err)
 
                             if (attachment.size === stats.size) {
-                                debug(`Attachment ${base} from item ${item.links.view} finished downloading & has same file size locally as in VAULT.`)
+                                debug(`Attachment "${filename.base}" from item ${item.links.view} finished downloading & has same file size locally as in VAULT.`)
                             } else if (attachment.size * 0.95 <= stats.size && attachment.size * 1.05 >= stats.size) {
-                                debug(`Attachment ${base} from item ${item.links.view} finished downloading & is roughly the same size as it was in VAULT.`)
+                                debug(`Attachment "${filename.base}" from item ${item.links.view} finished downloading & is roughly the same size as it was in VAULT.`)
                             } else {
-                                console.error(`Error: file size discrepancy. Attachment ${base} from item ${item.links.view} finished downloading & is a significantly different size.\nLocal: ${stats.size}\tVAULT: ${attachment.size}`)
+                                console.error(`Error: file size discrepancy. Attachment "${filename.base}" from item ${item.links.view} finished downloading & is a significantly different size.\nLocal: ${stats.size}\tVAULT: ${attachment.size}`)
                             }
                         })
                     }

@@ -1,5 +1,4 @@
 const fs = require('fs')
-const https = require('https')
 const path = require('path')
 
 const fetch = require('node-fetch')
@@ -52,16 +51,10 @@ function handleErr(e) { if (e) console.error(e) }
 
 // fetch abstraction
 async function http(url, opts={}) {
-    // specify an HTTP agent so we can set maxSockets to < Infinity
-    const agent = new https.Agent({
-        keepAlive: true,
-        maxSockets: 10
-    })
     const headers = {
         'Accept': 'application/json',
         'X-Authorization': 'access_token=' + options.token,
     }
-    opts.agent = agent
     opts.headers = headers
     url = new URL(options.root + url)
     return fetch(url, opts)

@@ -122,7 +122,7 @@ function getAttachments(item, itemDir) {
 
                 res.body.on('err', handleErr)
 
-                // check downloaded attachment against size recorded in attachments metadata
+                // check downloaded attachment's md5 hash
                 res.body.on('end', () => {
                     if (attachment.md5) {
                         md5(path.join(itemDir, filename.full)).then(hash => {
@@ -132,18 +132,8 @@ function getAttachments(item, itemDir) {
                                 console.error(`Error: md5sum mismatch. Attachment "${filename.base}" from item ${item.links.view} finished downloading & md5sum validation failed.\nLocal: ${hash}\tVAULT: ${attachment.md5}`)
                             }
                         }).catch(handleErr)
-                    } else if (attachment.size) {
-                        fs.stat(path.join(itemDir, filename.full), (err, stats) => {
-                            if (err) handleErr(err)
-
-                            if (attachment.size === stats.size) {
-                                debug(`Attachment "${filename.base}" from item ${item.links.view} finished downloading & has same file size locally as in VAULT.`)
-                            } else if (attachment.size * 0.95 <= stats.size && attachment.size * 1.05 >= stats.size) {
-                                debug(`Attachment "${filename.base}" from item ${item.links.view} finished downloading & is roughly the same size as it was in VAULT.`)
-                            } else {
-                                console.error(`Error: file size discrepancy. Attachment "${filename.base}" from item ${item.links.view} finished downloading & is a significantly different size.\nLocal: ${stats.size}\tVAULT: ${attachment.size}`)
-                            }
-                        })
+                    } else {
+                        debug(`No md5sum for attachment "${filename.base}" from item ${item.links.view}`)
                     }
                 })
             })

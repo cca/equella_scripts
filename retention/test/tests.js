@@ -26,6 +26,7 @@ const items = {
     recent: new Item(require('./fixtures/recent-item.json'), options),
     recentAndExcluded: new Item(require('./fixtures/recent-and-excluded.json'), options),
     untitled: new Item(require('./fixtures/untitled.json'), options),
+    VCSThesis: new Item(require('./fixtures/vcs-thesis.json'), options),
 }
 
 describe('Identify items', () => {
@@ -59,6 +60,10 @@ describe('Identify items', () => {
     it('should not remove items that have won awards', () => {
         assert.equal(items.award.hasNoAwards, false)
         assert.equal(items.award.toBeRemoved, false)
+    })
+
+    it('should not remove Visual Critical Studies theses', () => {
+        assert.equal(items.VCSThesis.isntVCSThesis, false)
     })
 
     it('should be able to handle items with & without titles', () => {

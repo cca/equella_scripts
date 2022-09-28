@@ -1,0 +1,21 @@
+{
+  "uuid": "28e93032-7a82-1caa-8c2e-300f22159dcc",
+  "version": 1,
+  "metadata": "<xml><mods><name><subNameWrapper>ephetteplace<gradDate>Spring 2016</gradDate></subNameWrapper></name><noteWrapper><note>Reviewer Name</note></noteWrapper><titleInfo><title>Example metadata copied from real VCS thesis and anonymized</title></titleInfo><part/><language authority=\"iso639-2b\"/><accessCondition type=\"use and reproduction\">For rights relating to this resource, please contact the CCA Humanities and Sciences Division</accessCondition><recordInfo><recordContentSource authority=\"oclc\">cc9</recordContentSource><recordIdentifier>19787e4a-5d5c-4809-ae0a-49717e39e239</recordIdentifier><languageOfCataloging>eng</languageOfCataloging></recordInfo></mods><local><courseWorkWrapper><courseWorkType>Thesis</courseWorkType></courseWorkWrapper><courseInfo><courseName>VISCR-618</courseName><facultyID>jfrancis</facultyID><semester>Spring 2016</semester><course>Master's Project 3</course><faculty>Faculty Name1</faculty><section>VISCR-618-01</section><department>VISCR</department></courseInfo><thesisWrapper><reader>Faculty Name2</reader><advisor>Faculty Name3</advisor></thesisWrapper><tags> essay film</tags><tags>institutional critique</tags><tags>contemporary art</tags><tags>postcolonial art</tags><tags>film studies </tags><tags>cultural studies</tags><division>Humanities and Sciences Division</division><department>Visual Critical Studies</department><assessmentWrapper><useInReview>no</useInReview></assessmentWrapper></local></xml>",
+  "status": "live",
+  "createdDate": "2016-01-31T16:02:44.832-08:00",
+  "modifiedDate": "2016-01-31T16:32:37.470-08:00",
+  "owner": {
+    "id": "cfbe6c26-cf49-c679-bd90-ebdbe22d84f1"
+  },
+  "collaborators": [],
+  "collection": {
+    "uuid": "49de1037-0279-41b4-8070-0f7ffcbae56d"
+  },
+  "rating": -1,
+  "thumbnail": "default",
+  "links": {
+    "view": "https://vault.cca.edu/items/28e93032-7a82-1caa-8c2e-300f22159dcc/1/",
+    "self": "https://vault.cca.edu/api/item/28e93032-7a82-1caa-8c2e-300f22159dcc/1/"
+  }
+}

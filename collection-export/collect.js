@@ -1,11 +1,13 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
-const fetch = require('node-fetch')
-const filenamify = require('filenamify')
-const md5 = require('md5-file')
-const xpath = require('xpath')
-const xmldom = require('@xmldom/xmldom').DOMParser
+import fetch from 'node-fetch'
+import filenamify from 'filenamify'
+import md5 from 'md5-file'
+import rc from 'rc'
+import xpath from 'xpath'
+import { DOMParser as xmldom } from '@xmldom/xmldom'
+
 const defaults = {
     // obviously need attachment & metadata info
     // "basic" is a nicety, gives item.name
@@ -13,7 +15,7 @@ const defaults = {
     info: 'attachment,basic,detail,metadata',
     length: 50,
 }
-const options = require('rc')('app', defaults)
+const options = rc('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
 
 if ((!options.collection || !options.collection.match(UUIDRegex)) && (!options.item || !options.item.match(UUIDRegex))) {

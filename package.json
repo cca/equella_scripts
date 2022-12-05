@@ -27,7 +27,7 @@
     "mocha": "^10.1.0"
   },
   "dependencies": {
-    "@xmldom/xmldom": "^0.8.6",
+    "@xmldom/xmldom": "^0.8.4",
     "async": "^3.2.4",
     "csv-stringify": "^6.2.3",
     "filenamify": "~5.1.1",

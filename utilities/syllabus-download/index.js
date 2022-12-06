@@ -1,12 +1,13 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'node:fs'
+import path from 'node:path'
 
-const request = require('request')
-const xpath = require('xpath')
-const xmldom = require('@xmldom/xmldom').DOMParser
-const async = require('async')
+import async from 'async'
+import rc from 'rc'
+import request from 'request'
+import xpath from 'xpath'
+import {DOMParser as xmldom} from '@xmldom/xmldom'
 
-const options = require('rc')('equella', {})
+const options = rc('equella', {})
 const headers = {
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,

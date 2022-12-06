@@ -3,12 +3,14 @@
 // you can pass any valid parameter for the search API route on the CLI
 // https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
 // e.g. node index --order=relevance --count=500 --status=draft --modifiedAfter=2019-09-01
-const qs = require("qs")
+import fs from 'fs'
+import qs from 'qs'
 
-const CSVStringify = require('csv-stringify/sync').stringify
-const request = require("request")
-const xmldom = require('@xmldom/xmldom').DOMParser
-const xpath = require('xpath')
+import { stringify } from 'csv-stringify/sync'
+import rc from 'rc'
+import request from 'request'
+import { DOMParser as xmldom } from '@xmldom/xmldom'
+import xpath from 'xpath'
 
 let defaults = {
     count: Infinity,
@@ -18,7 +20,7 @@ let defaults = {
     order: "modified",
     q: "",
 }
-let options = require('rc')('metadata-csv', defaults)
+let options = rc('metadata-csv', defaults)
 // subset of options to be passed to oE Search API
 let searchOptions = {}
 Object.assign(searchOptions, options);
@@ -36,7 +38,7 @@ function debug(msg) {
 // only doing this to silence eslint
 let metadataMap = null
 try {
-    metadataMap = require(`./${options.metadataMap}`)
+    metadataMap = JSON.parse(fs.readFileSync(`./${options.metadataMap}`))
 } catch (e) {
     console.error(e)
     console.error("Do you have a metadata-map.json file or reference one with the --metadataMap flag?")
@@ -84,7 +86,7 @@ function writeCSV(items) {
         'Collaborators',
         'Collection'
     ].concat(Object.values(metadataMap))
-    console.log(CSVStringify([header]).trim())
+    console.log(stringify.CSVStringify([header]).trim())
 
     items.forEach(item => {
         let xml = new xmldom().parseFromString(item.metadata)
@@ -105,7 +107,7 @@ function writeCSV(items) {
             item.collection.uuid
         ].concat(strings)
         // stringify expects an array of row arrays
-        console.log(CSVStringify([row]).trim())
+        console.log(stringify.CSVStringify([row]).trim())
     })
 }
 

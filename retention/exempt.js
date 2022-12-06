@@ -1,9 +1,12 @@
-const fs = require('fs')
-const path = require('path')
-const xpath = require('xpath')
-const Item = require('./item')
+import fs from 'fs'
 
-let options = require('rc')('retention')
+import rc from 'rc'
+// used in commented-out exemption criteria
+import xpath from 'xpath'
+
+import Item from './item.js'
+
+let options = rc('retention')
 
 let file = options.f || options.file
 let dryrun = options.d || options['dry-run']
@@ -20,7 +23,12 @@ Flags:
     -f, --file      the file of items to process
     --debug         print items that were exempted
     -d, --dry-run   do not edit the items file in place; instead, print items that would be exempted
-    -h, --help      print this usage information`)
+    -h, --help      print this usage information
+
+TO TEST:
+    - uncomment the exemption criteria in the exemptionFilter function
+    - run 'node exempt -d --debug -f data/exempt-item.json'
+`)
 }
 
 if (options.h || options.help) {

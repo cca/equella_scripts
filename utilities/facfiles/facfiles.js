@@ -1,11 +1,14 @@
-const fs = require('fs')
-const path = require('path')
+import fs  from 'fs'
+import path  from 'path'
 
-const request = require('request')
-const xpath = require('xpath')
-const xmldom = require('@xmldom/xmldom').DOMParser
-const async = require('async')
-const options = require('rc')('facfiles')
+import async  from 'async'
+import request  from 'request'
+import rc from 'rc'
+import { DOMParser as xmldom } from '@xmldom/xmldom'
+import xpath  from 'xpath'
+
+const options = rc('facfiles')
+
 const LENGTH = 50
 
 const headers = {

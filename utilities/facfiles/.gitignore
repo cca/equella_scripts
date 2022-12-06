@@ -3,3 +3,4 @@ files/*
 ~files/.gitkeep
 faculty.txt
 faculty/
+logs/*.log

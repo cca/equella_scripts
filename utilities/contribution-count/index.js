@@ -1,10 +1,13 @@
 // you can pass any valid parameter for the search API route on the CLI
 // https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
 // e.g. node index --order=relevance --count=500 --status=draft --modifiedAfter=2019-09-01
-const qs = require("qs")
-const request = require("request")
+import qs from 'qs'
+
+import rc from 'rc'
+import request from 'request'
+
 let defaults = { length: 50, count: 200, "q": "", order: "modified" }
-let options = require('rc')('contribution-count', defaults)
+let options = rc('contribution-count', defaults)
 
 let headers = {
     'X-Authorization': 'access_token=' + options.token,

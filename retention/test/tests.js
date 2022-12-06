@@ -20,17 +20,20 @@ const httpsAgent = new https.Agent({
 // _in the root_ of this project (since `npm test` runs from root)
 // see example.testretentionrc & fill in token & SMTP credentials
 const options = rc('testretention')
+const fixtpath = 'retention/test/fixtures'
 const items = {
-    award: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/award.json')), options), // owned by ephetteplace
-    commaInTitle: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/comma-in-title.json')), options), // owned by internal user
-    excluded: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/excluded-collection.json')), options),
-    highRated: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/high-rating.json')), options),
-    old: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/old-item.json')), options),
-    ppd: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/ppd.json')), options),
-    recent: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/recent-item.json')), options),
-    recentAndExcluded: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/recent-and-excluded.json')), options),
-    untitled: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/untitled.json')), options),
-    VCSThesis: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/vcs-thesis.json')), options),
+    // owned by ephetteplace
+    award: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/award.json`)), options),
+    // owned by internal user
+    commaInTitle: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/comma-in-title.json`)), options),
+    excluded: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/excluded-collection.json`)), options),
+    highRated: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/high-rating.json`)), options),
+    old: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/old-item.json`)), options),
+    ppd: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/ppd.json`)), options),
+    recent: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/recent-item.json`)), options),
+    recentAndExcluded: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/recent-and-excluded.json`)), options),
+    untitled: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/untitled.json`)), options),
+    VCSThesis: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/vcs-thesis.json`)), options),
 }
 
 describe('Identify items', () => {

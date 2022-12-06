@@ -1,6 +1,6 @@
-const CSVStringify = require('csv-stringify/sync').stringify
-const xmldom = require('@xmldom/xmldom').DOMParser
-const xpath = require('xpath')
+import { stringify } from 'csv-stringify/sync'
+import { DOMParser as xmldom } from '@xmldom/xmldom'
+import xpath from 'xpath'
 
 const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, isntPPD, hasNoAwards, isntVCSThesis]
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
@@ -30,7 +30,7 @@ class Item {
 
     toCSV() {
         // meant to serialize multiple records so it expects an array of arrays
-        return CSVStringify([[
+        return stringify.CSVStringify([[
             this.links.view,
             this.title,
             this.status,
@@ -89,4 +89,4 @@ function isntVCSThesis(item) {
     return item.collection.uuid !== '49de1037-0279-41b4-8070-0f7ffcbae56d' || xpath.select('string(//local/courseWorkWrapper/courseWorkType)', item.xml).toLowerCase() !== 'thesis'
 }
 
-module.exports = Item
+export default Item

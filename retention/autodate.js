@@ -7,7 +7,7 @@
  *
  * @return  {String}        date six years ago if input was null
  */
-module.exports = (date) => {
+export default (date) => {
     if (!date) {
         let d = new Date()
         d.setYear(d.getFullYear() - 6)

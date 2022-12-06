@@ -1,8 +1,13 @@
-const fs = require('fs')
-const https = require('https')
+import fs from 'node:fs'
+import https from 'node:https'
+import { pathToFileURL } from 'node:url'
 
-const fetch = require('node-fetch')
-let options = require('rc')('retention')
+import fetch from 'node-fetch'
+import rc from 'rc'
+
+import log from './log.js'
+
+let options = rc('retention')
 
 // tests run from root with a different rc file
 // so if we're testing, we load the test configuration
@@ -34,7 +39,7 @@ const headers = {
  *
  * @return  {Promise}        fetch HTTP request promise from VAULT API
  */
-function unlockItem(item) {
+export function unlockItem(item) {
     // https://vault.cca.edu/apidocs.do#operations-tag-Item_locks
     // we don't care if the item is locked or not, we're going to delete it anyways
     // so paradoxically _if this request fails_ we don't care, but success means the
@@ -52,7 +57,7 @@ function unlockItem(item) {
  *
  * @return  {Promise}        fetch HTTP request promise from VAULT API
  */
-function deleteItem(item) {
+export function deleteItem(item) {
     // https://vault.cca.edu/apidocs.do#operations-Items-deleteItem
     return fetch(
         `${options.url}/api/item/${item.uuid}/${item.version}`,
@@ -84,14 +89,14 @@ function main() {
 
     items.forEach(item => unlockItem(item).then(res => {
         if (res.ok && options.verbose) {
-            console.log(`Successfully unlocked item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+            log(`Successfully unlocked item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
         }
     }).then(res => {
         deleteItem(item).then(res => {
             if (!res.ok) {
                 throw new Error(`HTTP status: ${res.status} ${res.statusText}`)
             } else if (options.verbose) {
-                console.log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+                log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
             }
         }).catch(err => {
             // deleteItem error
@@ -106,9 +111,6 @@ function main() {
     )
 }
 
-exports.unlockItem = unlockItem
-exports.deleteItem = deleteItem
-
-if (require.main === module) {
+if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
     main()
 }

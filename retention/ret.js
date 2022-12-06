@@ -1,10 +1,14 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'node:fs'
+import path from 'node:path'
 
-const request = require('request')
-const options = require('rc')('retention', {})
-options.date = require('./autodate')(options.date)
-const Item = require('./item')
+import rc from 'rc'
+import request from 'request'
+
+import autodate from './autodate.js'
+import Item from './item.js'
+
+const options = rc('retention', {})
+options.date = autodate(options.date)
 const LENGTH = 50
 
 const headers = {

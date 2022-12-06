@@ -22,7 +22,7 @@ import log from './log.js'
  *
  * @return  {Array[Item[]]}         array of arrays of items
  */
-export function chunk(groupedItems, size) {
+export default function chunk(groupedItems, size) {
     let chunks = []
     let owners = Object.keys(groupedItems)
     // i = the current chunk, j = the current owner

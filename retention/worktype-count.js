@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import xpath from 'xpath'

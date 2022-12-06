@@ -1,8 +1,17 @@
 /* globals describe,it,before,after */
-const assert = require('assert')
+import assert from 'node:assert'
 
-const fetch = require('node-fetch')
-const https = require('https')
+import fetch from 'node-fetch'
+import fs from 'fs'
+import https from 'https'
+import rc from 'rc'
+
+import Item from '../item.js'
+import { groupByOwner, mailUser } from '../contact.js'
+import chunk from '../chunk.js'
+import { deleteItem, unlockItem } from '../del.js'
+import { embedUser, getCollections } from '../embeddata.js'
+
 const httpsAgent = new https.Agent({
     rejectUnauthorized: false,
 })
@@ -10,23 +19,18 @@ const httpsAgent = new https.Agent({
 // NOTE: requires a separate config file for tests that's
 // _in the root_ of this project (since `npm test` runs from root)
 // see example.testretentionrc & fill in token & SMTP credentials
-const options = require('rc')('testretention')
-const Item = require('../item.js')
-const contact = require('../contact')
-const chunk = require('../chunk')
-const del = require('../del')
-const { embedUser, getCollections } = require('../embeddata')
+const options = rc('testretention')
 const items = {
-    award: new Item(require('./fixtures/award.json'), options), // owned by ephetteplace
-    commaInTitle: new Item(require('./fixtures/comma-in-title.json'), options), // owned by internal user
-    excluded: new Item(require('./fixtures/excluded-collection.json'), options),
-    highRated: new Item(require('./fixtures/high-rating.json'), options),
-    old: new Item(require('./fixtures/old-item.json'), options),
-    ppd: new Item(require('./fixtures/ppd.json'), options),
-    recent: new Item(require('./fixtures/recent-item.json'), options),
-    recentAndExcluded: new Item(require('./fixtures/recent-and-excluded.json'), options),
-    untitled: new Item(require('./fixtures/untitled.json'), options),
-    VCSThesis: new Item(require('./fixtures/vcs-thesis.json'), options),
+    award: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/award.json')), options), // owned by ephetteplace
+    commaInTitle: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/comma-in-title.json')), options), // owned by internal user
+    excluded: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/excluded-collection.json')), options),
+    highRated: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/high-rating.json')), options),
+    old: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/old-item.json')), options),
+    ppd: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/ppd.json')), options),
+    recent: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/recent-item.json')), options),
+    recentAndExcluded: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/recent-and-excluded.json')), options),
+    untitled: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/untitled.json')), options),
+    VCSThesis: new Item(JSON.parse(fs.readFileSync('retention/test/fixtures/vcs-thesis.json')), options),
 }
 
 describe('Identify items', () => {
@@ -129,7 +133,7 @@ describe('Contact owner', () => {
     it('group multiple items by the same owner', () => {
         // award owned by ephetteplace, other 2 owned by same UUID user
         const list = [items.award.toJSON(), items.recent.toJSON(), items.recentAndExcluded.toJSON()]
-        const itemsGroupedByOwner = contact.groupByOwner(list)
+        const itemsGroupedByOwner = groupByOwner(list)
         assert.ok(itemsGroupedByOwner)
         assert.equal(itemsGroupedByOwner[items.award.owner.id].length, 1)
         assert.equal(itemsGroupedByOwner[items.award.owner.id][0].uuid, items.award.toJSON().uuid)
@@ -139,7 +143,7 @@ describe('Contact owner', () => {
     it('sends an email to the owner', async function () {
         // email is _very_ slow so we use https://mochajs.org/#timeouts
         this.timeout(10000)
-        let result = await contact.mailUser(items.award.owner.id, [items.award.toJSON()])
+        let result = await mailUser(items.award.owner.id, [items.award.toJSON()])
         // nodemailer result looks like
         // {
         //     accepted: [ 'ephetteplace@cca.edu' ],
@@ -180,7 +184,7 @@ describe('Delete item', () => {
     })
 
     it('unlocks the item if it is locked', () => {
-        return del.unlockItem(testItem)
+        return unlockItem(testItem)
             .then(res => {
                 assert.ok(res.ok)
             }).catch(err => {
@@ -190,7 +194,7 @@ describe('Delete item', () => {
     })
 
     it('deletes the unlocked item', () => {
-        return del.deleteItem(testItem)
+        return deleteItem(testItem)
             .then(res => {
                 assert.ok(res.ok)
             }).catch(err => {

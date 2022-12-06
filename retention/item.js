@@ -30,7 +30,7 @@ class Item {
 
     toCSV() {
         // meant to serialize multiple records so it expects an array of arrays
-        return stringify.CSVStringify([[
+        return stringify([[
             this.links.view,
             this.title,
             this.status,

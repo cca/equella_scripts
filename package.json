@@ -16,6 +16,9 @@
   "keywords": [
     "equella"
   ],
+  "engines": {
+    "node": ">=14.16"
+  },
   "author": "phette23 <phette23@gmail.com> (http://phette.net/)",
   "license": "MIT",
   "bugs": {

@@ -1,9 +1,15 @@
-const fs = require('fs')
-const nodemailer = require('nodemailer')
-let options = require('rc')('retention')
-const Item = require('./item')
-const sleep = require('./sleep')
-const log = require('./log')
+import fs from 'node:fs'
+import path from 'node:path'
+import { pathToFileURL } from 'node:url'
+
+import nodemailer from 'nodemailer'
+import rc from 'rc'
+
+import Item from './item.js'
+import sleep from './sleep.js'
+import log from './log.js'
+
+let options = rc('retention')
 
 // tests run from root with a different rc file
 // so if we're testing, we load the test configuration
@@ -46,9 +52,10 @@ if (options.transporter == 'mailgun') {
  * @return  {Object}         owners mapped to an array of their items
  * i.e. { "me": [Item1, Item2], "you": [Item3] }
  */
-function groupByOwner(items) {
+export function groupByOwner(items) {
     let output = {}
     items.forEach(item => {
+        if (!item.owner) console.log(item)
         if (Object.prototype.hasOwnProperty.call(output, item.owner.id)) {
             // some items have no owner (because the account was deleted)
             // https://vault.cca.edu/items/0729ca6a-7469-480e-82aa-8facc1e7e2aa/1/
@@ -75,7 +82,7 @@ function groupByOwner(items) {
  * @return  {Promise|Boolean}   Promise from nodemailer or False if no mail was sent
  *
  */
-function mailUser(username, items) {
+export function mailUser(username, items) {
     // skip internal users, no need to email them
     if (items[0].internalOwner) {
         return `Skipping ${items.length} items owned by internal user with UUID ${username}.`
@@ -153,14 +160,10 @@ async function main(file) {
     }
 }
 
-exports.groupByOwner = groupByOwner
-exports.mailUser = mailUser
-
-if (require.main === module) {
+if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
     const items_file = options.file || options.f
     main(items_file).catch(e => console.error(e)).finally(() => {
-        const path = require('path')
-            , basename = path.basename(items_file)
+        const basename = path.basename(items_file)
             , new_name = items_file.replace(basename, `x${basename}`);
         fs.rename(items_file, new_name, (err) => {
             if (err) throw err

@@ -4,12 +4,17 @@
  * and adds user information to the `owner` field if it's found
  * then overwrites the original JSON file
  */
+import fs from 'node:fs'
+import https from 'node:https'
+import path from 'node:path'
+import { pathToFileURL, fileURLToPath } from 'node:url'
 
-const fs = require('fs')
-const https = require('https')
+import fetch from 'node-fetch'
+import rc from 'rc'
 
-const fetch = require('node-fetch')
-let options = require('rc')('retention')
+import log from './log.js'
+
+let options = rc('retention')
 // tests run from root with a different rc file
 // so if we're testing, we load the test configuration
 if (options._[0] && options._[0].indexOf('retention/test') != -1) {
@@ -27,33 +32,38 @@ const headers = {
     'X-Authorization': 'access_token=' + options.token
 }
 const fetch_options = { headers: headers, agent: agent }
-const collections_file = `${__dirname}/data/collections.json`
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+const collections_file = `${dirname}/data/collections.json`
 
 function writeCollections(data) {
     fs.writeFile(collections_file, JSON.stringify(data, null, 2), (err) => {
         if (err) {
             console.error(`Error writing ${collections_file} file`)
             console.error(err)
+        } else if (options.debug) {
+            log(`Downloaded collections data & wrote to file ${collections_file}`)
         }
     })
 }
 
 // load downloaded collections JSON or, if we don't have it, get it from API
-async function getCollections() {
+export async function getCollections() {
+    let collections = []
     try {
-        const collections = require(collections_file)
-        return collections
+        collections = JSON.parse(fs.readFileSync(collections_file))
+        if (collections.length && options.debug) log(`Found collections data in ${collections_file}`)
     } catch (e) {
+        if (options.debug) log(`No collections data found, downloading from API...`)
         let response = await fetch(`${options.url}/api/collection/?length=500`, fetch_options)
         let data = await response.json()
-        let collections = data.results
+        collections = data.results
         // write a data file but without blocking
         writeCollections(collections)
-        return collections
     }
+    return collections
 }
 
-function embedUser(user, item) {
+export function embedUser(user, item) {
     Object.keys(user).forEach(key => {
         item.owner[key] = user[key]
     })
@@ -62,7 +72,7 @@ function embedUser(user, item) {
 }
 
 function embed(item) {
-    if (options.debug) console.log(`Embedding data in item ${item.uuid}`)
+    if (options.debug) log(`Embedding data in item ${item.uuid}`)
 
     item.collection.name = collections.find(c => c.uuid === item.collection.uuid).name
 
@@ -77,7 +87,7 @@ function embed(item) {
         embedded_items.push(item)
         return finish()
     } else {
-        if (options.debug) console.log(`No user found in cache for ${item.owner.id}`)
+        if (options.debug) log(`No user found in cache for ${item.owner.id}`)
         // get user data from API and cache it in the users object
         let url = `${options.url}/api/userquery/search?q=${item.owner.id}&groups=false&roles=false`
         let uuid_regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
@@ -102,7 +112,7 @@ function embed(item) {
                     users.push(data)
                     item = embedUser(data, item)
                 } else {
-                    console.log(`Unable to find user ${item.owner.id} in VAULT.`)
+                    log(`Unable to find user ${item.owner.id} in VAULT.`)
                 }
                 embedded_items.push(item)
                 return finish()
@@ -116,7 +126,7 @@ function embed(item) {
 
 function finish() {
     if (embedded_items.length === items.length && !!items_file) {
-        console.log('Done embedding data in items, overwriting the original file')
+        log('Done embedding data in items, overwriting the original file')
         fs.writeFile(items_file, JSON.stringify(items, null, 2), (err) => {
             if (err) {
                 console.error(`Error writing ${items_file} file`)
@@ -136,19 +146,14 @@ let items_file = options.f || options.file
 async function main(items_file) {
     // first get list of collections because we only need to do this once
     collections = await getCollections()
-    items = require(`./${items_file}`)
+    items = JSON.parse(fs.readFileSync(`./${items_file}`))
     items.forEach(i => embed(i))
 }
 
-if (require.main === module) {
+if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
     if (!items_file) {
         console.error('Error: you must provide a JSON files of items with the -f or --file flag.')
         process.exit(1)
     }
     main(items_file)
-}
-
-module.exports = {
-    "getCollections": getCollections,
-    "embedUser": embedUser
 }

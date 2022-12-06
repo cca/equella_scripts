@@ -5,6 +5,7 @@ import rc from 'rc'
 import xpath from 'xpath'
 
 import Item from './item.js'
+import log from './log.js'
 
 let options = rc('retention')
 
@@ -58,7 +59,7 @@ function exemptionFilter(item) {
     // exempt = (i.collection.uuid === '49de1037-0279-41b4-8070-0f7ffcbae56d' && xpath.select('string(//local/courseWorkWrapper/courseWorkType)', i.xml).toLowerCase() === 'thesis')
 
     if ((dryrun || options.debug) && exempt) {
-        console.log(`Item "${i.title}" owned by ${i.owner.id} is exempt from retention.\n${i.links.view}`)
+        log(`Item "${i.title}" owned by ${i.owner.id} is exempt from retention.\n${i.links.view}`)
     }
 
     counts.total++
@@ -93,5 +94,5 @@ fs.readFile(file, { encoding: 'utf-8' }, (err, data) => {
         fs.writeFile(file, JSON.stringify(items, null, 2), err => handleErr(err))
     }
 
-    console.log(`${counts.exempt} exempt items out of ${counts.total} total items in ${file}.`)
+    log(`${counts.exempt} exempt items out of ${counts.total} total items in ${file}.`)
 })

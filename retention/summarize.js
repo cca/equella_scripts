@@ -1,23 +1,24 @@
-const fs = require('fs')
-const path = require('path')
-const Item = require('./item')
+import fs from 'fs'
 
-const options = require('rc')('retention', {})
-options.date = require('./autodate')(options.date)
+import rc from 'rc'
+
+import autodate from './autodate.js'
+import Item from './item.js'
+
+const options = rc('retention', {})
+options.date = autodate(options.date)
 const file = options.file || options.f
 
-if (!file) {
+if (!file || typeof(file) !== 'string') {
     console.error("Error: no file provided. Please provide the path to a JSON file with the -f or --file flags.")
     process.exit(1)
 }
 
-let data = JSON.parse(fs.readFileSync(file))
+const data = JSON.parse(fs.readFileSync(file))
 // work with JSON search results or JSON from our ret.js script
 let items =  Array.isArray(data.results) ? data.results.map(i => new Item(i, options)) : data.map(i => new Item(i, options))
 
 // what else do we want to know?
-// mean/mode/median/max number of items per user
-// number of items belonging to internal users
 
 // array filter, return unique items
 function unique(item, index, array) {
@@ -51,6 +52,7 @@ items.forEach(i => owner_items.filter(oi => oi.owner === i.owner.id)[0].items.pu
 
 const max = Math.max(...owner_items.map(oi => oi.owner ? oi.items.length : 0))
 const max_users = owner_items.filter(oi => oi.items.length === max).map(oi => oi.owner)
+// we could look for internal owners & look their username here
 console.log(`Max items owned by one user: ${max} (${max_users.join(', ')})`)
 
 console.log(`Average items owned per user: ${Math.round((items.length / owners.length) * 100) / 100}`)

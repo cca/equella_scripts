@@ -1,7 +1,7 @@
-const fs = require('fs')
+import fs from 'fs'
 
-const xmldom = require('@xmldom/xmldom').DOMParser
-const xpath = require('xpath')
+import { DOMParser as xmldom } from '@xmldom/xmldom'
+import xpath from 'xpath'
 
 const file = process.argv[2]
 if (!file) {

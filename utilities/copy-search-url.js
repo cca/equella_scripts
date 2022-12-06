@@ -6,13 +6,14 @@
  * > ./copySearchURL.js
  * There's no output; the URL is copied to your clipboard.
  */
-var stem = 'https://vault.cca.edu/access/searching.do?doc='
+import { spawn } from 'child_process'
+let stem = 'https://vault.cca.edu/access/searching.do?doc='
     , xmltpl
     , el
     , id
     , params = 'q=&sort=datemodified&dr=AFTER'
     , url
-    , pbcopy = require('child_process').spawn('pbcopy');
+    , pbcopy = spawn('pbcopy');
 
 /**
  * XML search document w/ "REPLACE" in the middle, e.g.

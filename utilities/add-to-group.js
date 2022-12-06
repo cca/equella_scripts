@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-const request = require('request')
-const fs = require('fs')
-const async = require('async')
+import request from 'request'
+import fs from 'fs'
+import async from 'async'
+
+import rc from 'rc'
 
 let cli_defaults = { add: true }
-let options = require('rc')('equella', cli_defaults)
+let options = rc('equella', cli_defaults)
 
 if (options.help || options.h) {
     console.log('usage: node add-to-group --group 1234 --users [ users.json | user1,user2 ] [ --add | --replace | --clear ]')

@@ -4,8 +4,10 @@
  *
  * Requires a configured .equellarc file.
  */
-const fetch = require('node-fetch')
-const opts = require('rc')('equella')
+import fetch from 'node-fetch'
+import rc from 'rc'
+
+const opts = rc('equella')
 const DEPT = opts._[0]
 
 if (!DEPT || typeof(DEPT) !== 'string' || !DEPT.match(/[A-Z]{5}/)) {

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-const request = require('request')
+import fetch from 'node-fetch'
+import rc from 'rc'
 
-let options = require('rc')('equella', {})
+let options = rc('equella', {})
 
 if (options.help || options.h) {
     console.log('usage: node rm-from-group --group UUID --user USER')
@@ -16,13 +17,12 @@ if (options.help || options.h) {
     process.exit(0)
 }
 
-let headers = {
+const headers = {
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
 }
-let url = `https://vault.cca.edu/api/usermanagement/local/group/${options.group}`
-let req_options = { headers: headers, json: true, url: url }
-let http = request.defaults(req_options)
+const url = `https://vault.cca.edu/api/usermanagement/local/group/${options.group}`
+const fetch_options = { headers: headers, json: true }
 
 if (!options.group || !options.user) {
     console.error('Must provide a group UUID _and_ a username. See --help for usage info.')
@@ -31,32 +31,36 @@ if (!options.group || !options.user) {
 
 function handleError(e) { if (e) throw e }
 
-http.get({}, (err, resp) => {
-    handleError(err)
+fetch(url, fetch_options).then(r => r.json())
+    .then(data => {
+        let group = data
+        // EQUELLA API errors return an object like this
+        if (group.error) throw Error(`${group.code} ${group.error}: ${group.error_description}`)
 
-    let group = resp.body
-    // EQUELLA API errors return an object like this
-    if (group.error) throw Error(`${group.code} ${group.error}: ${group.error_description}`)
+        if (options.verbose) console.log('group: ', group)
 
-    if (options.verbose) console.log('group: ', group)
+        if (group.users.includes(options.user)) {
+            let new_group = group
+            new_group.users = new_group.users.filter(user => user != options.user)
 
-    if (group.users.includes(options.user)) {
-        let new_group = group
-        new_group.users = new_group.users.filter(user => user != options.user)
-
-        http.put({ json: new_group }, (err, resp) => {
-            handleError(err)
-            if (resp.statusCode === 200) {
-                console.log(`Removed ${options.user} from "${group.name}"`)
-                process.exit(0)
-            } else {
-                console.log(`Problem removing ${options.user} from "${group.name}". HTTP Status: ${resp.statusCode} ${resp.statusMessage}`)
-                process.exit(1)
+            let fetch_options = {
+                body: JSON.stringify(new_group),
+                headers: headers,
+                method: 'PUT',
             }
-        })
-    } else {
-        console.log(`${options.user} was not in "${group.name}"`)
-        console.log('Exiting without doing anything.')
-        process.exit(1)
-    }
-})
+            fetch_options.headers['Content-Type'] = 'application/json'
+
+            fetch(url, fetch_options).then(resp => {
+                if (resp.status === 200) {
+                    console.log(`Removed ${options.user} from "${group.name}"`)
+                    process.exit(0)
+                } else {
+                    console.log(`Problem removing ${options.user} from "${group.name}". HTTP Status: ${resp.status} ${resp.statusText}`)
+                    process.exit(1)
+                }
+            }).catch(e => handleError(e))
+        } else {
+            console.log(`${options.user} was not in "${group.name}"`)
+            process.exit(1)
+        }
+    }).catch(e => handleError(e))

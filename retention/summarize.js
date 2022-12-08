@@ -15,8 +15,18 @@ if (!file || typeof(file) !== 'string') {
 }
 
 const data = JSON.parse(fs.readFileSync(file))
-// work with JSON search results or JSON from our ret.js script
-let items =  Array.isArray(data.results) ? data.results.map(i => new Item(i, options)) : data.map(i => new Item(i, options))
+// work with JSON search results, items grouped by owner, or items straight
+// from ret.js
+let items = []
+if (Array.isArray(data.results)) {
+    items = data.results.map(i => new Item(i, options))
+} else if (Array.isArray(data[0])) {
+    data.forEach(arr => {
+        arr.forEach(item => items.push(item) )
+    })
+} else {
+    items = data.map(i => new Item(i, options))
+}
 
 // what else do we want to know?
 

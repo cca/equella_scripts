@@ -16,7 +16,7 @@ Uses [poetry](https://python-poetry.org) for virtual environment and dependency 
 > poetry shell # enter virtual env
 ```
 
-You can prefix commands with `poetry run` rather than entering the venv.
+Analogous to pipenv, we can prefix commands with `poetry run` rather than entering the venv.
 
 ## Execution
 

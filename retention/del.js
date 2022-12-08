@@ -1,3 +1,13 @@
+/**
+ * usage: node del -f data/items.json [ -v | --verbose ]
+ *
+ * Delete items in the provided file (-f or --file flag).
+ * The recommended way to run this script is to pipe its output to stdout & a
+ * log file, then rename the items file it's deleted, e.g.
+ *
+ *   node del -f data/items-1.json | tee -a data/log.txt && mv -v \
+ *   data/items-1.json data/deleted-items-1.json
+ */
 import fs from 'node:fs'
 import https from 'node:https'
 import { pathToFileURL } from 'node:url'

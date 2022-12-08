@@ -76,6 +76,17 @@ export function deleteItem(item) {
     )
 }
 
+/**
+ * return link to openEQUELLA item in VAULT (hardcodes our domain)
+ *
+ * @param   {Item}  item
+ *
+ * @return  {string}        HTTPS link to view item in browser
+ */
+function vaultUrl(item) {
+    return `https://vault.cca.edu/items/${item.uuid}/${item.version}`
+}
+
 async function main() {
     let items_file = options.file || options.f
     if (typeof items_file !== 'string') {
@@ -103,24 +114,28 @@ async function main() {
     for (const item of items) {
         unlockItem(item).then(res => {
             if (res.ok && options.verbose) {
-                log(`Successfully unlocked item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+                log(`Successfully unlocked item ${vaultUrl(item)}`)
             }
         }).then(res => {
             deleteItem(item).then(res => {
                 if (!res.ok) {
-                    throw new Error(`HTTP status: ${res.status} ${res.statusText}`)
+                    if (res.status === 404) {
+                        log(`404 deleting item ${vaultUrl(item)} it's already deleted`)
+                    } else {
+                        throw new Error(`HTTP status: ${res.status} ${res.statusText}`)
+                    }
                 } else if (options.verbose) {
-                    log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+                    log(`Successfully deleted item ${vaultUrl(item)}`)
                 }
             }).catch(err => {
                 // deleteItem error
-                console.error(`Error deleting item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
+                console.error(`Error deleting item ${vaultUrl(item)}\n`, err)
             })
         }).catch(err => {
             // unlockItem error
             // we're happy that this only catches networking errors, not non-2XX HTTP responses,
             // because when you try to unlock an already-unlocked item you get a 404
-            console.error(`Error unlocking item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
+            console.error(`Error unlocking item ${vaultUrl(item)}\n`, err)
         })
         await sleep(2000)
     }

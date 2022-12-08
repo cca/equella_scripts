@@ -21,10 +21,10 @@ Analogous to pipenv, we can prefix commands with `poetry run` rather than enteri
 ## Execution
 
 - obtain a CSV[^1] & name it fajr.csv
-- `poetry run python fajr-process.py fajr.csv`
+- `poetry run fajr fajr.csv`
 - this adds usernames to the two permissions groups & generates a taxonomy CSV named "taxo.csv", then runs `upload.sh` to upload the taxonomy to EQUELLA
 - afterwards the upload script offers to archive fajr.csv & taxo.csv in a "data" directory
 
-The "fajr-process.py" script relies on a configured ".equellarc" file (see [equella-cli](https://github.com/cca/equella_cli) for details on that) with a configured OAuth token in your user's home directory, while the upload.sh script relies on the (included) `uptaxo` abstraction over EQUELLA's command-line tools for updating taxonomies. Note that, while this project is Python 3, `uptaxo` is old code from EQUELLA and requires a python2 binary on your path.
+The "fajr/process.py" script relies on a configured ".equellarc" file (see [equella-cli](https://github.com/cca/equella_cli) for details on that) with a configured OAuth token in your user's home directory, while the upload.sh script relies on the (included) `uptaxo` abstraction over EQUELLA's command-line tools for updating taxonomies. Note that, while this project is Python 3, `uptaxo` and its dependencies (equellasoap.py, util.py) are old code from EQUELLA and require a python2 binary on your path.
 
 [^1]: Formerly this CSV was downloaded from an Informer report, now we create it from data provided by the Fine Arts office. In the future, we may use a Workday Report. The CSV must contain `id,name,major,username` as column headers.

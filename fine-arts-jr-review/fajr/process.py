@@ -11,8 +11,8 @@ import csv
 import os
 import sys
 
-from fajr_group import add_to_fajr_group
-from semester import semester
+from fajr.group import add_to_fajr_group
+from fajr.semester import semester
 
 
 def parse_args():
@@ -141,6 +141,10 @@ def main(args):
     os.system('./upload.sh')
 
 
-if __name__ == '__main__':
+def start():
+    # for use in pyproject.toml scripts
     args = parse_args()
     main(args)
+
+if __name__ == '__main__':
+    start()

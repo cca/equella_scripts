@@ -66,7 +66,7 @@ export function deleteItem(item) {
     )
 }
 
-function main() {
+async function main() {
     let items_file = options.file || options.f
     if (typeof items_file !== 'string') {
         console.error('Error: please supply a file of items to delete with the --file or -f flag.')
@@ -112,7 +112,7 @@ function main() {
             // because when you try to unlock an already-unlocked item you get a 404
             console.error(`Error unlocking item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
         })
-        sleep(2000)
+        await sleep(2000)
     }
 }
 

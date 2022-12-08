@@ -6,6 +6,7 @@ import fetch from 'node-fetch'
 import rc from 'rc'
 
 import log from './log.js'
+import sleep from './sleep.js'
 
 let options = rc('retention')
 
@@ -87,28 +88,32 @@ function main() {
         items = unpacked_items
     }
 
-    items.forEach(item => unlockItem(item).then(res => {
-        if (res.ok && options.verbose) {
-            log(`Successfully unlocked item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
-        }
-    }).then(res => {
-        deleteItem(item).then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP status: ${res.status} ${res.statusText}`)
-            } else if (options.verbose) {
-                log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+    // we do a for-of loop instead of items.forEach so we can sleep() in
+    // between deletes & not DDOS our own server
+    for (const item of items) {
+        unlockItem(item).then(res => {
+            if (res.ok && options.verbose) {
+                log(`Successfully unlocked item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
             }
+        }).then(res => {
+            deleteItem(item).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP status: ${res.status} ${res.statusText}`)
+                } else if (options.verbose) {
+                    log(`Successfully deleted item https://vault.cca.edu/items/${item.uuid}/${item.version}`)
+                }
+            }).catch(err => {
+                // deleteItem error
+                console.error(`Error deleting item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
+            })
         }).catch(err => {
-            // deleteItem error
-            console.error(`Error deleting item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
+            // unlockItem error
+            // we're happy that this only catches networking errors, not non-2XX HTTP responses,
+            // because when you try to unlock an already-unlocked item you get a 404
+            console.error(`Error unlocking item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
         })
-    }).catch(err => {
-        // unlockItem error
-        // we're happy that this only catches networking errors, not non-2XX HTTP responses,
-        // because when you try to unlock an already-unlocked item you get a 404
-        console.error(`Error unlocking item https://vault.cca.edu/items/${item.uuid}/${item.version}\n`, err)
-    })
-    )
+        sleep(2000)
+    }
 }
 
 if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {

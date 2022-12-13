@@ -1,7 +1,8 @@
 /**
- * usage: node del -f data/items.json [ -v | --verbose ]
+ * usage: node del -f data/items.json [ -v | --verbose ] [ --sleep MS ]
  *
  * Delete items in the provided file (-f or --file flag).
+ * --sleep X: sleep X milliseconds in between each item deletion (default = 2000)
  * The recommended way to run this script is to pipe its output to stdout & a
  * log file, then rename the items file it's deleted, e.g.
  *
@@ -18,7 +19,7 @@ import rc from 'rc'
 import log from './log.js'
 import sleep from './sleep.js'
 
-let options = rc('retention')
+let options = rc('retention', { sleep: 2000 })
 
 // tests run from root with a different rc file
 // so if we're testing, we load the test configuration
@@ -137,7 +138,7 @@ async function main() {
             // because when you try to unlock an already-unlocked item you get a 404
             console.error(`Error unlocking item ${vaultUrl(item)}\n`, err)
         })
-        await sleep(2000)
+        await sleep(options.sleep)
     }
 }
 

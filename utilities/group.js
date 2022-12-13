@@ -14,7 +14,7 @@ function usage(exitCode=0) {
     console.log('"rm" and must identify a group with either a --uuid or --name.')
 
     console.log('\n\t--uuid: group UUID')
-    console.log('\t--group: group name (case insensitive)')
+    console.log('\t--name: group name (case insensitive)')
     console.log('\t--users: comma-separated list of users or path to a JSON file containing an array of usernames')
     console.log('\t--debug: print more info & complete group JSON before/after modification')
 

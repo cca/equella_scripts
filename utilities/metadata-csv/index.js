@@ -3,8 +3,7 @@
 // you can pass any valid parameter for the search API route on the CLI
 // https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
 // e.g. node index --order=relevance --count=500 --status=draft --modifiedAfter=2019-09-01
-import fs from 'fs'
-import qs from 'qs'
+import fs from 'node:fs'
 
 import { stringify } from 'csv-stringify/sync'
 import rc from 'rc'
@@ -48,9 +47,10 @@ try {
 function getItems(start=0) {
     if (items.length < options.count) {
         debug(`Getting items ${items.length + 1} through ${items.length + options.length}...`)
+        const params = new URLSearchParams(searchOptions)
         let reqOptions = {
             headers: headers,
-            url: `${options.root}/search?start=${start}&${qs.stringify(searchOptions)}`,
+            url: `${options.root}/search?start=${start}&${params.toString()}`,
             json: true
         }
         request(reqOptions, (err, resp, data) => {

@@ -1,9 +1,9 @@
 /* globals describe,it,before,after */
 import assert from 'node:assert'
+import fs from 'node:fs'
+import https from 'node:https'
 
 import fetch from 'node-fetch'
-import fs from 'fs'
-import https from 'https'
 import rc from 'rc'
 
 import Item from '../item.js'
@@ -12,6 +12,7 @@ import chunk from '../chunk.js'
 import { deleteItem, unlockItem } from '../del.js'
 import { embedUser, getCollections } from '../embeddata.js'
 
+// @TODO is this needed anymore?
 const httpsAgent = new https.Agent({
     rejectUnauthorized: false,
 })

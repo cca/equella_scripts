@@ -11,12 +11,6 @@ import log from './log.js'
 
 let options = rc('retention')
 
-// tests run from root with a different rc file
-// so if we're testing, we load the test configuration
-if (options._[0] === 'retention/test') {
-    options = JSON.parse(fs.readFileSync('.testretentionrc'))
-}
-
 // https://nodemailer.com/transports/stream/ for testing
 let transporter = nodemailer.createTransport({ jsonTransport: true })
 if (options.transporter == 'mailgun') {

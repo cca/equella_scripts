@@ -20,7 +20,7 @@ const httpsAgent = new https.Agent({
 // NOTE: requires a separate config file for tests that's
 // _in the root_ of this project (since `npm test` runs from root)
 // see example.testretentionrc & fill in token & SMTP credentials
-const options = rc('testretention')
+const options = rc('test')
 const fixtpath = 'retention/test/fixtures'
 const items = {
     // owned by ephetteplace

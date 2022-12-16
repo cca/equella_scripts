@@ -21,12 +21,6 @@ import sleep from './sleep.js'
 
 let options = rc('retention', { sleep: 2000 })
 
-// tests run from root with a different rc file
-// so if we're testing, we load the test configuration
-if (options._[0] === 'retention/test') {
-    options = JSON.parse(fs.readFileSync('.testretentionrc'))
-}
-
 options.verbose = options.v || options.verbose
 
 // specify an HTTP agent so we can set maxSockets to < Infinity

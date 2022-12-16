@@ -15,11 +15,6 @@ import rc from 'rc'
 import log from './log.js'
 
 let options = rc('retention')
-// tests run from root with a different rc file
-// so if we're testing, we load the test configuration
-if (options._[0] && options._[0].indexOf('retention/test') != -1) {
-    options = JSON.parse(fs.readFileSync('.testretentionrc'))
-}
 
 // specify an HTTP agent so we can set maxSockets to < Infinity
 const agent = new https.Agent({

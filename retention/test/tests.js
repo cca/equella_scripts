@@ -1,7 +1,6 @@
 /* globals describe,it,before,after */
 import assert from 'node:assert'
 import fs from 'node:fs'
-import https from 'node:https'
 
 import fetch from 'node-fetch'
 import rc from 'rc'
@@ -11,11 +10,6 @@ import { groupByOwner, mailUser } from '../contact.js'
 import chunk from '../chunk.js'
 import { deleteItem, unlockItem } from '../del.js'
 import { embedUser, getCollections } from '../embeddata.js'
-
-// @TODO is this needed anymore?
-const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-})
 
 // NOTE: requires a separate config file for tests that's
 // _in the root_ of this project (since `npm test` runs from root)
@@ -171,7 +165,7 @@ describe('Delete item', () => {
         'Accept': 'application/json',
         'X-Authorization': 'access_token=' + options.token
     }
-    let httpOpts = { headers: headers, method: 'POST', agent: httpsAgent }
+    let httpOpts = { headers: headers, method: 'POST' }
     // note that the del methods expect an item hash, not a URL
     let testItem = { uuid: options.test_item_uuid, version: 1 }
 

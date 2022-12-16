@@ -7,6 +7,7 @@
     "contrib-wiz": "uglifyjs bookmarklets/link-to-contrib-wizard.js -c -m -o cw.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat cw.min.js)\" | sed -e 's/^/javascript:/' | pbcopy",
     "login-link": "uglifyjs bookmarklets/login-linkify.js -c -m -o ll.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat ll.min.js)\" | sed -e 's/^/javascript:/' | pbcopy",
     "test": "mocha retention/test --config retention/test/.testretentionrc",
+    "grouptest": "mocha utilities/test/group --config utilities/test/.grouprc",
     "lint": "eslint . --ignore-pattern retention/item.js --cache"
   },
   "repository": {

@@ -24,6 +24,23 @@ function usage(exitCode=0) {
 
 if (options.help || options.h) usage()
 
+/**
+ * Internal Group
+ * This class is not used, it's just to get type annotations elsewhere.
+ */
+class Group {
+    constructor (g) {
+        /* @type {str} */
+        this.id = g.id
+        /* @type {string} */
+        this.name = g.name
+        /* @type {Array} */
+        this.users = g.users
+        /* @type {Object} */
+        this.links = g.links
+    }
+}
+
 const headers = new Headers({
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
@@ -45,6 +62,13 @@ async function fetchJSONOrThrow(url, options) {
     return data
 }
 
+/**
+ * given UUID, return Group
+ *
+ * @param   {str}  group uuid
+ *
+ * @return  {Group}
+ */
 export async function getGroupByUUID(uuid) {
     debug(`Looking up group by UUID ${uuid}`)
     let group = await fetchJSONOrThrow(url + uuid, fetch_options)
@@ -52,6 +76,13 @@ export async function getGroupByUUID(uuid) {
     return group
 }
 
+/**
+ * given name, return Group
+ *
+ * @param   {str}  group name
+ *
+ * @return  {Group}
+ */
 export async function getGroupByName(name) {
     debug(`Looking up group by name ${name}`)
     let data = await fetchJSONOrThrow(url, fetch_options)
@@ -71,6 +102,14 @@ export async function getGroupByName(name) {
     }
 }
 
+/**
+ * get users from command line parameter
+ *
+ * @param   {Path|str}  users
+ * Either the Path to a JSON file of users or a comma-separated string of users
+ *
+ * @return  {Array[str]}         array of username strings
+ */
 export async function getUsers(users) {
     if (users.match(/\.json$/)) {
         // users.json file
@@ -82,12 +121,20 @@ export async function getUsers(users) {
     }
 }
 
+/**
+ * modify group with provided Group object
+ *
+ * @param   {Group}  group
+ * @param   {str}  successMsg   message to log on success
+ *
+ * @return  {Promise}           promise from fetch
+ */
 function modifyGroup(group, successMsg) {
     let put_opts = fetch_options
     put_opts.headers.append('Content-Type', 'application/json')
     put_opts["method"] = 'PUT'
     put_opts["body"] = JSON.stringify(group)
-    fetch(url + group.id, put_opts).then(resp => {
+    return fetch(url + group.id, put_opts).then(resp => {
         if (!resp.ok) {
             console.error(`HTTP Error: ${resp.status} ${resp.statusText}`)
         } else {
@@ -96,6 +143,14 @@ function modifyGroup(group, successMsg) {
     })
 }
 
+/**
+ * add users to group
+ *
+ * @param   {Array}  users
+ * @param   {Group}  group
+ *
+ * @return  {Promise|undefined}   promise from modifyGroup()
+ */
 export function addUsersToGroup(users, group) {
     let new_group = group
     let changes = false
@@ -108,14 +163,19 @@ export function addUsersToGroup(users, group) {
         }
     })
 
-    if (!changes) {
-        console.error(`No changes to make to group, exiting without doing anything.`)
-        process.exit(1)
-    }
+    if (!changes) return console.error(`No changes to make to group, exiting without doing anything.`)
 
-    modifyGroup(new_group, `Successfully added ${users.join(',')} to ${group.name}`)
+    return modifyGroup(new_group, `Successfully added ${users.join(',')} to ${group.name}`)
 }
 
+/**
+ * remove users from group
+ *
+ * @param   {Array}  users
+ * @param   {Group}  group
+ *
+ * @return  {Promise|undefined}   promise from modifyGroup()
+ */
 export function rmUsersFromGroup(users, group) {
     let new_group = group
     let changes = false
@@ -128,12 +188,9 @@ export function rmUsersFromGroup(users, group) {
         }
     })
 
-    if (!changes) {
-        console.error(`No changes to make to group, exiting without doing anything.`)
-        process.exit(1)
-    }
+    if (!changes) return console.error(`No changes to make to group, exiting without doing anything.`)
 
-    modifyGroup(new_group, `Successfully removed ${users.join(',')} from ${group.name}`)
+    return modifyGroup(new_group, `Successfully removed ${users.join(',')} from ${group.name}`)
 }
 
 async function main(options) {

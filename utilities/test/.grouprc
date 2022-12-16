@@ -1,0 +1,8 @@
+{
+    "debug": false,
+    "test_group_name": "TEST GROUP FOR EQ",
+    "test_group_uuid": "8a196939-f499-43e9-9059-ba28d7e9d003",
+    "test_user_to_add": "ephetteplace",
+    "test_user_to_rm": "stest",
+    "testing": true
+}

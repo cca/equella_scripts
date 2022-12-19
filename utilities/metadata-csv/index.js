@@ -6,13 +6,12 @@
 import fs from 'node:fs'
 
 import { stringify } from 'csv-stringify/sync'
+import { default as fetch, Headers } from 'node-fetch'
 import rc from 'rc'
-// @TODO switch to node-fetch
-import request from 'request'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import xpath from 'xpath'
 
-let defaults = {
+const defaults = {
     count: Infinity,
     info: 'attachment,basic,detail,metadata',
     length: 50,
@@ -24,12 +23,12 @@ let options = rc('metadata-csv', defaults)
 // subset of options to be passed to oE Search API
 let searchOptions = {}
 Object.assign(searchOptions, options);
-[ 'debug', 'metadataMap', 'token' ].forEach(key => delete searchOptions[key])
+[ 'debug', 'metadataMap', 'token', 'config',  'configs', 'root', '_' ].forEach(key => delete searchOptions[key])
 
-let headers = {
+const headers = new Headers ({
     'X-Authorization': 'access_token=' + options.token,
-    'Content-Type': 'application/json',
-}
+    'Accept': 'application/json',
+})
 let items = []
 // log messages only when debug=true
 function debug(msg) {
@@ -41,34 +40,33 @@ try {
     metadataMap = JSON.parse(fs.readFileSync(`./${options.metadataMap}`))
 } catch (e) {
     console.error(e)
-    console.error("Do you have a metadata-map.json file or reference one with the --metadataMap flag?")
+    console.error("Did you provide a metadata-map.json file or reference one with the --metadataMap flag?")
     process.exit(1)
 }
 
 function getItems(start=0) {
     if (items.length < options.count) {
         debug(`Getting items ${items.length + 1} through ${items.length + options.length}...`)
+
         const params = new URLSearchParams(searchOptions)
-        let reqOptions = {
-            headers: headers,
-            url: `${options.root}/search?start=${start}&${params.toString()}`,
-            json: true
-        }
-        request(reqOptions, (err, resp, data) => {
-            if (err) {
-                throw err
-                // API sends a { code, error, error_description } error response
-            } else if (data.error) {
-                console.error('EQUELLA API Error:', data)
+        const url = `${options.root}/search?start=${start}&${params.toString()}`
+        fetch(url, { headers: headers })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(`EQUELLA API Error: ${JSON.stringify(data, null, 2)}`)
+                }
+
+                // the first time through, if our count is higher than the total
+                // of available items, reset the count to be that total
+                if (start === 0 && data.available < options.count) options.count = data.available
+                items = items.concat(data.results)
+                // recursively call this function until we're done
+                return getItems(items.length)
+            }).catch(e => {
+                console.error(`Error: ${e}`)
                 process.exit(1)
-            }
-            // the first time through, if our count is higher than the total
-            // of available items, reset the count to be that total
-            if (start === 0 && data.available < options.count) options.count = data.available
-            items = items.concat(data.results)
-            // recursively call this function until we're done
-            return getItems(items.length)
-        })
+            })
     } else {
         writeCSV(items)
     }

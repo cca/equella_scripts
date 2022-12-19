@@ -7,6 +7,7 @@ import fs from 'node:fs'
 
 import { stringify } from 'csv-stringify/sync'
 import rc from 'rc'
+// @TODO switch to node-fetch
 import request from 'request'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import xpath from 'xpath'

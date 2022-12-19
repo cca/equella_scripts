@@ -1,8 +1,9 @@
-import fs from 'node:fs'
+oimport fs from 'node:fs'
 import path from 'node:path'
 
 import async from 'async'
 import rc from 'rc'
+// @TODO switch to node-fetch
 import request from 'request'
 import xpath from 'xpath'
 import {DOMParser as xmldom} from '@xmldom/xmldom'

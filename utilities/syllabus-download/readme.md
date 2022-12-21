@@ -9,14 +9,12 @@ See also: the facfiles tool for downloading syllabi from particular faculty memb
 - ensure we have node & npm
 - run `pnpm install` (preferred) or `npm install` to get dependencies
 - if you don't already have an .equellarc file, obtain an OAuth token from VAULT & create one (details on .equellarc are in the equella-cli project)
-- edit index.js (see `semesters` variable towards the top)
+- edit the semesters list in index.js (or use the `--semesters` flag, see **Usage** below)
 
 ## Usage
 
-Run `node index --programs ANIMA,ARTED` to download the files, where the `--programs` flag is all the department codes to include.
+Run `node index --semesters "Fall 2022,Spring 2022" --programs ANIMA,ARTED` to download the files, where the `--programs` flag is all the department codes to include.
 
-We can include a `q` freetext query to further refine results `node index --programs ANIMA --q games`.
+We can include a `q` freetext query to further refine results: `node index --programs ANIMA -q games`. The utility first searches _all_ syllabi and only filters to the correct semester and department once it has the item metadata, so one way to speed things up for narrow use cases is to use a redundant query so we don't start with so many search results, e.g. `node index --programs ANIMA --semesters "Spring 2022" -q "Spring 2022"` will finish much faster than it would without the query.
 
 If running repeated times, we may want to clean out the files directory in between. The script is meant to be flexible enough to extract multiple years of syllabi from multiple departments. To get _all_ syllabi, simply remove the `where` parameter from the initial API requests.
-
-If we're downloading hundreds of syllabi at a time, we can split them up into smaller batches by editing the `semesters` variable so the multiple requests to VAULT don't time out.

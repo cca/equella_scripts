@@ -17,7 +17,6 @@ Secondly, write a JSON map of XML paths to CSV column headers. Examples for the 
 
 * How to handle multiple metadata nodes? E.g. multiple /mods/name/namePart
   * Currently, you can map columns one-by-one like `"/mods/name[1]/namePart": "Creator 1"`
-* Add the facility to download item _files_, too
 
 ## Setup
 

@@ -38,7 +38,7 @@ class Item {
             this.modifiedDate,
             this.owner.id,
             this.collaborators.join(', '),
-            this.collection.uuid, // @TODO better to use collection name
+            this.collection.uuid,
             this.toBeRemoved
         ]])
     }

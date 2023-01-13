@@ -1,9 +1,9 @@
 import fs from 'node:fs'
+import https from 'node:https'
 import path from 'node:path'
 
+import { Headers, default as fetch } from 'node-fetch'
 import rc from 'rc'
-// @TODO switch to node-fetch
-import request from 'request'
 
 import autodate from './autodate.js'
 import Item from './item.js'
@@ -12,65 +12,65 @@ const options = rc('retention', {})
 options.date = autodate(options.date)
 const LENGTH = 50
 
-const headers = {
+// limit number of concurrent requests or we run into an ECONNRESET error
+const agent = new https.Agent({ maxSockets: 10 })
+const headers = new Headers({
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
-}
-
-// see https://openequella.github.io/guides/RestAPIGuide.html#items-aka-resources
+})
 // query string parameters for search API route
-const params = {
+// see https://openequella.github.io/guides/RestAPIGuide.html#items-aka-resources
+let params = new URLSearchParams({
     info: 'detail,metadata',
     // maximum no. of items we can get in an API request
     length: LENGTH,
     modifiedBefore: options.date,
     order: "modified",
     reverse: true,
-    showall: true
-}
-
-const searchRequest = request.defaults({
-    headers: headers,
-    json: true,
-    // In node 12 the HTTP library's maxSockets was set to Infinity but this
-    // breaks our script to high numbers of items because it overwhelms VAULT
-    // with so many parallel requests that a TLS error is thrown.
-    // see https://stackoverflow.com/a/12061013
-    pool: { maxSockets: 10 },
-    qs: params
+    showall: true,
+    start: 0
 })
 
 let total = 0
+// number of items _we have requested_ not number we have (which is all_items.length)
 let count = 0
 let all_items = []
+let summarized = false
 
 // collect items from a request into global array, set total in case it's changed
-function collectItems (err, resp, data) {
-    if (err) {
-        console.error(`Error getting syllabi search results. Count was ${all_items.length}.`)
-        throw err
-    }
-
+function collectItems (data) {
     all_items = all_items.concat(data.results.map(item => new Item(item, options)))
     total = data.available
 
-    // this implies we're finished
-    if (all_items.length >= total) summarize()
+    // implies we're finished, prevent repeating
+    if (all_items.length >= total && !summarized) summarize()
 }
 
-// figure out how many items there are & collect them into all_items array
-searchRequest.get(`${options.url}/api/search/`, (err, resp, data) => {
-    if (err) throw err
+// recursive function to gather all items in the search results
+function search(start=0) {
+    params.set('start', start)
+    fetch(`${options.url}/api/search/?${params.toString()}`, { agent: agent, headers: headers })
+        .then(r => {
+            if (!r.ok) console.error(`HTTP error: ${r.status} ${r.statusText}`)
+            return r.json()
+        })
+        .then(d => {
+            // how EQUELLA handles API error messages
+            if (d.error) {
+                throw new Error(`${d.code} ${d.error}: ${d.error_description}`)
+            }
 
-    collectItems(null, null, data)
-    console.log(`${total} total items`)
-    // these requests fire off in parallel
-    while (count < total) {
-        console.log(`Getting items ${count + 1} through ${count + LENGTH}...`)
-        count += LENGTH
-        searchRequest.get(`${options.url}/api/search/`, { qs: { start: count } }, collectItems)
-    }
-})
+            collectItems(d)
+            // these requests fire off in parallel
+            while (count < total) {
+                console.log(`Getting items ${count + 1} through ${count + LENGTH}...`)
+                count += LENGTH
+                search(count)
+            }
+        })
+}
+
+search()
 
 function summarize() {
     let items_to_remove = all_items.filter(i => i.toBeRemoved)

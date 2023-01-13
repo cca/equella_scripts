@@ -81,7 +81,6 @@ function isntPPD(item, options) {
 }
 
 function hasNoAwards(item, options) {
-    // @TODO this needs more testing, review different awards XML paths
     return !xpath.select('string(//local/award)', item.xml)
 }
 

@@ -75,16 +75,21 @@ search()
 function summarize() {
     let items_to_remove = all_items.filter(i => i.toBeRemoved)
 
-    console.log(`\nTotal items: ${all_items.length}`)
+    console.log('')
+    console.log(`Total items: ${all_items.length}`)
     console.log(`Items to remove: ${items_to_remove.length}`)
-    console.log('\nReasons why items were retained')
+
+    console.log('')
+    console.log('Reasons why items were retained')
     // isOldEnough, isntInExcludedCollection, isntHighRated, isntPPD, hasNoAwards
     console.log(`${'Not old enough:'.padEnd(25)} ${all_items.filter(i => !i.isOldEnough).length}`)
     console.log(`${'In excluded collection:'.padEnd(25)} ${all_items.filter(i => !i.isntInExcludedCollection).length}`)
     console.log(`${'Is highly rated:'.padEnd(25)} ${all_items.filter(i => !i.isntHighRated).length}`)
     console.log(`${'Is PPD:'.padEnd(25)} ${all_items.filter(i => !i.isntPPD).length}`)
-    console.log(`${'Won an award:'.padEnd(25)} ${all_items.filter(i => !i.hasNoAwards).length}\n`)
+    console.log(`${'Won an award:'.padEnd(25)} ${all_items.filter(i => !i.hasNoAwards).length}`)
+    console.log(`${'Is a VCS thesis:'.padEnd(25)} ${all_items.filter(i => !i.isntVCSThesis).length}`)
 
+    console.log('')
     writeOutput(items_to_remove)
 }
 

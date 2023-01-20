@@ -7,9 +7,14 @@ mkdir -p faculty
 for name in (cat $file)
     echo (date) "Downloading syllabi for $name"
     # download all available syllabi
-    node facfiles.js --name "$name" --start_term 'Fall 2018' --stop_term 'Spring 2022'
+    node facfiles.js --name "$name"
     # put them into their own directory
     set dirname (echo $name | tr -d '\\/()[]{}*?!')
     mkdir -p "faculty/$dirname"
     mv -v files/* "faculty/$dirname"
+    if [ $status -ne 0 ];
+        set_color red
+        echo "No files were downloaded for $name"
+        set_color normal
+    end
 end

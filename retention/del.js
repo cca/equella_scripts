@@ -14,6 +14,7 @@ import https from 'node:https'
 import { pathToFileURL } from 'node:url'
 
 import fetch from 'node-fetch'
+import DateTime from 'luxon'
 import rc from 'rc'
 
 import log from './log.js'
@@ -124,13 +125,13 @@ async function main() {
                 }
             }).catch(err => {
                 // deleteItem error
-                console.error(`Error deleting item ${vaultUrl(item)}\n`, err)
+                console.error(`${DateTime.now().toISO()} Error deleting item ${vaultUrl(item)}\n`, err)
             })
         }).catch(err => {
             // unlockItem error
             // we're happy that this only catches networking errors, not non-2XX HTTP responses,
             // because when you try to unlock an already-unlocked item you get a 404
-            console.error(`Error unlocking item ${vaultUrl(item)}\n`, err)
+            console.error(`${DateTime.now().toISO()} Error unlocking item ${vaultUrl(item)}\n`, err)
         })
         await sleep(options.sleep)
     }

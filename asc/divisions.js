@@ -73,6 +73,7 @@ var map = {
     'SFMBA': ['Strategic Foresight (MBA)', 'Design'],
     'SOCPR': ['Social Practice & Public Forms (MA)', 'Fine Arts'],
     'TEXTL': ['Textiles (BFA)', 'Fine Arts'],
+    'UDIST': ['Upper Division Interdisciplinary Studies', 'Humanities & Sciences'],
     'VISCR': ['Visual & Critical Studies (MA)', 'Humanities & Sciences'],
     // renamed from "Visual Studies" 2020FA, program code => HAAVC 2021SP
     'VISST': ['History of Art and Visual Culture (BFA)', 'Humanities & Sciences'],

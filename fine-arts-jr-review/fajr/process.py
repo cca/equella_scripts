@@ -9,7 +9,6 @@ to add users to user groups and upload.sh to add the taxonomy to VAULT.
 import argparse
 import csv
 import os
-import sys
 
 from fajr.group import add_to_fajr_group
 from fajr.semester import semester

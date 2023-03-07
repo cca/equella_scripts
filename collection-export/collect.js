@@ -170,7 +170,7 @@ function escapeHTML(s) {
 
 function labelIfExists(label, xp, xml) {
     let text = xpath.select(`string(${xp})`, xml)
-    if (text) return `<dt><b>${label}</b></dt><dd>${escapeHTML(text)}</dd>`
+    if (text) return `<p><b>${label}</b>:&nbsp;${escapeHTML(text)}</p>`
     return ''
 }
 
@@ -181,8 +181,6 @@ function itemToHTML(item) {
 
     html += `<html><head><title>${escapeHTML(item.name)} | CCA VAULT</title></head><body>`
     html += `<h1><a href="${item.links.view}">${escapeHTML(item.name)}</a></h1><dl>`
-
-    debugger;
 
     html += labelIfExists('Date', '//mods/origininfo/dateCreatedWrapper/dateCreated', xml)
     html += labelIfExists('Type', '//mods/physicalDescription/formBroad', xml)

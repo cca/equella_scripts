@@ -78,7 +78,7 @@ async function search(offset=0) {
 function createItemDir(item, callback) {
     let dirname = path.join('data', `${item.uuid}-v${item.version}`)
     if (options.name) {
-        dirname =  filenamify.path('data' + path.sep + item.name)
+        dirname = path.join('data', filenamify(item.name, { replacement: '_' }))
     }
     // @TODO handle potential collisions with --name option
     fs.mkdir(dirname, (err) => {

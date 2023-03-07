@@ -106,43 +106,45 @@ function getAttachments(item, itemDir) {
     debug(`Downloading attachments for item ${item.links.view}`)
 
     item.attachments.forEach(attachment => {
-        // handle filesnames with path separators in them that must be preserved
-        // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
-        let filename = path.parse(attachment.filename || attachment.folder)
-        filename.encodedBase = encodeURIComponent(filename.base)
-        filename.url = filename.dir ? `${filename.dir}/${filename.encodedBase}` : filename.encodedBase
-        filename.full = filenamify(attachment.filename, { replacement: '_' })
-        debug(`Downloading "${filename.base}" from item ${item.links.view}`)
+        if (attachment.type === 'file') {
+            // handle filesnames with path separators in them that must be preserved
+            // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
+            let filename = path.parse(attachment.filename || attachment.folder)
+            filename.encodedBase = encodeURIComponent(filename.base)
+            filename.url = filename.dir ? `${filename.dir}/${filename.encodedBase}` : filename.encodedBase
+            filename.full = filenamify(attachment.filename, { replacement: '_' })
+            debug(`Downloading "${filename.base}" from item ${item.links.view}`)
 
-        http(`/api/item/${item.uuid}/${item.version}/file/${filename.url}`)
-            .then(res => {
-                if (res.status != 200) {
-                    return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment "${filename.base}" for item ${item.links.view}`)
-                }
-
-                res.body.pipe(fs.createWriteStream(path.join(itemDir, filename.full)))
-
-                res.body.on('err', handleErr)
-
-                // check downloaded attachment's md5 hash
-                res.body.on('end', () => {
-                    if (attachment.md5) {
-                        md5(path.join(itemDir, filename.full)).then(hash => {
-                            if (hash === attachment.md5) {
-                                debug(`Attachment "${filename.base}" from item ${item.links.view} finished downloading & has a matching md5sum.`)
-                            } else {
-                                console.error(`Error: md5sum mismatch. Attachment "${filename.base}" from item ${item.links.view} finished downloading & md5sum validation failed.\nLocal: ${hash}\tVAULT: ${attachment.md5}`)
-                            }
-                        }).catch(handleErr)
-                    } else {
-                        debug(`No md5sum for attachment "${filename.base}" from item ${item.links.view}`)
+            http(`/api/item/${item.uuid}/${item.version}/file/${filename.url}`)
+                .then(res => {
+                    if (res.status != 200) {
+                        return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment "${filename.base}" for item ${item.links.view}`)
                     }
+
+                    res.body.pipe(fs.createWriteStream(path.join(itemDir, filename.full)))
+
+                    res.body.on('err', handleErr)
+
+                    // check downloaded attachment's md5 hash
+                    res.body.on('end', () => {
+                        if (attachment.md5) {
+                            md5(path.join(itemDir, filename.full)).then(hash => {
+                                if (hash === attachment.md5) {
+                                    debug(`Attachment "${filename.base}" from item ${item.links.view} finished downloading & has a matching md5sum.`)
+                                } else {
+                                    console.error(`Error: md5sum mismatch. Attachment "${filename.base}" from item ${item.links.view} finished downloading & md5sum validation failed.\nLocal: ${hash}\tVAULT: ${attachment.md5}`)
+                                }
+                            }).catch(handleErr)
+                        } else {
+                            debug(`No md5sum for attachment "${filename.base}" from item ${item.links.view}`)
+                        }
+                    })
                 })
-            })
-            .catch('error', e => {
-                console.error(`Error downloading file ${attachment.filename} from item ${item.links.view}`)
-                handleErr(e)
-            })
+                .catch('error', e => {
+                    console.error(`Error downloading file ${attachment.filename} from item ${item.links.view}`)
+                    handleErr(e)
+                })
+        }
     })
 }
 

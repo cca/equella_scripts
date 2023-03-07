@@ -182,13 +182,17 @@ function itemToHTML(item) {
     html += `<html><head><title>${escapeHTML(item.name)} | CCA VAULT</title></head><body>`
     html += `<h1><a href="${item.links.view}">${escapeHTML(item.name)}</a></h1><dl>`
 
-    // @TODO this part should be created from a hash in options
-    html += labelIfExists('Creator(s)', '//mods/name/namePart', xml)
-    html += labelIfExists('Date', '//mods/dateCreatedWrapper/dateCreated', xml)
-    html += labelIfExists('Type', '//local/courseWorkWrapper/courseWorkType', xml)
+    html += labelIfExists('Date', 'mods/origininfo/dateCreatedWrapper/dateCreated', xml)
+    html += labelIfExists('Type', 'mods/physicalphysicalDescription/formBroad', xml)
+    html += labelIfExists('Extent', 'mods/physicalphysicalDescription/extent', xml)
+    html += labelIfExists('Publisher', 'mods/originInfo/publisher', xml)
+    html += labelIfExists('Place', 'mods/originInfo/place', xml)
+    html += labelIfExists('Name', 'mods/name/namePart/', xml)
+    html += labelIfExists('Position', 'mods/name/subNameWrapper/description', xml)
+    html += labelIfExists('Phone', 'mods/name/subNameWrapper/phone', xml)
+    html += labelIfExists('Email', 'mods/name/subNameWrapper/email', xml)
+    html += labelIfExists('Address', 'mods/location/physicalLocation', xml)
 
-    let abstract = xpath.select('string(//mods/abstract)', xml)
-    if (abstract) html += `<dt><b>Description</b></dt><dd><pre>${abstract}</pre></dd>`
     html += '</dl></body></html>'
     return html
 }

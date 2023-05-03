@@ -52,7 +52,6 @@ function collectItems (data) {
 
 // figure out how many syllabi there are & collect them into the items array
 function search(start=0) {
-    console.log('searched', start, count, total, items.length)
     fetch(`${options.root}/api/search/?start=${start}&${params.toString()}`, { headers: headers })
         .then(r => r.json())
         .then(data => {

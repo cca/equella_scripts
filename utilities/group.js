@@ -193,7 +193,7 @@ export function rmUsersFromGroup(users, group) {
     return modifyGroup(new_group, `Successfully removed ${users.join(',')} from ${group.name}`)
 }
 
-async function main(options) {
+async function main() {
     let group, users, command = options._[0];
     if (options.uuid && options.name) {
         console.error('Error: invoked with both a group name and UUID; use only one or the other.\n')
@@ -227,5 +227,5 @@ async function main(options) {
 }
 
 if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
-    main(options)
+    main()
 }

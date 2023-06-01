@@ -2,6 +2,7 @@
 // https://inveniordm.docs.cern.ch/customize/vocabularies/
 // NOTE: only works with flat taxonomies, Invenio vocabs are all flat so they cannot
 // represent something hierarchical like VAULT's course list taxonomies
+import { pathToFileURL } from 'node:url'
 import { default as fetch, Headers } from 'node-fetch'
 import rc from 'rc'
 import YAML from 'yaml'
@@ -52,4 +53,6 @@ async function main() {
     console.log(yaml)
 }
 
-main()
+if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
+    main()
+}

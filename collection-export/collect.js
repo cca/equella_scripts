@@ -207,7 +207,7 @@ search().then(r => r.json())
             total = 1
             items = data
         } else {
-            total = data.available
+            total = data.available > options.length ? options.length : data.available
             items = data.results
             console.log(`Found ${total} search results`)
         }
@@ -219,7 +219,7 @@ search().then(r => r.json())
             // we need data for the items not in the first page of results
             debug('Iterating through search results pages to get all item data')
 
-            for (var i = data.results.length; i < total; i += options.length) {
+            for (let i = data.results.length; i < total; i += options.length) {
                 search(i).then(r => r.json())
                     .then(data => {
                         items = items.concat(data.results)

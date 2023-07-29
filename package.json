@@ -33,6 +33,7 @@
   "dependencies": {
     "@xmldom/xmldom": "^0.8.8",
     "async": "^3.2.4",
+    "csv-reader": "^1.0.12",
     "csv-stringify": "^6.4.0",
     "filenamify": "~6.0.0",
     "luxon": "^3.3.0",

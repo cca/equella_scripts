@@ -11,6 +11,9 @@ dependencies:
   async:
     specifier: ^3.2.4
     version: 3.2.4
+  csv-reader:
+    specifier: ^1.0.12
+    version: 1.0.12
   csv-stringify:
     specifier: ^6.4.0
     version: 6.4.0
@@ -339,6 +342,11 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
     dev: true
+
+  /csv-reader@1.0.12:
+    resolution: {integrity: sha512-0AAgazKJUywtjvZbclNuovIiQY/WyvojWw15Y2k3kPixE+pDiOFnfg5FcH3CfDqqnrB2f3p5oPAc446EXD01Tw==}
+    engines: {node: '>=8.0.0'}
+    dev: false
 
   /csv-stringify@6.4.0:
     resolution: {integrity: sha512-HQsw0QXiN5fdlO+R8/JzCZnR3Fqp8E87YVnhHlaPtNGJjt6ffbV0LpOkieIb1x6V1+xt878IYq77SpXHWAqKkA==}

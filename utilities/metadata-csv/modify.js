@@ -32,6 +32,12 @@ function debug(msg) {
     if (options.debug) console.error(msg)
 }
 
+// shorten this call elsewhere
+const xmls = new XMLSerializer()
+function XMLStringify(xml) {
+    return xmls.serializeToString(xml)
+}
+
 // take header row and row of values and turn them into a hash
 function makeChangesHash(columns, row) {
     if (columns.length === 0) {
@@ -53,7 +59,7 @@ function applyChanges(item, xml) {
     let putHeaders = headers
     putHeaders.append('Content-Type', 'application/json')
     const body = item
-    body.metadata = new XMLSerializer().serializeToString(xml)
+    body.metadata = XMLStringify(xml)
     console.log(body)
     fetch(url, {
         method: 'PUT',
@@ -81,7 +87,7 @@ function prepChanges(item, changes) {
     let xps = Object.keys(changes)
     xps.splice(0, 2)
 
-    if (options.dryrun) console.log(`${item.uuid}/${item.version} Item Metadata:\n${new XMLSerializer().serializeToString(xml)}`)
+    if (options.dryrun) console.log(`${item.uuid}/${item.version} Item Metadata:\n${XMLStringify(xml)}`)
 
     for (let xp of xps) {
         let element = xpath.select1(xp, xml)
@@ -102,7 +108,7 @@ function prepChanges(item, changes) {
     if (changed) {
         // modify record via API
         if (options.dryrun) {
-            console.log(`${item.uuid}/${item.version} Modified XML:\n${new XMLSerializer().serializeToString(xml)}`)
+            console.log(`${item.uuid}/${item.version} Modified XML:\n${XMLStringify(xml)}`)
         } else {
             applyChanges(item, xml)
         }

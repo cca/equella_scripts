@@ -53,9 +53,9 @@ function makeChangesHash(columns, row) {
     return changes
 }
 
-// PUTs new item metadata to VAULT
+// PUTs new item metadata to EQUELLA
 function applyChanges(item, xml) {
-    const url = `https://vault.cca.edu/api/item/${item.uuid}/${item.version}/`
+    const url = `${options.root}/item/${item.uuid}/${item.version}/`
     let putHeaders = headers
     putHeaders.append('Content-Type', 'application/json')
     const body = item
@@ -113,13 +113,13 @@ function prepChanges(item, changes) {
             applyChanges(item, xml)
         }
     } else {
-        debug(`No changes to item https://vault.cca.edu/${item.uuid}/${item.version}/`)
+        debug(`No changes to item ${options.root.replace(/api$/, '')}${item.uuid}/${item.version}/`)
     }
 }
 
 // get item information from EQUELLA
 function getItem(item) {
-    const url = `https://vault.cca.edu/api/item/${item.uuid}/${item.version}`
+    const url = `${options.root}/item/${item.uuid}/${item.version}`
     fetch(url, { headers: headers })
         .then(r => r.json())
         .then(data => {

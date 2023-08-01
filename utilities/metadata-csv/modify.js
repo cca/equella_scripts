@@ -60,7 +60,7 @@ function applyChanges(item, xml) {
     putHeaders.append('Content-Type', 'application/json')
     const body = item
     body.metadata = XMLStringify(xml)
-    console.log(body)
+
     fetch(url, {
         method: 'PUT',
         headers: putHeaders,

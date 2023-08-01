@@ -67,11 +67,12 @@ function applyChanges(item, xml) {
         body: JSON.stringify(body), })
         // EQUELLA responds with an empty body on success
         .then(r => {
-            if (r.status == 200) return debug(`Successfully edited item ${url}`)
+            if (r.status == 200) return console.log(`Successfully edited item ${url}`)
+            // if we're unsuccessful we might have error JSON
             r.json()
         })
         .then(data => {
-            if (data.error) throw(data)
+            if (data && data.error) throw(data)
         }).catch(e => {
             console.error(`Error editing item ${url}`)
             console.error('EQUELLA API Response:')
@@ -113,7 +114,7 @@ function prepChanges(item, changes) {
             applyChanges(item, xml)
         }
     } else {
-        debug(`No changes to item ${options.root.replace(/api$/, '')}${item.uuid}/${item.version}/`)
+        console.log(`No changes to item ${options.root.replace(/api$/, '')}${item.uuid}/${item.version}/`)
     }
 }
 

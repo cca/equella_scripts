@@ -58,13 +58,12 @@ function applyChanges(item, xml) {
     const url = `${options.root}/item/${item.uuid}/${item.version}/`
     let putHeaders = headers
     putHeaders.append('Content-Type', 'application/json')
-    const body = item
-    body.metadata = XMLStringify(xml)
+    item.metadata = XMLStringify(xml)
 
     fetch(url, {
         method: 'PUT',
         headers: putHeaders,
-        body: JSON.stringify(body), })
+        body: JSON.stringify(item), })
         // EQUELLA responds with an empty body on success
         .then(r => {
             if (r.status == 200) return console.log(`Successfully edited item ${url}`)

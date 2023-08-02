@@ -76,7 +76,7 @@ function writeCSV(items) {
     debug(`Found ${items.length} total items matching search...`)
 
     let header = [
-        'VAULT URL',
+        'Item URL',
         'Title',
         'Status',
         'Date Added',

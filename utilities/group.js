@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { pathToFileURL } from 'node:url'
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 
 import { default as fetch, Headers } from 'node-fetch'
 import rc from 'rc'
@@ -113,7 +113,7 @@ export async function getGroupByName(name) {
 export async function getUsers(users) {
     if (users.match(/\.json$/)) {
         // users.json file
-        let data = await fs.readFile(users, 'utf8')
+        let data = await fs.readFile(users)
         return JSON.parse(data)
     } else {
         // comma-separated string 'user1,user2'

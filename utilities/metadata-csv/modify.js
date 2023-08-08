@@ -43,8 +43,7 @@ function XMLStringify(xml) {
 // take header row and row of values and turn them into a hash
 function makeChangesHash(columns, row) {
     if (columns.length === 0) {
-        console.error('Error: could not find header row. Are you sure the first two columns are "uuid,version" (case insensitive)?')
-        process.exit(1)
+        throw Error('Error: could not find header row. Are you sure the first two columns are "uuid,version" (case insensitive)?')
     }
     let changes = {}
     columns.forEach((col, idx) => {
@@ -140,13 +139,16 @@ function getItem(item) {
 
 // exit with an error if an xpath looks invalid
 function checkPathPrefixes(row) {
+    // QUESTION: support for "//"-prefixed relative paths
+    // we can support them for deletions or changing existing fields
+    // but they don't make sense when adding a new field
     for (let i = 2; i < row.length; i++) {
         let xp = row[i]
         if (xp.indexOf('/xml') !== 0 && xp.indexOf('/') === 0) {
-            console.error(`ERROR: XPath ${xp} begins with a slash but not "/xml", it won't be found in EQUELLA records. Try either prefixing all metadata columns with "/xml" or removing the leading slash.`)
-            process.exit(1)
+            throw Error(`ERROR: XPath ${xp} begins with a slash but not "/xml", it won't be found in EQUELLA records. Try either prefixing all metadata columns with "/xml" or removing the leading slash.`)
         }
     }
+    return true
 }
 
 let columns = []

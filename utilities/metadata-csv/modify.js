@@ -1,9 +1,10 @@
 // usage:
 //      node modify --csv input.csv [--debug] [--dryrun]
 import fs from 'node:fs'
+import https from 'node:https'
 import { pathToFileURL } from 'node:url'
 
-import { default as fetch, Headers } from 'node-fetch'
+import { default as fetch } from 'node-fetch'
 import rc from 'rc'
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import xpath from 'xpath'
@@ -24,9 +25,12 @@ if (options.h || options.help) {
 
 if (options.dryrun) console.log('Dry run: no records will be modified.')
 
-const headers = new Headers({
+const headers = {
     'X-Authorization': 'access_token=' + options.token,
     'Accept': 'application/json',
+}
+const httpsAgent = new https.Agent({
+    maxSockets: 5
 })
 
 // log messages only when debug=true
@@ -57,19 +61,22 @@ function makeChangesHash(columns, row) {
 // PUTs new item metadata to EQUELLA
 function applyChanges(item, xml) {
     const url = `${options.root}/item/${item.uuid}/${item.version}/`
-    let putHeaders = headers
-    putHeaders.append('Content-Type', 'application/json')
+    // ph = headers; ph.append('content-type'...) does not work, ends up with
+    // duplicates in putHeader & EQUELLA throws an error
+    let putHeaders = { 'Content-Type': 'application/json' }
+    putHeaders = Object.assign(headers, putHeaders)
     item.metadata = XMLStringify(xml)
 
     fetch(url, {
+        agent: httpsAgent,
         method: 'PUT',
         headers: putHeaders,
         body: JSON.stringify(item), })
         // EQUELLA responds with an empty body on success
         .then(r => {
-            if (r.status == 200) return console.log(`Successfully edited item ${url}`)
+            if (r.ok) return console.log(`Successfully edited item ${url}`)
             // if we're unsuccessful we might have error JSON
-            r.json()
+            return r.json()
         })
         .then(data => {
             if (data && data.error) throw(data)

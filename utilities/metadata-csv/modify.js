@@ -9,7 +9,7 @@ import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import xpath from 'xpath'
 import { default as CSVReader } from 'csv-reader'
 
-let options = rc('metadata-csv', {})
+let options = rc('metadata-csv', { 'root': 'https://vault.cca.edu/api' })
 
 // usage info
 if (options.h || options.help) {
@@ -115,9 +115,11 @@ function prepChanges(item, changes) {
             console.log(`${item.uuid}/${item.version} Modified XML:\n${XMLStringify(xml)}`)
         } else {
             applyChanges(item, xml)
+            return xml
         }
     } else {
         console.log(`No changes to item ${options.root.replace(/api$/, '')}${item.uuid}/${item.version}/`)
+        return null
     }
 }
 
@@ -139,13 +141,12 @@ function getItem(item) {
 
 // exit with an error if an xpath looks invalid
 function checkPathPrefixes(row) {
-    // QUESTION: support for "//"-prefixed relative paths
-    // we can support them for deletions or changing existing fields
-    // but they don't make sense when adding a new field
+    // NOTE: relative "//" xpaths do not make sense when adding a new field,
+    // only when deleting or modifying
     for (let i = 2; i < row.length; i++) {
         let xp = row[i]
-        if (xp.indexOf('/xml') !== 0 && xp.indexOf('/') === 0) {
-            throw Error(`ERROR: XPath ${xp} begins with a slash but not "/xml", it won't be found in EQUELLA records. Try either prefixing all metadata columns with "/xml" or removing the leading slash.`)
+        if (xp.indexOf('/xml') !== 0 && xp.indexOf('//') !== 0) {
+            throw Error(`ERROR: XPath ${xp} is not relative nor does it begin with "/xml", it won't be found in EQUELLA records. Try either prefixing all metadata columns with "/xml" making it relative with two leading slashes.`)
         }
     }
     return true

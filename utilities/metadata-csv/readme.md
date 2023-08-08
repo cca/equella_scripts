@@ -4,7 +4,7 @@ Tools to work with VAULT metadata in bulk. The idea is to export metadata from V
 
 ## Setup
 
-To download metadata, you need an OAuth access token with the ability to search all collections and see items in all states (draft, live, etc). To modify items, your token needs item edit privileges. You can either pass a token on the command line as `--token=${token}` or (recommended) add it to a .metadata-csvrc config file (see the included example). Any parameter passed on the command line may be added to the configuration file where it will be the default but can be overridden by CLI parameters.
+To download metadata, we need an OAuth access token with the ability to search all collections and see items in all states (draft, live, etc). To modify items, our token needs item edit privileges. We can either pass a token on the command line as `--token=${token}` or (recommended) add it to a .metadata-csvrc config file (see the included example). Any parameter passed on the command line may be added to the configuration file where it will be the default but can be overridden by CLI parameters.
 
 Downloaded metadata requires a JSON file which maps metadata xpaths to labels, for example:
 
@@ -24,8 +24,9 @@ To edit items, the CSV passes to the modify script can't use the labels. It need
 ## To Do / Questions
 
 * How to handle multiple metadata nodes? E.g. multiple /mods/name/namePart
-  * Currently, you can map columns one-by-one like `"/mods/name[1]/namePart": "Creator 1"`
-* Allow a special `DELETE` value (or similar) which lets you _remove_ fields with the modify script
+  * Currently, we can map columns one-by-one like `"/mods/name[1]/namePart": "Creator 1"`
+* Allow a special `DELETE` value (or similar) which lets us _remove_ fields with the modify script
+* Support adding new values
 * Bring the two scripts into alignment
   * index.js's JSON map applies an `/xml` prefix on its own while the modify CSV expects the user to supply it
   * the CSV expects UUID & version columns but the exported metadata uses a single URL column instead
@@ -41,7 +42,7 @@ Download all items matching a search into a CSV with selected metadata nodes inc
 > node index --metadataMap hamaguchi-map.json --where="/xml/mods/relatedItem/title = 'Hamaguchi Study Print Collection'" > hamaguchi.csv
 ```
 
-Any of the parameters you can pass to the openEQUELLA Search API route are accepted on the command line: https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
+Any of the parameters we can pass to the openEQUELLA Search API route are accepted on the command line: https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
 
 Secondly, write a JSON map of XML paths to CSV column headers. Examples for the Hamaguchi and Design MFA collections are included.
 
@@ -61,4 +62,4 @@ Options:
  --dryrun:  do not modify records, but print XML documents
 ```
 
-Only records where a change in one of the metadata fields is detected are modified. Items are modified in-place (as opposed to creating a new version with the changes). The script cannot add or remove attachments, though you could modify metadata fields that reference attachments (e.g. `mods/part`), but this would rarely make sense to do.
+Only records where a change in one of the metadata fields is detected are modified. Items are modified in-place (as opposed to creating a new version with the changes). The script cannot add or remove attachments, though we can modify metadata fields that reference attachments (e.g. `/xml/mods/part`), but this would rarely make sense to do.

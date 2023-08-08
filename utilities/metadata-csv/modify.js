@@ -91,10 +91,13 @@ function prepChanges(item, changes) {
 
     for (let xp of xps) {
         let element = xpath.select1(xp, xml)
-        let text = (element ? element.textContent.trim() : null)
+        let text = (element ? element.textContent.trim() : "")
         let newValue = changes[xp].trim()
-        if (!text) {
+        // don't add "new" fields that are just empty text nodes
+        if (!text && newValue !== "") {
             debug(`New field ${xp} = "${newValue}"`)
+            // @TODO implement this, not easy if we cannot assume parent exists
+            // have to recursively check for ancestor elements' existence
         }
         else if (text === newValue) {
             debug(`No change to ${xp}`)

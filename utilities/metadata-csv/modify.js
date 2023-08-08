@@ -1,6 +1,8 @@
 // usage:
 //      node modify --csv input.csv [--debug] [--dryrun]
 import fs from 'node:fs'
+import { pathToFileURL } from 'node:url'
+
 import { default as fetch, Headers } from 'node-fetch'
 import rc from 'rc'
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
@@ -148,18 +150,25 @@ function checkPathPrefixes(row) {
 }
 
 let columns = []
+const main = () => {
+    fs.createReadStream(options.csv, 'utf8').pipe(new CSVReader({ trim: true }))
+        .on('data', (row) => {
+            if (row[0].toLowerCase() === 'uuid' && row[1].toLowerCase() === 'version') {
+                columns = row
+                debug(`CSV columns are ${columns.join(', ')}`)
+                checkPathPrefixes(row)
+            } else {
+                let changes = makeChangesHash(columns, row)
+                getItem(changes)
+            }
+        })
+        .on('end', () => {
+            debug('Finished reading rows from CSV')
+        })
+}
 
-fs.createReadStream(options.csv, 'utf8').pipe(new CSVReader({ trim: true }))
-    .on('data', (row)=>  {
-        if (row[0].toLowerCase() === 'uuid' && row[1].toLowerCase() === 'version') {
-            columns = row
-            debug(`CSV columns are ${columns.join(', ')}`)
-            checkPathPrefixes(row)
-        } else {
-            let changes = makeChangesHash(columns, row)
-            getItem(changes)
-        }
-    })
-    .on('end', () => {
-        debug('Finished reading rows from CSV')
-    })
+export { checkPathPrefixes, prepChanges, makeChangesHash }
+
+if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
+    main()
+}

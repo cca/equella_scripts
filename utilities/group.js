@@ -212,6 +212,8 @@ async function main() {
         usage(1)
     }
     users = await getUsers(options.users)
+    // support passing CCA email addresses as well as usernames
+    users = users.map(u => u.replace('@cca.edu', ''))
 
     switch (command) {
     case 'add':

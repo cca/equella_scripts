@@ -91,6 +91,30 @@ function applyChanges(item, xml) {
         })
 }
 
+/**
+ * insert a new element into the provided XML document
+ *
+ * @param   {Document}  doc    complete XML document
+ * @param   {string}  path   Xpath of new element
+ * @param   {string}  value  value of new element
+ *
+ * @return  {Document}         modified XML document
+ */
+function insertNewElement(doc, path, value) {
+    let pathsArray = path.split('/')
+    const tagName = pathsArray.pop()
+    let parentPath = pathsArray.join('/')
+    let parent = xpath.select1(parentPath, doc)
+
+    // this recursively ensures the whole path exists
+    if (!parent) insertNewElement(doc, parentPath, '')
+    // parent is still undefined
+    parent = xpath.select1(parentPath, doc)
+    const element = doc.createElement(tagName)
+    element.textContent = value
+    parent.appendChild(element)
+}
+
 // compares existing item metadata & changes, prepares a new XML document if there are changes
 // @TODO allow a special "DELETE" value that removes the field
 function prepChanges(item, changes) {
@@ -108,8 +132,7 @@ function prepChanges(item, changes) {
         // don't add "new" fields that are just empty text nodes
         if (!text && newValue !== "") {
             debug(`New field ${xp} = "${newValue}"`)
-            // @TODO implement this, not easy if we cannot assume parent exists
-            // have to recursively check for ancestor elements' existence
+            insertNewElement(xml, xp, newValue)
         }
         else if (text === newValue) {
             debug(`No change to ${xp}`)
@@ -181,7 +204,7 @@ const main = () => {
         })
 }
 
-export { checkPathPrefixes, prepChanges, makeChangesHash }
+export { checkPathPrefixes, insertNewElement, prepChanges, makeChangesHash }
 
 if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
     main()

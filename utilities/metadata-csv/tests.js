@@ -1,9 +1,10 @@
 /* globals describe,it,before,after */
 import assert from 'node:assert'
 
+import { DOMParser } from '@xmldom/xmldom'
 import xpath from 'xpath'
 
-import { checkPathPrefixes, prepChanges, makeChangesHash } from './modify.js'
+import { checkPathPrefixes, insertNewElement, prepChanges, makeChangesHash } from './modify.js'
 
 describe('Changes Hash', () => {
     it('makes a hash from column headers & a row', () => {
@@ -88,5 +89,36 @@ describe('Apply XML Changes', () => {
         changes[xp] = value
         let changedXML = prepChanges(item, changes)
         assert.equal(xpath.select(`string(${xp})`, changedXML), value)
+    })
+})
+
+describe('Insert new XML elements', () => {
+    const xmldom = new DOMParser()
+    it('inserts when the parent element exists', () => {
+        let doc = xmldom.parseFromString('<xml><parent></parent></xml>')
+        const path = '/xml/parent/child'
+        const value = 'text string'
+        insertNewElement(doc, path, value)
+        const element = xpath.select1(path, doc)
+        assert.ok(element)
+        assert.equal(element.textContent, value)
+    })
+    it('inserts when the parent element does not exist', () => {
+        let doc = xmldom.parseFromString('<xml></xml>')
+        const path = '/xml/parent/child'
+        const value = 'text string'
+        insertNewElement(doc, path, value)
+        const element = xpath.select1(path, doc)
+        assert.ok(element)
+        assert.equal(element.textContent, value)
+    })
+    it('inserts when the the parent and grandparent elements do not exist', () => {
+        let doc = xmldom.parseFromString('<xml></xml>')
+        const path = '/xml/grandparent/parent/child'
+        const value = 'text string'
+        insertNewElement(doc, path, value)
+        const element = xpath.select1(path, doc)
+        assert.ok(element)
+        assert.equal(element.textContent, value)
     })
 })

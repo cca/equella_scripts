@@ -60,6 +60,10 @@ function makeChangesHash(columns, row) {
 
 // PUTs new item metadata to EQUELLA
 function applyChanges(item, xml) {
+    if (!item.uuid || !item.version) {
+        debug('No item UUID or version (probably testing), not applying changes.')
+        return null
+    }
     const url = `${options.root}/item/${item.uuid}/${item.version}/`
     // ph = headers; ph.append('content-type'...) does not work, ends up with
     // duplicates in putHeader & EQUELLA throws an error

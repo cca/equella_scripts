@@ -15,7 +15,7 @@ Downloaded metadata requires a JSON file which maps metadata xpaths to labels, f
 }
 ```
 
-To edit items, the CSV passes to the modify script can't use the labels. It needs a UUID column, version column, and then full-specified metadata xpaths.
+To edit items, the CSV passed to the modify script can't use the labels. It needs a UUID column, version column, and then fully-specified metadata xpaths.
 
 | uuid | version | /xml/mods/name/namePart | /xml/mods/abstract
 |---|---|---|---
@@ -26,7 +26,8 @@ To edit items, the CSV passes to the modify script can't use the labels. It need
 * How to handle multiple metadata nodes? E.g. multiple /mods/name/namePart
   * Currently, we can map columns one-by-one like `"/mods/name[1]/namePart": "Creator 1"`
 * Allow a special `DELETE` value (or similar) which lets us _remove_ fields with the modify script
-* Support adding new values
+  * Right now, we could use empty CSV values to set XML nodes to empty string as a workaround
+* ~~Support adding new values~~
 * Bring the two scripts into alignment
   * index.js's JSON map applies an `/xml` prefix on its own while the modify CSV expects the user to supply it
   * the CSV expects UUID & version columns but the exported metadata uses a single URL column instead

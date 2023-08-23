@@ -1,4 +1,4 @@
-# VAULT Contribution Count
+# VAULT CSV Metadata
 
 Tools to work with VAULT metadata in bulk. The idea is to export metadata from VAULT, modify it in spreadsheet software, then apply the changes back to VAULT.
 

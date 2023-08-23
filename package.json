@@ -42,7 +42,6 @@
     "node-fetch": "~3.3.2",
     "nodemailer": "^6.9.4",
     "rc": "^1.2.8",
-    "request": "^2.88.2",
     "uglify-js": "^3.17.4",
     "xpath": "^0.0.32",
     "yaml": "^2.3.1"

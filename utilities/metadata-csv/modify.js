@@ -180,7 +180,7 @@ function checkPathPrefixes(row) {
     for (let i = 2; i < row.length; i++) {
         let xp = row[i]
         if (xp.indexOf('/xml') !== 0 && xp.indexOf('//') !== 0) {
-            throw Error(`ERROR: XPath ${xp} is not relative nor does it begin with "/xml", it won't be found in EQUELLA records. Try either prefixing all metadata columns with "/xml" making it relative with two leading slashes.`)
+            throw Error(`ERROR: XPath ${xp} is not relative nor does it begin with "/xml", it won't be found in EQUELLA records. Try either prefixing all metadata columns with "/xml" or making it relative with two leading slashes.`)
         }
     }
     return true

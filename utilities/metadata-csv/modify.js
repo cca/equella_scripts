@@ -12,19 +12,6 @@ import { default as CSVReader } from 'csv-reader'
 
 let options = rc('metadata-csv', { 'root': 'https://vault.cca.edu/api' })
 
-// usage info
-if (options.h || options.help) {
-    console.log('Usage:\n\tnode modify --csv input.csv [--debug] [--dryrun]\n')
-    console.log('Modify records based on a CSV of metadata. The CSV must have a header row, the first column must be the item UUID, and the second column must be the item version. The rest are treaded as metadata columns where the header is the XPath of the field to be modified (e.g. "/xml/mods/abstract"). It is recommended to use full paths that start with "/xml/mods".')
-    console.log('\nOptions:')
-    console.log('\t--csv:'.padEnd(12) + 'metadata changes spreadsheet')
-    console.log('\t--debug:'.padEnd(12) + 'prints a lot more information about what\'s going on')
-    console.log('\t--dryrun:'.padEnd(12) + 'do not modify records, but print XML documents')
-    process.exit(0)
-}
-
-if (options.dryrun) console.log('Dry run: no records will be modified.')
-
 const headers = {
     'X-Authorization': 'access_token=' + options.token,
     'Accept': 'application/json',
@@ -207,5 +194,17 @@ const main = () => {
 export { checkPathPrefixes, insertNewElement, prepChanges, makeChangesHash }
 
 if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
+    // usage info
+    if (options.h || options.help) {
+        console.log('Usage:\n\tnode modify --csv input.csv [--debug] [--dryrun]\n')
+        console.log('Modify records based on a CSV of metadata. The CSV must have a header row, the first column must be the item UUID, and the second column must be the item version. The rest are treaded as metadata columns where the header is the XPath of the field to be modified (e.g. "/xml/mods/abstract"). It is recommended to use full paths that start with "/xml/mods".')
+        console.log('\nOptions:')
+        console.log('\t--csv:'.padEnd(12) + 'metadata changes spreadsheet')
+        console.log('\t--debug:'.padEnd(12) + 'prints a lot more information about what\'s going on')
+        console.log('\t--dryrun:'.padEnd(12) + 'do not modify records, but print XML documents')
+        process.exit(0)
+    }
+
+    if (options.dryrun) console.log('Dry run: no records will be modified.')
     main()
 }

@@ -100,14 +100,17 @@ function embed(item) {
             .then(data => {
                 if (data && Array.isArray(data.users)) {
                     let user = data.users.find(u => u.id === item.owner.id)
-                    users.push(user)
-                    item = embedUser(user, item)
+                    // if a user was deleted they won't be in the array
+                    if (user) {
+                        users.push(user)
+                        item = embedUser(user, item)
+                    } else if (options.debug) {
+                        log(`Unable to find user ${item.owner.id} in VAULT`)
+                    }
                 } else if (data && data.id) {
                     delete data.links
                     users.push(data)
                     item = embedUser(data, item)
-                } else {
-                    log(`Unable to find user ${item.owner.id} in VAULT.`)
                 }
                 embedded_items.push(item)
                 return finish()
@@ -121,8 +124,9 @@ function embed(item) {
 
 function finish() {
     if (embedded_items.length === items.length && !!items_file) {
-        log('Done embedding data in items, overwriting the original file')
-        fs.writeFile(items_file, JSON.stringify(items, null, 2), (err) => {
+        const fn = items_file.replace(/\.json$/,'-embedded.json')
+        log(`Done embedding data in items, writing to ${fn}`)
+        fs.writeFile(fn, JSON.stringify(items, null, 2), (err) => {
             if (err) {
                 console.error(`Error writing ${items_file} file`)
                 console.error(err)

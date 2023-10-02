@@ -49,20 +49,20 @@ if (options.transporter == 'mailgun') {
 export function groupByOwner(items) {
     let output = {}
     items.forEach(item => {
-        if (!item.owner) console.log(item)
-        if (Object.prototype.hasOwnProperty.call(output, item.owner.id)) {
-            // some items have no owner (because the account was deleted)
-            // https://vault.cca.edu/items/0729ca6a-7469-480e-82aa-8facc1e7e2aa/1/
-            if (item.owner.id.trim() === "") {
-                if (options.verbose || options.v) {
-                    log(item.links.view)
-                    log('Item has no owner, no notification email will be sent.')
-                }
-                return null
+        if (!item.owner) log('Error, item has no owner object', item)
+        // some items have owner {id: ""} (because the account was deleted)
+        // https://vault.cca.edu/items/0729ca6a-7469-480e-82aa-8facc1e7e2aa/1/
+        if (item.owner.id === "") {
+            if (options.verbose || options.v) {
+                log(item.links.view, 'has no owner, no email will be sent.')
             }
-            return output[item.owner.id].push(item)
+            return null
         }
-        output[item.owner.id] = [item]
+        if (Object.prototype.hasOwnProperty.call(output, item.owner.id)) {
+            return output[item.owner.id].push(item)
+        } else {
+            output[item.owner.id] = [item]
+        }
     })
     return output
 }

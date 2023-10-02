@@ -73,6 +73,7 @@ function search(start=0) {
 search()
 
 function summarize() {
+    summarized = true
     let items_to_remove = all_items.filter(i => i.toBeRemoved)
 
     console.log('')

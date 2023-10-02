@@ -5,7 +5,7 @@ We remove items from the VAULT digital archive that are older than 6 years old a
 ## Procedures
 
 1. Identify items for removal, `node ret`
-    1. Items must have been contributed at least six years ago
+    1. Items must have been contributed at least seven years ago
     1. Items must not have markers of significance (awards, "high" rating, program portfolios)
     1. Items must not be in an important collection (Libraries, Syllabus, Accreditation)
 1. (Optional) Compile summary statistics, `node summarize -f items.json`

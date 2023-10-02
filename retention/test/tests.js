@@ -11,8 +11,7 @@ import chunk from '../chunk.js'
 import { deleteItem, unlockItem } from '../del.js'
 import { embedUser, getCollections } from '../embeddata.js'
 
-// NOTE: requires a separate config file for tests that's
-// _in the root_ of this project (since `npm test` runs from root)
+// we pass `--config path/to/.testretentionrc` to mocha otherwise another rc file would be used
 // see example.testretentionrc & fill in token & SMTP credentials
 const options = rc('test')
 const fixtpath = 'retention/test/fixtures'

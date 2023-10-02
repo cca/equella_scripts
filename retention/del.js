@@ -14,7 +14,7 @@ import https from 'node:https'
 import { pathToFileURL } from 'node:url'
 
 import fetch from 'node-fetch'
-import DateTime from 'luxon'
+import { DateTime } from 'luxon'
 import rc from 'rc'
 
 import log from './log.js'

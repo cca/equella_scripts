@@ -24,8 +24,6 @@ class Item {
         this.reasonsRetained = CRITERIA.filter(c => !this[c.name], this).map(fn => fn.name)
     }
 
-    // ESLint doesn't support static class properties yet
-    // https://stackoverflow.com/questions/60046847/eslint-does-not-allow-static-class-properties
     static CSVHeaderRow = 'link,title,status,created,modified,owner,collaborators,collection,"to remove"\n';
 
     toCSV() {

@@ -9,7 +9,7 @@
     "test": "mocha retention/test --config retention/test/.testretentionrc",
     "csvtest": "mocha utilities/metadata-csv/tests",
     "grouptest": "mocha utilities/test/group --config utilities/test/.grouprc",
-    "lint": "eslint . --ignore-pattern retention/item.js --cache"
+    "lint": "eslint . --cache"
   },
   "repository": {
     "type": "git",

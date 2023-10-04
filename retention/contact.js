@@ -73,7 +73,7 @@ export function groupByOwner(items) {
  * @param   {String}  username
  * @param   {Item[]}  items     items to be removed
  *
- * @return  {Promise|Boolean}   Promise from nodemailer or False if no mail was sent
+ * @return  {Promise|String}   Promise from nodemailer or String message if no mail was sent
  *
  */
 export function mailUser(username, items) {

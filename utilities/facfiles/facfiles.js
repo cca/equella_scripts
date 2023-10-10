@@ -74,7 +74,7 @@ function getFile (item, callback) {
     const semester = xpath.select('string(//local/courseInfo/semester)', xml)
     const faculty = xpath.select('string(//local/courseInfo/faculty)', xml)
 
-    if (inTimeRange(semester) && !faculty.indexOf(options.name)) {
+    if (inTimeRange(semester) && faculty.includes(options.name)) {
         const section = [
             semester,
             xpath.select('string(//local/courseInfo/section)', xml),

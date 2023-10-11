@@ -20,6 +20,8 @@ node collect --item $UUID
 node collect --collection $UUID --status DRAFT,ARCHIVE --modifiedBefore 2020-01-01
 # download items into folders that use the items' titles
 node collect  --collection $UUID --name
+# sub-collection of Libraries, note --where needs fully-specified /xml/... path
+node collect --collection 6b755832-4070-73d2-77b3-3febcc1f5fad --where "/xml/mods/relatedItem/title = 'Robert Sommer Mudflats Collection'"
 ```
 
 By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is append to the folder name if it would collide with an existing folder (NOTE: not yet, but this is a planned development).

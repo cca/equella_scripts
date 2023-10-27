@@ -26,9 +26,19 @@ node collect --collection 6b755832-4070-73d2-77b3-3febcc1f5fad --where "/xml/mod
 
 By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is append to the folder name if it would collide with an existing folder (NOTE: not yet, but this is a planned development).
 
+## Metadata Evaluation
+
+Often we want to see the possible values a particular field takes on in the exported collection. The Fish shell technique below is useful; in this example, we look for possible mods/noteWrapper/note@type attribute values.
+
+```sh
+for i in data/*/metadata/metadata.xml;
+    xmlstarlet fo $i | grep -C 2 "note type"
+end
+```
+
 ## Testing
 
-@TODO I should write real tests for this.
+TODO I should write real tests for this.
 
 ```sh
 # single item test

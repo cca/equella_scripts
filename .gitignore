@@ -3,3 +3,4 @@
 .equellarc
 .testretentionrc
 utilities/*.json
+.tmp.driveupload

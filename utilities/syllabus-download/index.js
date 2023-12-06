@@ -26,6 +26,11 @@ const collections = ['9ec74523-e018-4e01-ab4e-be4dd06cdd68'] // ID for Syllabus 
 const programs = options.programs ? options.programs.split(',') : []
 // the utilities/semesters.js script can generate this list
 const semesters = (options.semesters && options.semesters.split(',')) || [
+    "Fall 2023",
+    "Summer 2023",
+    "Spring 2023",
+    "Fall 2022",
+    "Summer 2022",
     "Spring 2022",
     "Fall 2021",
     "Summer 2021",
@@ -33,9 +38,6 @@ const semesters = (options.semesters && options.semesters.split(',')) || [
     "Fall 2020",
     "Summer 2020",
     "Spring 2020",
-    "Fall 2019",
-    "Summer 2019",
-    "Spring 2019"
 ]
 
 // combine multiple programs into one XPath-like "where" clause
@@ -57,14 +59,11 @@ const params = {
     q: options.q || '',
 }
 
-let total = 0
-let count = options.length
 let items = []
-// collect items from a request into global array, set total in case it's changed
+// collect items from a request into global array, begin downloads if we have them all
 function collectItems (data) {
     items = items.concat(data.results)
-    total = data.available
-    if (items.length >= total) downloadFiles(items)
+    if (items.length >= data.available) downloadFiles(items)
 }
 
 async function search(start=0) {
@@ -75,23 +74,21 @@ async function search(start=0) {
         .then(r => r.json())
         .then(data => {
             collectItems(data)
-            // these requests fire off in parallel
-            // count is _number of results we've requested so far_ & we have to
-            // rely on that to know we need to ask for more & not items.length
-            // which is _number of results we've received_
-            while (count < total) {
-                count += options.length
-                search(items.length)
+            // if it's the first request (start=0), fire off all the requests we'll need in parallel
+            if (start === 0) {
+                for (i = options.length; i < data.available; i += options.length) {
+                    search(i)
+                }
             }
         }).catch(e => {
             console.error(`Search error: ${e}`)
-            console.error(`Total: ${total} | Count: ${count} | Offset: ${start}`)
+            console.error(`Number of items: ${items.length} | Offset: ${start}`)
         })
 }
 
 function downloadFiles (items) {
-    console.log(`${total} syllabi search results for ${programs.join(', ')}`)
-    console.log('Downloading files (this may take a minute).')
+    console.log(`${items.length} syllabi search results for ${programs.join(', ')}`)
+    console.log('Downloading files (this may take a while).')
     async.each(items, getFile)
 }
 

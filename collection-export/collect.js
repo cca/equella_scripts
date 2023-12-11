@@ -170,7 +170,7 @@ function escapeHTML(s) {
 
 function labelIfExists(label, xp, xml) {
     let text = xpath.select(`string(${xp})`, xml)
-    if (text) return `<dt><b>${label}</b></dt><dd>${escapeHTML(text)}</dd>`
+    if (text) return `<dt><strong>${label}:</strong></dt>&nbsp;<dd>${escapeHTML(text)}</dd><br>`
     return ''
 }
 

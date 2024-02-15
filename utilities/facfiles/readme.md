@@ -15,6 +15,8 @@ If running multiple times, remember to clean out the files directory in between.
 
 ## Notes
 
+We have a [Syllabi for APT Drive folder](https://drive.google.com/drive/folders/1Cq9iEmORrsbzYRSQWIUIh1jobfGNhIVF) where we store these files. Don't share that folder itself with whomever in Academic Affairs requested syllabi, but a dated child folder (which has the same contents as the "faculty" folder here).
+
 Any parameter defined in .facfilesrc can also be passed as a command-line parameter, e.g., `node facfiles --name 'Eric Phetteplace' --start_term 'Fall 2017'`.
 
 Terms must be in form "Fall 2020", i.e., match this regex "(Spring|Summer|Fall) \d{4}". Either `start_term` or `stop_term` can be `0` (or another falsey value) to remove that limit. We can retrieve _all_ syllabi by setting both to `0`.

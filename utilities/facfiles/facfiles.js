@@ -13,6 +13,12 @@ const headers = new Headers({
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
 })
+
+if (!options.name) {
+    console.error('Please provide a name to search for with the --name flag.')
+    process.exit(1)
+}
+
 // query string parameters for API, see apidocs.do
 const params = new URLSearchParams({
     collections: options.collection_uuid,

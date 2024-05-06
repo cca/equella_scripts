@@ -103,7 +103,7 @@ function insertNewElement(doc, path, value) {
 }
 
 // compares existing item metadata & changes, prepares a new XML document if there are changes
-// @TODO allow a special "DELETE" value that removes the field
+// TODO allow a special "DELETE" value that removes the field
 function prepChanges(item, changes) {
     let changed = false // whether we have changes for the record or not
     let xml = new DOMParser().parseFromString(item.metadata)

@@ -95,7 +95,7 @@ function addToReview (term) {
 
 // change name metadata fields from old name to new
 function nameChange(oldName, newName) {
-    // @TODO do we loop over namePart nodes or naively `xml.set` the first one?
+    // TODO do we loop over namePart nodes or naively `xml.set` the first one?
     var list = xml.list('mods/name/namePart')
 
     for (var i = 0; i < list.size(); i++) {

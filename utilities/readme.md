@@ -32,7 +32,7 @@ Calculates the "hash code" used in the path to a item's files, which is based on
 
 ## new-course-code
 
-Skaffold out the various course information taxonomies we use for each program. @TODO this might as well create the "{{PROGRAM}} Faculty" and "{{PROGRAM}} Administrator" user groups, too.
+Skaffold out the various course information taxonomies we use for each program. TODO this might as well create the "{{PROGRAM}} Faculty" and "{{PROGRAM}} Administrator" user groups, too.
 
 ## semesters
 

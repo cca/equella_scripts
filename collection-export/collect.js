@@ -80,7 +80,7 @@ function createItemDir(item, callback) {
     if (options.name) {
         dirname = path.join('data', filenamify(item.name, { replacement: '_' }))
     }
-    // @TODO handle potential collisions with --name option
+    // TODO handle potential collisions with --name option
     fs.mkdir(dirname, (err) => {
         if (err) handleErr(err)
         fs.mkdir(path.join(dirname, 'metadata'), (err) => {
@@ -182,7 +182,7 @@ function itemToHTML(item) {
     html += `<html><head><title>${escapeHTML(item.name)} | CCA VAULT</title></head><body>`
     html += `<h1><a href="${item.links.view}">${escapeHTML(item.name)}</a></h1><dl>`
 
-    // @TODO this part should be created from a hash in options
+    // TODO this part should be created from a hash in options
     html += labelIfExists('Creator(s)', '//mods/name/namePart', xml)
     html += labelIfExists('Date', '//mods/dateCreatedWrapper/dateCreated', xml)
     html += labelIfExists('Type', '//local/courseWorkWrapper/courseWorkType', xml)

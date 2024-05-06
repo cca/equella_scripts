@@ -40,7 +40,7 @@ function termToYaml(term) {
     // { id, props, title: { en } }
     // where props is usually irrelevant & title.en is the English text of the term
     // (Q: why are subjects not internationalized?!?)
-    // @TODO slugify id? https://www.npmjs.com/package/slugify
+    // TODO slugify id? https://www.npmjs.com/package/slugify
     if (opts.type === 'subject') {
         return { id: term.fullTerm, subject: term.term }
     } else {

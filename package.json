@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "eslint": "^9.0.0",
-    "globals": "^15.0.0",
+    "eslint": "^9.2.0",
+    "globals": "^15.1.0",
     "mocha": "^10.4.0"
   },
   "dependencies": {
@@ -45,6 +45,6 @@
     "rc": "^1.2.8",
     "uglify-js": "^3.17.4",
     "xpath": "^0.0.34",
-    "yaml": "^2.4.1"
+    "yaml": "^2.4.2"
   }
 }

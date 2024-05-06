@@ -71,12 +71,12 @@ function collectionCount(items) {
                 }
             })
             // print "sorted hash" as best we can in JS
-            console.log(`${'Collection'.padEnd(41)}\tContribution count`)
-            uuids.sort((a, b) => {
-                return counts[b].count - counts[a].count
-            }).forEach(uuid => {
-                console.log(`${counts[uuid].name.padEnd(40)} \t${counts[uuid].count}`);
-            });
+            const longestNameLen = Object.keys(counts).map(k => counts[ k ].name).sort((a, b) => b.length - a.length)[ 0 ].length
+            console.log(`${'Collection'.padEnd(longestNameLen)}\tContribution count`)
+            uuids.sort((a, b) => counts[ b ].count - counts[ a ].count)
+                .forEach(uuid => {
+                    console.log(`${counts[uuid].name.padEnd(longestNameLen)}\t${counts[uuid].count}`);
+                })
         }).catch(e => {
             console.error(e)
             process.exit(1)

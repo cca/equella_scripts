@@ -1,6 +1,7 @@
+data/
 .facfilesrc
-files/*
 ~files/.gitkeep
 faculty.txt
 faculty/
+files/*
 logs/*.log

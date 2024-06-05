@@ -32,6 +32,10 @@ let total = 0
 let count = LENGTH
 let items = []
 
+function debug() {
+    if (options.debug) console.log(...arguments)
+}
+
 // determine if a semester falls within the start/stop term parameters
 function inTimeRange(semester) {
     const num = termToNumber(semester)
@@ -57,8 +61,10 @@ function collectItems (data) {
 }
 
 // figure out how many syllabi there are & collect them into the items array
-function search(start=0) {
-    fetch(`${options.root}/api/search/?start=${start}&${params.toString()}`, { headers: headers })
+function search(start = 0) {
+    const url = `${options.root}/api/search/?start=${start}&${params.toString()}`
+    debug('Searching', url)
+    fetch(url, { headers: headers })
         .then(r => r.json())
         .then(data => {
             collectItems(data)
@@ -77,18 +83,23 @@ function downloadFiles (items) {
 
 function getFile (item, callback) {
     const xml = new xmldom().parseFromString(item.metadata)
+    const section_code = xpath.select('string(//local/courseInfo/section)', xml)
     const semester = xpath.select('string(//local/courseInfo/semester)', xml)
     const faculty = xpath.select('string(//local/courseInfo/faculty)', xml)
+    debug('Result:', semester, section_code, faculty)
 
     if (inTimeRange(semester) && faculty.includes(options.name)) {
+        debug('Match:', semester, section_code, faculty)
         const section = [
             semester,
-            xpath.select('string(//local/courseInfo/section)', xml),
+            section_code,
             xpath.select('string(//local/courseInfo/course)', xml),
         ].join(' ')
         // handle multiple attachments, add number to filename
         item.attachments.forEach((attachment, index) => {
-            fetch(`${options.root}/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`, { headers: headers })
+            const url = `${options.root}/api/item/${item.uuid}/${item.version}/file/${encodeURIComponent(attachment.filename)}`
+            debug('Downloading', url)
+            fetch(url, { headers: headers })
                 .then(resp => {
                     if (resp.status != 200) {
                         return console.error(`${resp.status} ${resp.statusText} ERROR: unable to retrieve attachment "${attachment.filename}" for item ${item.links.view}`)

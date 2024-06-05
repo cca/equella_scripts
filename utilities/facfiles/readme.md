@@ -13,6 +13,19 @@ To run the script:
 
 If running multiple times, remember to clean out the files directory in between. Included is a "list-download.fish" script to iterate over a list of names in a "faculty.txt" file, creating a folder for each instructor's syllabi.
 
+## Sections
+
+For requests for particular section codes, use `node sections --match ARTED-1002` where the `--match` parameter is checked against the section code. The sections script also supports a `modifiedAfter` parameter to filter search results a little further. If we want all 2023-24 DSMBA syllabi, for instance, we can run `node sections --match DSMBA --modifiedAfter 2023-08-01` since all syllabi would be uploaded after that date.
+
+To run against a list of section codes, try this (Fish shell code):
+
+```fish
+for code in (cat sections.txt)
+  echo "Downloading syllabi for $code"
+  node sections --match $code
+end
+```
+
 ## Notes
 
 We have a [Syllabi for APT Drive folder](https://drive.google.com/drive/folders/1Cq9iEmORrsbzYRSQWIUIh1jobfGNhIVF) where we store these files. Don't share that folder itself with whomever in Academic Affairs requested syllabi, but a dated child folder (which has the same contents as the "faculty" folder here).

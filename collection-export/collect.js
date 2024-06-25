@@ -106,15 +106,16 @@ function getAttachments(item, itemDir) {
     debug(`Downloading attachments for item ${item.links.view}`)
 
     item.attachments.forEach(attachment => {
-        // TODO handle zip and html/mypages attachments
-        // TODO https://github.com/cca/equella_scripts/issues/40
-        if (attachment.type === 'file') {
-            // handle filesnames with path separators in them that must be preserved
+        // TODO html/mypages attachments https://github.com/cca/equella_scripts/issues/40
+        if (['file', 'zip'].includes(attachment.type)) {
+            // type=zip attachments have a folder property, type=file have a filename property
+            // below we handle filenames with path separators in them that must be preserved
             // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
             let filename = path.parse(attachment.filename || attachment.folder)
             filename.encodedBase = encodeURIComponent(filename.base)
             filename.url = filename.dir ? `${filename.dir}/${filename.encodedBase}` : filename.encodedBase
-            filename.full = filenamify(attachment.filename, { replacement: '_' })
+            // zip url/folder property always starts with "_zips/" which we trim off
+            filename.full = filenamify(attachment.filename || attachment.folder.replace(/^_zips\//, ''), { replacement: '_' })
             debug(`Downloading "${filename.base}" from item ${item.links.view}`)
 
             http(`/api/item/${item.uuid}/${item.version}/file/${filename.url}`)
@@ -138,6 +139,7 @@ function getAttachments(item, itemDir) {
                                 }
                             }).catch(handleErr)
                         } else {
+                            // zip attachments don't have md5sums
                             debug(`No md5sum for attachment "${filename.base}" from item ${item.links.view}`)
                         }
                     })

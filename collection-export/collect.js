@@ -106,6 +106,8 @@ function getAttachments(item, itemDir) {
     debug(`Downloading attachments for item ${item.links.view}`)
 
     item.attachments.forEach(attachment => {
+        // TODO handle zip and html/mypages attachments
+        // TODO https://github.com/cca/equella_scripts/issues/40
         if (attachment.type === 'file') {
             // handle filesnames with path separators in them that must be preserved
             // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21

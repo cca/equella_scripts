@@ -30,7 +30,7 @@
   "devDependencies": {
     "eslint": "^9.5.0",
     "globals": "^15.6.0",
-    "mocha": "^10.4.0"
+    "mocha": "^10.5.0"
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.8.10",
@@ -41,7 +41,7 @@
     "luxon": "^3.4.4",
     "md5-file": "^5.0.0",
     "node-fetch": "~3.3.2",
-    "nodemailer": "^6.9.13",
+    "nodemailer": "^6.9.14",
     "rc": "^1.2.8",
     "uglify-js": "^3.18.0",
     "xpath": "^0.0.34",

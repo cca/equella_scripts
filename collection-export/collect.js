@@ -106,16 +106,18 @@ function getAttachments(item, itemDir) {
     debug(`Downloading attachments for item ${item.links.view}`)
 
     item.attachments.forEach(attachment => {
-        // TODO html/mypages attachments https://github.com/cca/equella_scripts/issues/40
-        if (['file', 'zip'].includes(attachment.type)) {
+        // handle non-file attachments https://github.com/cca/equella_scripts/issues/40
+        if (['file', 'htmlpage', 'zip'].includes(attachment.type)) {
             // type=zip attachments have a folder property, type=file have a filename property
+            // type=htmlpage have a filename like "_mypages/{UUID}/page.html" -> {UUID}.html
             // below we handle filenames with path separators in them that must be preserved
             // these occur in unpacked zip archives, https://github.com/cca/equella_scripts/issues/21
             let filename = path.parse(attachment.filename || attachment.folder)
             filename.encodedBase = encodeURIComponent(filename.base)
             filename.url = filename.dir ? `${filename.dir}/${filename.encodedBase}` : filename.encodedBase
             // zip url/folder property always starts with "_zips/" which we trim off
-            filename.full = filenamify(attachment.filename || attachment.folder.replace(/^_zips\//, ''), { replacement: '_' })
+            filename.full = filenamify(attachment.filename || attachment.folder.replace(/^_zips\//, ''), {replacement: '_'})
+            if (attachment.type === 'htmlpage') filename.full = `${attachment.uuid}.html`
             debug(`Downloading "${filename.base}" from item ${item.links.view}`)
 
             http(`/api/item/${item.uuid}/${item.version}/file/${filename.url}`)

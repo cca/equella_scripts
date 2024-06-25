@@ -36,6 +36,14 @@ for i in data/*/metadata/metadata.xml;
 end
 ```
 
+## Notes
+
+HTML page attachments are downloaded and named after their UUID.
+
+ZIPs can exist as unpacked individual files or a zip attachment, we download both if they are present.
+
+Attachments that reference URLs or other EQUELLA items are not downloaded but present in the exported metadata.
+
 ## Testing
 
 TODO I should write real tests for this.

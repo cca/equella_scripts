@@ -15,11 +15,15 @@ Once in the psql client, we can export query results to a CSV with a few extra c
 ```sh
 equella_db_name=>\f ','
 equella_db_name=>\a
-equella_db_name=>\o '/our/home/output.csv'
+equella_db_name=>\o '/Users/ephetteplace/output.csv'
 equella_db_name=>SELECT * FROM item LIMIT 10000;
 ```
 
-This tends to be easier than the `\copy` command for complex, multiline queries like the ones stored here. There will be no output when we run the query because it's being written to the CSV.
+There will be no output when we run the query because it's being written to the CSV. This approach is better for copy-pasting the multiline queries like the ones stored here but is naïve about commas (e.g. in `attachment.description` or entity name fields). To get a true CSV, use the psql `\copy` command with the full query written in parentheses:
+
+```sql
+\copy (SELECT * FROM attachment a) To '/Users/ephetteplace/output.csv' With CSV DELIMITER ',' HEADER
+```
 
 ## Database Structure
 

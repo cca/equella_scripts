@@ -65,8 +65,8 @@ async function http(url, opts={}) {
 
 async function search(offset=0) {
     if (options.item) {
-        debug(`Exporting individual item with UUID ${options.item}`)
-        return http(`/api/item/${options.item}`)
+        debug(`Exporting individual item with UUID ${options.item} ${options.version ? `and version ${options.version}` : ''}`)
+        return http(`/api/item/${options.item}${options.version ? `/${options.version}` : ''}`)
     }
     params.start = offset
     debug(`Searching with offset ${offset}`)
@@ -211,14 +211,15 @@ search().then(r => r.json())
         let total, items;
         if (options.item) {
             total = 1
-            items = data
+            items = Array.isArray(data) ? data : [data] // is array if no --version otherwise object
         } else {
             total = data.available > options.length ? options.length : data.available
             items = data.results
             console.log(`Found ${total} search results`)
         }
 
-        if (total === items.length) {
+        // if --item has multiple versions & one wasn't specified we end up with >1 item
+        if (items.length >= total) {
             //  all items were in the first "page" of search results
             writeItemDirs(items)
         } else {

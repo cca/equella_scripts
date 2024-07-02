@@ -8,14 +8,16 @@ import { getGroupByUUID, getGroupByName, addUsersToGroup, rmUsersFromGroup } fro
 const opts = rc('group', {})
 
 describe('Get groups', () => {
-    it('should get groups by UUID', async () => {
+    it('should get groups by UUID', async function () {
+        this.timeout(10000)
         const group = await getGroupByUUID(opts.test_group_uuid)
         assert.ok(group)
         assert.equal(group.id, opts.test_group_uuid)
         assert.ok(Array.isArray(group.users))
     })
 
-    it('should get groups by name', async () => {
+    it('should get groups by name', async function () {
+        this.timeout(10000)
         const group = await getGroupByName(opts.test_group_name)
         assert.ok(group)
         assert.equal(group.name, opts.test_group_name)

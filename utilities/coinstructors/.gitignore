@@ -1,0 +1,3 @@
+.apprc
+data/*
+!data/.keep

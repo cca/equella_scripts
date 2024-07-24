@@ -18,9 +18,9 @@ Various scripts used in VAULT (our openEQUELLA instance). The scripts are catego
 
 Most of these are node scripts which share dependencies. Run `pnpm install` or `npm install` to get them.
 
-The fine arts junior review directory is a python project using [Poetry](https://python-poetry.org/). Run `poetry install` to get the dependencies.
+The fine arts junior review directory is a python project using [Poetry](https://python-poetry.org/). Run `poetry install` inside the directory to get the dependencies.
 
-Most tools will require their own rc file with settings, OAuth tokens, and other secrets. Each directory has an example and a readme with instructions.
+Most tools require their own rc file with settings, OAuth tokens, and other secrets. Each directory has an example and a readme with instructions.
 
 ## Notes
 
@@ -30,7 +30,9 @@ Probably the biggest gotcha I've found working with openEQUELLA's JavaScript is 
 
 ## Testing
 
-`npm test` runs the retention procedures' tests. They require a separate .equellarc file specific to the tests at the path retention/test/.testretentionrc (there is an example file provided). `npm run csvtest` runs the metadata-csv tests and `npm run grouptest` runs the utilities/group.js tests.
+`npm test` runs the retention procedures' tests. They require a separate .equellarc file specific to the tests at the path retention/test/.testretentionrc (an example is provided). `npm run csvtest` runs the utilities/metadata-csv tests and `npm run grouptest` runs the utilities/group.js tests.
+
+`npm run lint` lints all JavaScript.
 
 As tests are added to other utilities, they will need to run à la carte. I usually work on one utility at a time and it doesn't make sense to run tests over all of them, especially because they tend to involve HTTP requests and thus are quite slow. View the package.json scripts for shortcuts to different tools' tests.
 

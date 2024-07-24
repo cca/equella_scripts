@@ -18,6 +18,16 @@ const defaults = {
 const options = rc('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
 
+if (options.help || options.h || options._[0].match(/^help$/i)) {
+    console.log('Usage: node collect.js [options]\n')
+    console.log('Options:')
+    console.log('  --collection <UUID>  UUID of collection to export')
+    console.log('  --item <UUID>        UUID of single item to export')
+    console.log('  --verbose            Print debug info')
+    console.log('\nYou can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".\nSee https://vault.cca.edu/apidocs.do#operations-tag-Searching')
+    process.exit(0)
+}
+
 if ((!options.collection || !options.collection.match(UUIDRegex)) && (!options.item || !options.item.match(UUIDRegex))) {
     console.error('Error: must provide either a collection or item UUID.')
     process.exit(1)

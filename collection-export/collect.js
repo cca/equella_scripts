@@ -18,7 +18,7 @@ const defaults = {
 const options = rc('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
 
-if (options.help || options.h || options._[0].match(/^help$/i)) {
+if (options.help || options.h || (options._.length && options._[0].match(/^help$/i))) {
     console.log('Usage: node collect.js [options]\n')
     console.log('Options:')
     console.log('  --collection <UUID>  UUID of collection to export')

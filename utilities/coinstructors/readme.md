@@ -7,7 +7,7 @@ See [#42](https://github.com/cca/equella_scripts/issues/42) — syllabi pushed f
 Get _all_ course data since Fall 2019. Look in the gs://int_files_source_archive bucket.
 
 ```sh
-gsutil -m cp -r gs://int_files_source_archive/course_section_data_*.json data
+gsutil -m cp -r 'gs://int_files_source_archive/course_section_data_*.json' data
 ```
 
 The course_section_data_AP_Summer_2023.json file is malformed, there are newline characters in a section description. Find the `course_desc` for FURNT-1000-1 and delete the newlines (make it all one paragraph) or delete the description entirely, we do not use it.

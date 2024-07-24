@@ -85,14 +85,22 @@ async function search(offset=0) {
 
 // default, create a directory with item's UUID and version
 // if --name was passed, create a directory with the item's name
-function createItemDir(item, callback) {
-    let dirname = path.join('data', `${item.uuid}-v${item.version}`)
+function createItemDir(item, callback, iteration = 0) {
+    let postfix = iteration ? ` (${iteration})` : ''
+    let dirname = path.join('data', `${item.uuid}-v${item.version}${postfix}`)
     if (options.name) {
-        dirname = path.join('data', filenamify(item.name, { replacement: '_' }))
+        dirname = path.join('data', filenamify(`${item.name}${postfix}`, { replacement: '_' }))
     }
-    // TODO handle potential collisions with --name option
+
     fs.mkdir(dirname, (err) => {
-        if (err) handleErr(err)
+        if (err) {
+            if (err.code === 'EEXIST') {
+                debug(`Directory ${dirname} already exists, trying again`)
+                return createItemDir(item, callback, iteration + 1)
+            } else {
+                handleErr(err)
+            }
+        }
         fs.mkdir(path.join(dirname, 'metadata'), (err) => {
             if (err) handleErr(err)
             callback(dirname)

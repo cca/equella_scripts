@@ -78,10 +78,9 @@ let searchParams = {
  * @returns {Promise<Response>} - fetch Promise
  */
 function search(course) {
-    // TODO I think we need to use a --where XPath and not a query string
-    // "Fall 2020 IXDSN-2100-2"
-    const query = encodeURIComponent(`${termCodeToText(course.term)} ${course.section_code}`)
-    const url = `/api/search?${new URLSearchParams(searchParams)}&q=${query}`
+    // semester = "Fall 2020" & section = "IXDSN-2100-2"
+    const where = encodeURIComponent(`/xml/local/courseInfo/semester = '${termCodeToText(course.term)}' AND /xml/local/courseInfo/section = '${course.section_code}'`)
+    const url = `/api/search?${new URLSearchParams(searchParams)}&where=${where}`
     return http(url)
 }
 
@@ -96,19 +95,11 @@ courses.forEach(course => {
                 return debug(`No results found for ${courseText}`)
             }
             const items = json.results
-            // find (first) result course that exactly matches course (there could be multiple)
-            const item = items.find(c => {
-                const xml = new xmldom().parseFromString(c.metadata)
-                const ci = (xp) => `//local/courseInfo/${xp}`
-                const section_code = xpath.select(`string(${ci('section')})`, xml)
-                const semester = xpath.select(`string(${ci('semester')})`, xml)
-                return section_code === course.section_code && semester === termCodeToText(course.term)
-            })
-            if (!item) {
+            if (!items.length) {
                 return debug(`No exact match found for ${courseText}`)
             }
-            debug(`${item.links.view} is the syllabus for ${courseText}`)
-            // TODO fix(course, item)
+            debug(`${items[0].links.view} is the syllabus for ${courseText}`)
+            // TODO fix(course, items[0])
         })
         .catch(err => {
             console.error(err)

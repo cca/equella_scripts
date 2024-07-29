@@ -1,4 +1,4 @@
-import {readFileSync, writeFile} from 'fs'
+import {readFileSync, appendFile} from 'fs'
 
 import fetch from 'node-fetch'
 import rc from 'rc'
@@ -8,6 +8,7 @@ import {DOMParser as xmldom} from '@xmldom/xmldom'
 const options = rc('app', {
     collection: '9ec74523-e018-4e01-ab4e-be4dd06cdd68', // Syllabus Collection UUID
     courses: 'data/courses.json',
+    order: 'modified', // relevance, modified, name, rating
     info: 'basic,metadata',
     length: 50,
 })
@@ -56,13 +57,13 @@ let searchParams = {
     collections: options.collection,
     info: options.info,
     length: options.length,
+    order: options.order,
 };
 
 // more search params which we omit rather than supplying a default value
 [
     'modifiedAfter', // ISO dates, YYYY-MM-DD
     'modifiedBefore',
-    'order', // relevance, modified, name, rating
     'owner',
     'reverse',
     'showall',
@@ -99,8 +100,8 @@ courses.forEach(course => {
                     course.course_title,
                     course.instructors.map(i => `${i.first_name} ${i.last_name}`).join(', '),
                     course.section_code,
-                ].join('","') + '"'
-                return writeFile('data/missing-syllabi.csv', csvtext, err => {
+                ].join('","') + '"\n'
+                return appendFile('data/missing-syllabi.csv', csvtext, err => {
                     if (err) console.error(err)
                 })
             }

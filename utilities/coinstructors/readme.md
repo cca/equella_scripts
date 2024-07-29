@@ -27,3 +27,5 @@ The script assumes our data is at data/courses.json but we can specifiy a differ
 ```sh
 node fix --courses courses.json [ --dryrun ] [ --verbose ] [ --limit 10 ]
 ```
+
+The script writes a CSV of courses without matching items in the Syllabus Collection to data/missing-syllabi.csv.

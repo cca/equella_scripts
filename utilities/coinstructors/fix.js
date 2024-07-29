@@ -1,4 +1,4 @@
-import {readFileSync} from 'fs'
+import {readFileSync, writeFile} from 'fs'
 
 import fetch from 'node-fetch'
 import rc from 'rc'
@@ -91,8 +91,18 @@ courses.forEach(course => {
         .then(res => res.json())
         .then(json => {
             if (json.available === 0) {
-                // TODO would be good to create a list of these missing syllabi
-                return debug(`No results found for ${courseText}`)
+                debug(`No results found for ${courseText}`)
+                // write a CSV in same format as missing syllabi report
+                const csvtext = '"' + [
+                    termCodeToText(course.term),
+                    course.course_code.substr(0, 5),
+                    course.course_title,
+                    course.instructors.map(i => `${i.first_name} ${i.last_name}`).join(', '),
+                    course.section_code,
+                ].join('","') + '"'
+                return writeFile('data/missing-syllabi.csv', csvtext, err => {
+                    if (err) console.error(err)
+                })
             }
             const items = json.results
             if (!items.length) {

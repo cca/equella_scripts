@@ -9,12 +9,16 @@ const options = rc('app', {
     collection: '9ec74523-e018-4e01-ab4e-be4dd06cdd68', // Syllabus Collection UUID
     courses: 'data/courses.json',
     order: 'modified', // relevance, modified, name, rating
-    info: 'basic,metadata',
+    info: 'all', // I think we need "all" info when we're going to update the item
     length: 50,
 })
 
 function debug() {
     if (options.debug || options.verbose) console.log(...arguments)
+}
+
+if (options.dryrun) {
+    console.log('Dry run enabled, no changes will be made')
 }
 
 // read course data from JSON file
@@ -30,9 +34,6 @@ if (options.limit) {
     courses = courses.slice(0, options.limit)
 }
 
-// Outline: courses.forEach -> search() VAULT -> fix (if not dry run)
-// ? should we create a new version?
-
 /**
  * Translate Workday "AP_" style term references to human-friendly VAULT text.
  * @param {string} term - "AP_Fall_2020"
@@ -42,13 +43,22 @@ function termCodeToText(term) {
     return term.replace(/^AP_/, '').replace(/_/g, ' ')
 }
 
+/**
+ * Unique identifier for a course ("TERM SECTION_CODE").
+ * @param {Object} course - Workday course object
+ * @returns {string} - "Fall 2020 IXDSN-2100-2"
+ */
+function courseText(course) {
+    return `${termCodeToText(course.term)} ${course.section_code}`
+}
+
 // fetch abstraction
 async function http(url, opts = {}) {
     const headers = {
         'Accept': 'application/json',
         'X-Authorization': 'access_token=' + options.token,
     }
-    opts.headers = headers
+    opts.headers = opts.headers ? opts.headers : headers
     url = new URL(options.root + url)
     return fetch(url, opts)
 }
@@ -85,14 +95,54 @@ function search(course) {
     return http(url)
 }
 
-courses.forEach(course => {
-    const courseText = `${termCodeToText(course.term)} ${course.section_code}`
+/**
+ * Description
+ * @param {Object} course - course object from Workday JSON
+ * @param {Object} item - item object from VAULT
+ * @returns {Promise<Response>} - fetch Promise
+ */
+function fix(course, item) {
+    // much easier to PUT to the same version than create a new version
+    // see REST API guide: https://openequella.github.io/guides/RestAPIGuide.html#examples-1
+    const url = `/api/item/${item.uuid}/${item.version}`
+    let xml = new xmldom().parseFromString(item.metadata)
+    let facultyXML = xpath.select1('/xml/local/courseInfo/faculty', xml)
+    let facultyIDXML = xpath.select1('/xml/local/courseInfo/facultyID', xml)
+    let facultyString = course.instructors.map(i => `${i.first_name} ${i.last_name}`).join(', ')
+    let facultyIDString = course.instructors.map(i => i.username).join(', ')
 
+    if (facultyXML.textContent !== facultyString || facultyIDXML.textContent !== facultyIDString) {
+        debug(`Updating faculty details for ${courseText(course)}`)
+        debug(`local/courseInfo/faculty: ${facultyXML.textContent} -> ${facultyString}`)
+        debug(`local/courseInfo/facultyID: ${facultyIDXML.textContent} -> ${facultyIDString}`)
+        // these vars are references to live nodes in the XML
+        facultyXML.textContent = facultyString
+        facultyIDXML.textContent = facultyIDString
+        item.metadata = xml.toString()
+
+        if (options.dryrun) return Promise.resolve()
+
+        const opts = {
+            body: JSON.stringify(item),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Authorization': 'access_token=' + options.token,
+            },
+            method: 'PUT',
+        }
+        return http(url, opts)
+    }
+
+    debug(`No changes needed for ${courseText(course)}`)
+    return Promise.resolve()
+}
+
+courses.forEach(course => {
     search(course)
         .then(res => res.json())
         .then(json => {
             if (json.available === 0) {
-                debug(`No results found for ${courseText}`)
+                debug(`No results found for ${courseText(course)}`)
                 // write a CSV in same format as missing syllabi report
                 const csvtext = '"' + [
                     termCodeToText(course.term),
@@ -106,11 +156,9 @@ courses.forEach(course => {
                 })
             }
             const items = json.results
-            if (!items.length) {
-                return debug(`No exact match found for ${courseText}`)
-            }
-            debug(`${items[0].links.view} is the syllabus for ${courseText}`)
-            // TODO fix(course, items[0])
+            if (!items.length) return debug(`No exact match found for ${courseText(course)}`)
+            debug(`${items[0].links.view} is the syllabus for ${courseText(course)}`)
+            return fix(course, items[0])
         })
         .catch(err => {
             console.error(err)

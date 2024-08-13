@@ -80,11 +80,18 @@ var map = {
     'WRITE': ['Writing (MFA)', 'Humanities & Sciences'],
     'WRLIT': ['Writing & Literature (BFA)', 'Humanities & Sciences']
 }
-var dept = get('local/courseInfo/department')
+var dxp = 'local/courseInfo/department'
+var dept = get(dxp)
 // we have a department & it's in the map
-if (dept !== '' && map[dept]) {
+if (dept != '' && map[dept]) {
     xml.set('local/department', map[dept][0])
     xml.set('local/division', map[dept][1] + ' Division')
+}
+
+// Fix "DESST" department code for DSMBA syllabi
+// This will be fixed in Portal eventually (Sept. 2024)
+if (dept == 'DESST') {
+    xml.set(dxp, 'DSMBA')
 }
 
 // ##### END asc/divisions.js script #####

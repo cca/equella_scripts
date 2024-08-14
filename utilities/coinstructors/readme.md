@@ -22,7 +22,7 @@ Don't cat to a file in the same directory as the globbed source files to avoid a
 
 ## Usage
 
-The script assumes our data is at data/courses.json but we can specifiy a different file with the `--courses` flag.
+The script assumes our data is at data/courses.json but we can specify a different file with the `--courses` flag.
 
 ```sh
 node fix --courses courses.json [ --dryrun ] [ --verbose ] [ --limit 10 ]

@@ -11,7 +11,7 @@ class Item {
         // Object.entries() returns an array of key/value arrays
         Object.entries(item).forEach(pair => this[pair[0]] = pair[1])
 
-        this.xml = new xmldom().parseFromString(item.metadata)
+        this.xml = new xmldom().parseFromString(item.metadata, 'text/xml')
         this.title = xpath.select('string(//mods/titleInfo/title)', this.xml)
 
         // "this" is undefined within these array methods

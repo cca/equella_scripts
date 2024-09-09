@@ -24,7 +24,7 @@ const httpsAgent = new https.Agent({
 })
 
 function makeXMLDoc(values) {
-    let doc = new DOMParser().parseFromString('<xml/>')
+    let doc = new DOMParser().parseFromString('<xml/>', 'text/xml')
     for (let i = 0; i < values.length; i++) {
         let value = values[i].trim()
         if (value !== "") insertNewElement(doc, columns[i], value)

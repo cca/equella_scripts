@@ -15,7 +15,7 @@ let counts = {}
 types.forEach(t => counts[t] = { "(null)": 0 })
 
 items.forEach(item => {
-    let xml = new xmldom().parseFromString(item.metadata)
+    let xml = new xmldom().parseFromString(item.metadata, 'text/xml')
 
     types.forEach(type => {
         let value = xpath.select1(`string(//local/courseWorkWrapper/${type})`, xml)

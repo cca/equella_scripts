@@ -93,7 +93,7 @@ function downloadFiles (items) {
 }
 
 function getFile (item) {
-    const xml = new xmldom().parseFromString(item.metadata)
+    const xml = new xmldom().parseFromString(item.metadata, 'text/xml')
     const semester = xpath.select('string(//local/courseInfo/semester)', xml)
 
     if (semester && semesters.includes(semester)) {

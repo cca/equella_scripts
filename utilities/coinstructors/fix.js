@@ -105,7 +105,7 @@ function fix(course, item) {
     // much easier to PUT to the same version than create a new version
     // see REST API guide: https://openequella.github.io/guides/RestAPIGuide.html#examples-1
     const url = `/api/item/${item.uuid}/${item.version}`
-    let xml = new xmldom().parseFromString(item.metadata)
+    let xml = new xmldom().parseFromString(item.metadata, 'text/xml')
     let facultyXML = xpath.select1('/xml/local/courseInfo/faculty', xml)
     let facultyIDXML = xpath.select1('/xml/local/courseInfo/facultyID', xml)
     let facultyString = course.instructors.map(i => `${i.first_name} ${i.last_name}`).join(', ')

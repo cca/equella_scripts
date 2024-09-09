@@ -88,7 +88,7 @@ function writeCSV(items) {
     console.log(stringify([header]).trim())
 
     items.forEach(item => {
-        let xml = new xmldom().parseFromString(item.metadata)
+        let xml = new xmldom().parseFromString(item.metadata, 'text/xml')
         let strings = Object.keys(metadataMap).map(xp => {
             // prefix all xpaths with /xml
             if (xp.indexOf('/') !== 0) xp = `/${xp}`

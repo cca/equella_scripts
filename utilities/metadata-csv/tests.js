@@ -95,7 +95,7 @@ describe('Apply XML Changes', () => {
 describe('Insert new XML elements', () => {
     const xmldom = new DOMParser()
     it('inserts when the parent element exists', () => {
-        let doc = xmldom.parseFromString('<xml><parent></parent></xml>')
+        let doc = xmldom.parseFromString('<xml><parent></parent></xml>', 'text/xml')
         const path = '/xml/parent/child'
         const value = 'text string'
         insertNewElement(doc, path, value)
@@ -104,7 +104,7 @@ describe('Insert new XML elements', () => {
         assert.equal(element.textContent, value)
     })
     it('inserts when the parent element does not exist', () => {
-        let doc = xmldom.parseFromString('<xml></xml>')
+        let doc = xmldom.parseFromString('<xml></xml>', 'text/xml')
         const path = '/xml/parent/child'
         const value = 'text string'
         insertNewElement(doc, path, value)
@@ -113,7 +113,7 @@ describe('Insert new XML elements', () => {
         assert.equal(element.textContent, value)
     })
     it('inserts when the the parent and grandparent elements do not exist', () => {
-        let doc = xmldom.parseFromString('<xml></xml>')
+        let doc = xmldom.parseFromString('<xml></xml>', 'text/xml')
         const path = '/xml/grandparent/parent/child'
         const value = 'text string'
         insertNewElement(doc, path, value)

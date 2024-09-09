@@ -82,7 +82,7 @@ function downloadFiles (items) {
 }
 
 function getFile (item, callback) {
-    const xml = new xmldom().parseFromString(item.metadata)
+    const xml = new xmldom().parseFromString(item.metadata, 'text/xml')
     const section_code = xpath.select('string(//local/courseInfo/section)', xml)
     const semester = xpath.select('string(//local/courseInfo/semester)', xml)
     const faculty = xpath.select('string(//local/courseInfo/faculty)', xml)

@@ -106,7 +106,7 @@ function insertNewElement(doc, path, value) {
 // TODO allow a special "DELETE" value that removes the field
 function prepChanges(item, changes) {
     let changed = false // whether we have changes for the record or not
-    let xml = new DOMParser().parseFromString(item.metadata)
+    let xml = new DOMParser().parseFromString(item.metadata, 'text/xml')
     let xps = Object.keys(changes)
     xps.splice(0, 2)
 

@@ -19,3 +19,6 @@ for name in (cat $file)
         set_color normal
     end
 end
+
+# remove .DS_Store before we upload to Drive
+rm -f faculty/.DS_Store

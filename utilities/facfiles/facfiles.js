@@ -86,10 +86,8 @@ function getFile (item, callback) {
     const section_code = xpath.select('string(//local/courseInfo/section)', xml)
     const semester = xpath.select('string(//local/courseInfo/semester)', xml)
     const faculty = xpath.select('string(//local/courseInfo/faculty)', xml)
-    debug('Result:', semester, section_code, faculty)
 
     if (inTimeRange(semester) && faculty.includes(options.name)) {
-        debug('Match:', semester, section_code, faculty)
         const section = [
             semester,
             section_code,

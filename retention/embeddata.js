@@ -9,7 +9,6 @@ import https from 'node:https'
 import path from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
 
-import fetch from 'node-fetch'
 import rc from 'rc'
 
 import log from './log.js'

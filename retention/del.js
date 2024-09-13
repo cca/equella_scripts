@@ -13,7 +13,6 @@ import fs from 'node:fs'
 import https from 'node:https'
 import { pathToFileURL } from 'node:url'
 
-import fetch from 'node-fetch'
 import { DateTime } from 'luxon'
 import rc from 'rc'
 

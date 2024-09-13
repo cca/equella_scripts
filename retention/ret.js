@@ -1,8 +1,6 @@
 import fs from 'node:fs'
-import https from 'node:https'
 import path from 'node:path'
 
-import { Headers, default as fetch } from 'node-fetch'
 import rc from 'rc'
 
 import autodate from './autodate.js'
@@ -12,8 +10,6 @@ const options = rc('retention', {})
 options.date = autodate(options.date)
 const LENGTH = 50
 
-// limit number of concurrent requests or we run into an ECONNRESET error
-const agent = new https.Agent({ maxSockets: 10 })
 const headers = new Headers({
     'Accept': 'application/json',
     'X-Authorization': 'access_token=' + options.token,
@@ -30,7 +26,6 @@ let params = new URLSearchParams({
     showall: true,
     start: 0
 })
-
 let total = 0
 // number of items _we have requested_ not number we have (which is all_items.length)
 let count = 0
@@ -38,8 +33,9 @@ let all_items = []
 let summarized = false
 
 // collect items from a request into global array, set total in case it's changed
-function collectItems (data) {
-    all_items = all_items.concat(data.results.map(item => new Item(item, options)))
+function collectItems(data) {
+    // for memory purposes, do not map to Item objects until we're done
+    all_items.push(...data.results)
     total = data.available
 
     // implies we're finished, prevent repeating
@@ -47,33 +43,27 @@ function collectItems (data) {
 }
 
 // recursive function to gather all items in the search results
-function search(start=0) {
+async function search(start=0) {
     params.set('start', start)
-    fetch(`${options.url}/api/search/?${params.toString()}`, { agent: agent, headers: headers })
-        .then(r => {
-            if (!r.ok) console.error(`HTTP error: ${r.status} ${r.statusText}`)
-            return r.json()
-        })
-        .then(d => {
-            // how EQUELLA handles API error messages
-            if (d.error) {
-                throw new Error(`${d.code} ${d.error}: ${d.error_description}`)
-            }
+    const r = await fetch(`${options.url}/api/search/?${params.toString()}`, { headers: headers })
+    if (!r.ok) console.error(`HTTP error: ${r.status} ${r.statusText}`)
+    const d = await r.json()
+    // how EQUELLA handles API error messages
+    if (d.error) throw new Error(`${d.code} ${d.error}: ${d.error_description}`)
 
-            collectItems(d)
-            // these requests fire off in parallel
-            while (count < total) {
-                console.log(`Getting items ${count + 1} through ${count + LENGTH}...`)
-                count += LENGTH
-                search(count)
-            }
-        })
+    collectItems(d)
+    if (count < total) {
+        console.log(`Getting items ${count + 1} through ${count + LENGTH}...`)
+        count += LENGTH
+        search(count)
+    }
 }
 
-search()
+search(0)
 
 function summarize() {
     summarized = true
+    all_items = all_items.map(item => new Item(item, options))
     let items_to_remove = all_items.filter(i => i.toBeRemoved)
 
     console.log('')

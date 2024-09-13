@@ -2,7 +2,7 @@ import { stringify } from 'csv-stringify/sync'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import xpath from 'xpath'
 
-const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, isntPPD, hasNoAwards, isntVCSThesis]
+const CRITERIA = [isOldEnough, isntInExcludedCollection, isntHighRated, isntPPD, hasNoAwards, isntThesis]
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
 class Item {
@@ -50,16 +50,6 @@ class Item {
     }
 }
 
-// class Criteria {
-//     constructor(description, test) {
-//         this.description = description
-//
-//         this.test = test(item, xml, options)
-//
-//         CRITERIA.push(test.name)
-//     }
-// }
-
 // criteria methods return TRUE if an item is to be removed
 // & FALSE if it is to be retained
 function isOldEnough(item, options) {
@@ -82,8 +72,8 @@ function hasNoAwards(item, options) {
     return !xpath.select('string(//local/award)', item.xml)
 }
 
-function isntVCSThesis(item) {
-    return item.collection.uuid !== '49de1037-0279-41b4-8070-0f7ffcbae56d' || xpath.select('string(//local/courseWorkWrapper/courseWorkType)', item.xml).toLowerCase() !== 'thesis'
+function isntThesis(item) {
+    return xpath.select('string(//local/courseWorkWrapper/courseWorkType)', item.xml).toLowerCase().trim() !== 'thesis'
 }
 
 export default Item

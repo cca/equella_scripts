@@ -27,8 +27,6 @@ let params = new URLSearchParams({
     start: 0
 })
 let total = 0
-// number of items _we have requested_ not number we have (which is all_items.length)
-let count = 0
 let all_items = []
 let summarized = false
 
@@ -52,10 +50,10 @@ async function search(start=0) {
     if (d.error) throw new Error(`${d.code} ${d.error}: ${d.error_description}`)
 
     collectItems(d)
+    const count = all_items.length
     if (count < total) {
         console.log(`Getting items ${count + 1} through ${count + LENGTH}...`)
-        count += LENGTH
-        search(count)
+        search(count + LENGTH)
     }
 }
 
@@ -78,7 +76,7 @@ function summarize() {
     console.log(`${'Is highly rated:'.padEnd(25)} ${all_items.filter(i => !i.isntHighRated).length}`)
     console.log(`${'Is PPD:'.padEnd(25)} ${all_items.filter(i => !i.isntPPD).length}`)
     console.log(`${'Won an award:'.padEnd(25)} ${all_items.filter(i => !i.hasNoAwards).length}`)
-    console.log(`${'Is a VCS thesis:'.padEnd(25)} ${all_items.filter(i => !i.isntVCSThesis).length}`)
+    console.log(`${'Is a thesis:'.padEnd(25)} ${all_items.filter(i => !i.isntThesis).length}`)
 
     console.log('')
     writeOutput(items_to_remove)

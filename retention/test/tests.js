@@ -2,7 +2,6 @@
 import assert from 'node:assert'
 import fs from 'node:fs'
 
-import fetch from 'node-fetch'
 import rc from 'rc'
 
 import Item from '../item.js'
@@ -20,14 +19,16 @@ const items = {
     award: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/award.json`)), options),
     // owned by internal user
     commaInTitle: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/comma-in-title.json`)), options),
+    // also owned by ephetteplace — change this to your email & edit
+    email: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/email.json`)), options),
     excluded: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/excluded-collection.json`)), options),
     highRated: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/high-rating.json`)), options),
     old: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/old-item.json`)), options),
     ppd: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/ppd.json`)), options),
     recent: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/recent-item.json`)), options),
     recentAndExcluded: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/recent-and-excluded.json`)), options),
+    thesis: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/thesis.json`)), options),
     untitled: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/untitled.json`)), options),
-    VCSThesis: new Item(JSON.parse(fs.readFileSync(`${fixtpath}/vcs-thesis.json`)), options),
 }
 
 describe('Identify items', () => {
@@ -63,8 +64,8 @@ describe('Identify items', () => {
         assert.equal(items.award.toBeRemoved, false)
     })
 
-    it('should not remove Visual Critical Studies theses', () => {
-        assert.equal(items.VCSThesis.isntVCSThesis, false)
+    it('should not remove theses', () => {
+        assert.equal(items.thesis.isntThesis, false)
     })
 
     it('should be able to handle items with & without titles', () => {
@@ -128,7 +129,7 @@ describe('Chunk items', () => {
 
 describe('Contact owner', () => {
     it('group multiple items by the same owner', () => {
-        // award owned by ephetteplace, other 2 owned by same UUID user
+        // item owned by ephetteplace, other 2 owned by same UUID user
         const list = [items.award.toJSON(), items.recent.toJSON(), items.recentAndExcluded.toJSON()]
         const itemsGroupedByOwner = groupByOwner(list)
         assert.ok(itemsGroupedByOwner)
@@ -140,7 +141,7 @@ describe('Contact owner', () => {
     it('sends an email to the owner', async function () {
         // email is _very_ slow so we use https://mochajs.org/#timeouts
         this.timeout(10000)
-        let result = await mailUser(items.award.owner.id, [items.award.toJSON()])
+        let result = await mailUser(items.email.owner.id, [items.email.toJSON()])
         // nodemailer result looks like
         // {
         //     accepted: [ 'ephetteplace@cca.edu' ],
@@ -152,7 +153,7 @@ describe('Contact owner', () => {
         //     envelope: { from: 'vault@cca.edu', to: [ 'ephetteplace@cca.edu' ] },
         //     messageId: '<6b43ec3b-6a16-16db-6ccb-1f5324984827@cca.edu>'
         // }
-        assert.equal(items.award.owner.id + "@cca.edu", result.accepted[0])
+        assert.equal(items.email.owner.id + "@cca.edu", result.accepted[0])
         // response codes that start with a "2" generally indicate success
         // https://en.wikipedia.org/wiki/List_of_SMTP_server_return_codes
         assert.equal('2', result.response.substring(0, 1))

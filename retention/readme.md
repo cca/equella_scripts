@@ -1,10 +1,10 @@
 # VAULT Retention
 
-We remove items from the VAULT digital archive that are older than 6 years old and not deemed to have everlasting institutional value. See the [VAULT retention policy](https://docs.google.com/document/d/1kbWYS_Xa0hXvEU7YCrMLULuTco6RdhKdLY-qWBVky5o/edit#) for policy details.
+We remove items from the VAULT digital archive that are older than 7 years old and not deemed to have everlasting institutional value. See the [VAULT retention policy](https://docs.google.com/document/d/1kbWYS_Xa0hXvEU7YCrMLULuTco6RdhKdLY-qWBVky5o/edit#) for policy details.
 
 ## Procedures
 
-1. Identify items for removal, `node ret`
+1. Identify items for removal, `node ret --date (gdate -d '7 years ago' '+%Y-%m-%d')`
     1. Items must have been contributed at least seven years ago
     1. Items must not have markers of significance (awards, "high" rating, program portfolios)
     1. Items must not be in an important collection (Libraries, Syllabus, Accreditation)

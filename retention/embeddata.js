@@ -11,7 +11,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url'
 
 import rc from 'rc'
 
-import log from './log.js'
+import {debug, default as log} from './log.js'
 
 let options = rc('retention')
 
@@ -34,9 +34,8 @@ function writeCollections(data) {
         if (err) {
             console.error(`Error writing ${collections_file} file`)
             console.error(err)
-        } else if (options.debug) {
-            log(`Downloaded collections data & wrote to file ${collections_file}`)
         }
+        debug(options.debug, `Downloaded collections data & wrote to file ${collections_file}`)
     })
 }
 
@@ -47,7 +46,7 @@ export async function getCollections() {
         collections = JSON.parse(fs.readFileSync(collections_file))
         if (collections.length && options.debug) log(`Found collections data in ${collections_file}`)
     } catch (e) {
-        if (options.debug) log(`No collections data found, downloading from API...`)
+        debug(options.debug, `No collections data found, downloading from API...`)
         let response = await fetch(`${options.url}/api/collection/?length=500`, fetch_options)
         let data = await response.json()
         collections = data.results
@@ -61,91 +60,83 @@ export function embedUser(user, item) {
     Object.keys(user).forEach(key => {
         item.owner[key] = user[key]
     })
-    item.owner.fullName = `${user.firstName} ${user.lastName}`
+    if (user.firstName && user.lastName) item.owner.fullName = `${user.firstName} ${user.lastName}`
     return item
 }
 
-function embed(item) {
-    if (options.debug) log(`Embedding data in item ${item.uuid}`)
+async function embed(item) {
+    debug(options.debug, `Embedding data in item ${item.uuid}`)
 
     item.collection.name = collections.find(c => c.uuid === item.collection.uuid).name
 
-    if (item.owner.id == "") {
-        embedded_items.push(item)
-        return finish()
-    }
+    if (item.owner.id == "") return item
+
     // look in cache for user
     let user = users.find(u => u.id === item.owner.id)
     if (user) {
-        item = embedUser(user, item)
-        embedded_items.push(item)
-        return finish()
-    } else {
-        if (options.debug) log(`No user found in cache for ${item.owner.id}`)
-        // get user data from API and cache it in the users object
-        let url = `${options.url}/api/userquery/search?q=${item.owner.id}&groups=false&roles=false`
-        let uuid_regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
-        // for internal users
-        if (item.owner.id.match(uuid_regex)) {
-            url = `${options.url}/api/usermanagement/local/user/${item.owner.id}`
-        }
-        fetch(url, fetch_options)
-            .then(resp => {
-                if (resp.status === 204 || resp.status === 404) {
-                    return null
-                }
-                return resp.json()
-            })
-            .then(data => {
-                if (data && Array.isArray(data.users)) {
-                    let user = data.users.find(u => u.id === item.owner.id)
-                    // if a user was deleted they won't be in the array
-                    if (user) {
-                        users.push(user)
-                        item = embedUser(user, item)
-                    } else if (options.debug) {
-                        log(`Unable to find user ${item.owner.id} in VAULT`)
-                    }
-                } else if (data && data.id) {
-                    delete data.links
-                    users.push(data)
-                    item = embedUser(data, item)
-                }
-                embedded_items.push(item)
-                return finish()
-            }).catch(e => {
-                console.error(`Error requesting user info for ${item.owner.id}`)
-                console.error(e)
-                return finish()
-            })
+        debug(options.debug, `Found user ${user.firstName} ${user.lastName} (${item.owner.id}) in cache`)
+        return embedUser(user, item)
     }
-}
 
-function finish() {
-    if (embedded_items.length === items.length && !!items_file) {
-        const fn = items_file.replace(/\.json$/,'-embedded.json')
-        log(`Done embedding data in items, writing to ${fn}`)
-        fs.writeFile(fn, JSON.stringify(items, null, 2), (err) => {
-            if (err) {
-                console.error(`Error writing ${items_file} file`)
-                console.error(err)
-            }
-        })
+    debug(options.debug, `No user found in cache for ${item.owner.id}`)
+    // get user data from API and cache it in the users object
+    let url = `${options.url}/api/userquery/search?q=${item.owner.id}&groups=false&roles=false`
+    let uuid_regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+    // for internal users
+    if (item.owner.id.match(uuid_regex)) {
+        url = `${options.url}/api/usermanagement/local/user/${item.owner.id}`
     }
+
+    let response = await fetch(url, fetch_options)
+    if (response.status === 204 || response.status === 404) {
+        log(`No user found for ${item.owner.id}`)
+        // cache the empty response
+        users.push({ id: item.owner.id })
+        return item
+    }
+
+    let data = await response.json()
+    if (data && Array.isArray(data?.users)) {
+        user = data.users.find(u => u.id === item.owner.id)
+        // if a user was deleted they won't be in the array
+        if (user) {
+            debug(options.debug, `Found user ${user.firstName} ${user.lastName} (${item.owner.id})`)
+            users.push(user)
+            return embedUser(user, item)
+        }
+        debug(options.debug, `Unable to find user ${item.owner.id}`)
+    } else if (data && data?.id) {
+        // internal user
+        delete data.links
+        users.push(data)
+        return embedUser(data, item)
+    }
+
+    return item
 }
 
 // we will populate these global objects
 let collections = []
 let users = []
-let items = []
-let embedded_items = []
 let items_file = options.f || options.file
 
 async function main(items_file) {
     // first get list of collections because we only need to do this once
     collections = await getCollections()
-    items = JSON.parse(fs.readFileSync(`./${items_file}`))
-    items.forEach(i => embed(i))
+    let items = JSON.parse(fs.readFileSync(`./${items_file}`))
+    let embedded = []
+    for (let item of items) {
+        let i = await embed(item)
+        embedded.push(i)
+    }
+    const fn = items_file.replace(/\.json$/, '-embedded.json')
+    log(`Done embedding data in items, writing to ${fn}`)
+    fs.writeFile(fn, JSON.stringify(items, null, 2), (err) => {
+        if (err) {
+            console.error(`Error writing ${items_file} file`)
+            console.error(err)
+        }
+    })
 }
 
 if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {

@@ -1,8 +1,11 @@
 import { DateTime } from 'luxon'
 
 // prepend a formatted date to logged messages
-function log () {
+export default function log () {
     console.log(DateTime.now().toISO(), ...arguments)
 }
 
-export default log
+// log but only if options.debug is true
+export function debug(debug_option) {
+    if (debug_option) log(...Array.from(arguments).slice(1))
+}

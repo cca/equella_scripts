@@ -7,7 +7,7 @@ import rc from 'rc'
 
 import Item from './item.js'
 import sleep from './sleep.js'
-import log from './log.js'
+import {debug, default as log} from './log.js'
 
 let options = rc('retention')
 
@@ -54,7 +54,7 @@ export function groupByOwner(items) {
         // https://vault.cca.edu/items/0729ca6a-7469-480e-82aa-8facc1e7e2aa/1/
         if (item.owner.id === "") {
             if (options.verbose || options.v) {
-                log(item.links.view, 'has no owner, no email will be sent.')
+                debug(options.debug, item.links.view, 'has no owner, no email will be sent.')
             }
             return null
         }

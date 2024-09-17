@@ -121,13 +121,21 @@ let users = []
 let items_file = options.f || options.file
 
 async function main(items_file) {
-    // first get list of collections because we only need to do this once
-    collections = await getCollections()
     let items = JSON.parse(fs.readFileSync(`./${items_file}`))
-    let embedded = []
-    for (let item of items) {
-        let i = await embed(item)
-        embedded.push(i)
+    // we want a chunked items file of nested arrays
+    if (!items.every(Array.isArray)) {
+        console.error('Error: items file must be an array of arrays. Did you forget to run chunk.js first?')
+        process.exit(1)
+    }
+    collections = await getCollections()
+
+    let chunks = items.length
+    let embedded = Array.from({length: chunks}, () => []);
+    for (let i = 0; i < chunks; i++) {
+        for (let item of items[i]) {
+            let embedded_item = await embed(item)
+            embedded[i].push(embedded_item)
+        }
     }
     const fn = items_file.replace(/\.json$/, '-embedded.json')
     log(`Done embedding data in items, writing to ${fn}`)

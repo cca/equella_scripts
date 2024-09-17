@@ -87,7 +87,15 @@ async function embed(item) {
         url = `${options.url}/api/usermanagement/local/user/${item.owner.id}`
     }
 
-    let response = await fetch(url, fetch_options)
+    let response
+    try {
+        response = await fetch(url, fetch_options)
+    } catch(e) {
+        console.error(`Error fetching user data for ${item.owner.id}`)
+        console.error(e)
+        return item
+    }
+
     if (response.status === 204 || response.status === 404) {
         log(`No user found for ${item.owner.id}`)
         // cache the empty response

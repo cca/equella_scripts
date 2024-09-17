@@ -44,7 +44,7 @@ export async function getCollections() {
     let collections = []
     try {
         collections = JSON.parse(fs.readFileSync(collections_file))
-        if (collections.length && options.debug) log(`Found collections data in ${collections_file}`)
+        if (collections.length) debug(options.debug, `Found collections data in ${collections_file}`)
     } catch (e) {
         debug(options.debug, `No collections data found, downloading from API...`)
         let response = await fetch(`${options.url}/api/collection/?length=500`, fetch_options)

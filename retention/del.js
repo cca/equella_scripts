@@ -99,9 +99,7 @@ async function main() {
         items = items.results
     } else if (Array.isArray(items[0])) {
         // handled items grouped by owner (arrays of arrays)
-        let unpacked_items = []
-        items.forEach(a => unpacked_items = unpacked_items.concat(a))
-        items = unpacked_items
+        items = [].concat(...items)
     }
 
     // we do a for-of loop instead of items.forEach so we can sleep() in

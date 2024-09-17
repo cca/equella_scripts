@@ -86,31 +86,29 @@ export function mailUser(username, items) {
         return `Empty username for ${items.length} items; skipping email.`
     }
 
-    items = items.filter(i => i.status === 'live')
-    if (items.length === 0) {
+    if (!items.some(i => i.status === 'live')) {
         return `Skipping ${username} - none of their items to be removed are published.`
     }
-    let items_html = '<ul>'
-    items_html += items.reduce((accumulator, item) => {
+    let items_html = items.reduce((accumulator, item) => {
         accumulator += `<li><a href="${item.links.view}">${item.title}</a>`
         return accumulator
-    }, '')
+    }, '<ul>')
     items_html += '</ul>'
 
-    // Gmail will show the "from" address as the logged in user
+    // Gmail shows the "from" address as the logged in user
     let msg = {
         from: "vault@cca.edu",
         replyTo: "vault@cca.edu",
         to: `${username}@cca.edu`,
         subject: "Items will be removed from CCA VAULT in 6 months",
         html: `<p>Hello,</p>
-        <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. If you want to retain your works, you can <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items can only be downloaded one at a time. We apologize for any inconvenience.</p>
+        <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. If you want to retain your works, you can <a href="https://portal.cca.edu/knowledge-base/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items can only be downloaded one at a time. We apologize for any inconvenience.</p>
         <p>List of items to be removed:</p>${items_html}
         <p>You can access all your VAULT contributions, including unfinished drafts and superceded "archive" versions, on the <b><a href="https://vault.cca.edu/logon.do?.page=access/myresources.do">My Resources</a></b> page.</p>
         <p>For more information about this process, read <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/vault-retention-policy/">the VAULT retention policy</a> on Portal.</p>
         <p>Sincerely,<br>CCA Libraries<br>https://libraries.cca.edu&nbsp;|&nbsp;vault@cca.edu</p>
         <p><img height="48px" width="197px" src="https://www.cca.edu/sites/default/files/images/cca-logotype-394.png" style="border:0px;vertical-align:middle"></p>
-        <p>1111 8th St | San Francisco, CA | 94107</p><p><i>CCA is situated on the traditional unceded lands of the Ohlone peoples.</i></p>`
+        <p>145 Hooper Street | San Francisco, CA | 94107</p><p><i>CCA is located in Huichin and Yelamu, also known as San Francisco, on the unceded territories of Chochenyo and Ramaytush Ohlone peoples.</i></p>`
     }
 
     if (options.verbose || options.v) {
@@ -133,7 +131,7 @@ async function main(file) {
             log(`Emailing the ${items.length} owners of items in file ${file}`)
             for (const ownedItems of items) {
                 let result = await mailUser(ownedItems[0]['owner']['id'], ownedItems.map(i => new Item(i, options)))
-                log(result)
+                debug(options.debug, result)
                 await sleep(2000)
             }
         } else {
@@ -143,12 +141,12 @@ async function main(file) {
             const owners = Object.keys(itemsGroupedByOwner)
             for (const owner of owners) {
                 let result = await mailUser(owner, itemsGroupedByOwner[owner])
-                log(result)
+                debug(options.debug, result)
                 await sleep(2000)
             }
         }
     } else {
-        // just a single item, typically for testing
+        // just a single item, typically for testing so we log the result
         let result = await mailUser(items.owner.id, [new Item(items, options)])
         log(result)
     }

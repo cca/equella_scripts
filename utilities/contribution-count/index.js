@@ -2,7 +2,6 @@
 // https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
 // e.g. node index --order=relevance --count=500 --status=draft --modifiedAfter=2019-09-01
 import rc from 'rc'
-import { default as fetch, Headers } from 'node-fetch'
 
 const defaults = { length: 50, count: 200, "q": "", order: "modified" }
 let options = rc('contribution-count', defaults)

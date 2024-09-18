@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { Readable } from 'node:stream'
 
-import fetch from 'node-fetch'
 import filenamify from 'filenamify'
 import md5 from 'md5-file'
 import rc from 'rc'
@@ -144,12 +144,12 @@ function getAttachments(item, itemDir) {
                         return console.error(`${res.status} ${res.statusText} ERROR: unable to retrieve attachment "${filename.base}" for item ${item.links.view}`)
                     }
 
-                    res.body.pipe(fs.createWriteStream(path.join(itemDir, filename.full)))
-
-                    res.body.on('err', handleErr)
+                    const bodyStream = Readable.from(res.body)
+                    bodyStream.pipe(fs.createWriteStream(path.join(itemDir, filename.full)))
+                    bodyStream.on('err', handleErr)
 
                     // check downloaded attachment's md5 hash
-                    res.body.on('end', () => {
+                    bodyStream.on('end', () => {
                         if (attachment.md5) {
                             md5(path.join(itemDir, filename.full)).then(hash => {
                                 if (hash === attachment.md5) {

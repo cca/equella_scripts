@@ -114,8 +114,9 @@ function getFile (item, callback) {
                     const extension = attachment.filename.split('.').pop()
                     let filename = [course_name, (index ? ` (${index})` : ''), '.', extension].join('')
                     filename = filename.replace(/[/\\:]/g, "_")
-                    resp.body.pipe(fs.createWriteStream(path.join('files', filename)))
 
+                    // TODO use Readable stream with native node fetch
+                    resp.body.pipe(fs.createWriteStream(path.join('files', filename)))
                     resp.body.on('err', e => console.error(e))
                 })
         })

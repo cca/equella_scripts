@@ -6,7 +6,6 @@
 import fs from 'node:fs'
 
 import { stringify } from 'csv-stringify/sync'
-import { default as fetch, Headers } from 'node-fetch'
 import rc from 'rc'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import xpath from 'xpath'

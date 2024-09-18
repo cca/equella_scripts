@@ -4,7 +4,6 @@ import fs from 'node:fs'
 import https from 'node:https'
 import { pathToFileURL } from 'node:url'
 
-import { default as fetch } from 'node-fetch'
 import rc from 'rc'
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import xpath from 'xpath'

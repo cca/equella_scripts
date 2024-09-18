@@ -113,7 +113,8 @@ function getFile (item) {
                     const extension = attachment.filename.split('.').pop()
                     // handle multiple attachments & special chars
                     let filename = [section, (index ? ` (${index})` : ''), '.', extension].join('')
-                    filename = filenamify(filename, { replacement: '_' })
+                    filename = filenamify(filename, {replacement: '_'})
+                    // TODO this will need to change to a new Readable stream when using native fetch
                     resp.body.pipe(fs.createWriteStream(path.join('files', filename)))
                 })
                 .catch(err => {

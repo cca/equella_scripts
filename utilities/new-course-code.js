@@ -4,7 +4,6 @@
  *
  * Requires a configured .equellarc file.
  */
-import fetch from 'node-fetch'
 import rc from 'rc'
 
 const opts = rc('equella')

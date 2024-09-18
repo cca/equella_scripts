@@ -1,9 +1,9 @@
 // convert EQUELLA taxonomy to Invenio vocabulary
 // https://inveniordm.docs.cern.ch/customize/vocabularies/
-// NOTE: only works with flat taxonomies, Invenio vocabs are all flat so they cannot
+// ! only works with flat taxonomies, Invenio vocabs are all flat so they cannot
 // represent something hierarchical like VAULT's course list taxonomies
-import { pathToFileURL } from 'node:url'
-import { default as fetch, Headers } from 'node-fetch'
+import {pathToFileURL} from 'node:url'
+
 import rc from 'rc'
 import YAML from 'yaml'
 

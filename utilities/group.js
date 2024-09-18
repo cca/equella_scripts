@@ -2,7 +2,6 @@
 import { pathToFileURL } from 'node:url'
 import fs from 'node:fs/promises'
 
-import { default as fetch, Headers } from 'node-fetch'
 import rc from 'rc'
 
 let options = rc('equella', {})

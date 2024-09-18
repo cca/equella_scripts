@@ -1,6 +1,5 @@
 import {readFileSync, appendFile} from 'fs'
 
-import fetch from 'node-fetch'
 import rc from 'rc'
 import xpath from 'xpath'
 import {DOMParser as xmldom} from '@xmldom/xmldom'

@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import https from 'node:https'
 import path from 'node:path'
+import { Readable } from 'node:stream'
 
 import async from 'async'
-import { default as fetch, Headers } from 'node-fetch'
 import filenamify from 'filenamify'
 import rc from 'rc'
 import xpath from 'xpath'
@@ -114,8 +114,9 @@ function getFile (item) {
                     // handle multiple attachments & special chars
                     let filename = [section, (index ? ` (${index})` : ''), '.', extension].join('')
                     filename = filenamify(filename, {replacement: '_'})
-                    // TODO this will need to change to a new Readable stream when using native fetch
-                    resp.body.pipe(fs.createWriteStream(path.join('files', filename)))
+
+                    const bodyStream = Readable.from(resp.body)
+                    bodyStream.pipe(fs.createWriteStream(path.join('files', filename)))
                 })
                 .catch(err => {
                     console.error(err)

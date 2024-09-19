@@ -1,8 +1,8 @@
 import fs  from 'node:fs'
-import path  from 'node:path'
+import path from 'node:path'
+import { Readable } from 'node:stream'
 
 import async  from 'async'
-import {default as fetch, Headers} from 'node-fetch'
 import rc from 'rc'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import xpath  from 'xpath'
@@ -107,9 +107,9 @@ function getFile (item, callback) {
                     let filename = [section, (index ? ` (${index})` : ''), '.', extension].join('')
                     filename = filename.replace(/[/\\:]/g, "_")
 
-                    // TODO use Readable stream with native node fetch
-                    resp.body.pipe(fs.createWriteStream(path.join('files', filename)))
-                    resp.body.on('err', e => console.error(e))
+                    const bodyStream = Readable.from(resp.body)
+                    bodyStream.pipe(fs.createWriteStream(path.join('files', filename)))
+                    bodyStream.on('err', e => console.error(e))
                 })
         })
     }

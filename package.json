@@ -40,7 +40,6 @@
     "filenamify": "~6.0.0",
     "luxon": "^3.5.0",
     "md5-file": "^5.0.0",
-    "node-fetch": "~3.3.2",
     "nodemailer": "^6.9.15",
     "rc": "^1.2.8",
     "uglify-js": "^3.19.3",

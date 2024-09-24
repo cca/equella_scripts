@@ -162,6 +162,13 @@ async function main(itemsFile, homeEmailsFile) {
 }
 
 if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href.replace(/\.js$/, '')) {
+    if (options.h || options.help) {
+        console.log(`Usage: node ${path.basename(process.argv[1])} --file items.json --emails emails.json\n`)
+        console.log('Where items.json is a file of items to be removed (can be batched by owner or not) and emails.json is a JSON map of home emails converted from the Graduated Student Home Emails report in Workday. Both files are required. Also relies on email configuration in .retentionrc; see the retention readme for complete details.\n')
+        console.log('Options:\n\t--debug: show debug messages')
+        process.exit(0)
+    }
+
     const itemsFile = options.file || options.f
     const homeEmailsFile = options['home-emails'] || options.emails || options.e
     global.homeEmails = []

@@ -11,8 +11,11 @@ We remove items from the VAULT digital archive that are older than 7 years old a
 1. (Optional) Compile summary statistics, `node summarize -f items.json`
 1. Break items into reasonably sized sets of emails, `node chunk.js -f items.json`
 1. (Optional) Add collection and user info each items file, `node embeddata.js -f items-*.json`
-1. Reach out to item owners with instructions on downloading their works, `node contact -f items-1.json` (see notes below about email configuration)
-    1. The script logs to stdout, so realistically we run it like `node contact -f data/items-1.json | tee -a data/log.txt` so we can record the logs
+1. Run and download the "Graduated Student Home Emails" report in Workday then convert it to JSON
+    1. Conversion is easiest with python [csvkit](https://csvkit.readthedocs.io/en/latest/) `in2csv report.xlsx > emails.csv; csvjson emails.csv > emails.json`
+    1. The report has Username, Student, Primary Home Email Address, and Current Employee? columns and the JSON should be an array of objects with those keys e.g. `[{"Username": "ephetteplace", "Student": "Eric Phetteplace", "Primary Home Email Address": "email@example.com", "Current Employee?": true}]`
+1. Reach out to item owners with instructions on downloading their works, `node contact -f items-1.json -e email.json` (see notes below about email configuration)
+    1. The script logs to stdout, so realistically we run it like `node contact -f data/items-1.json -e email.json | tee -a data/log.txt` so we can record the logs
     1. Repeat this step for each "chunk" of items
 1. Wait six months and then bulk remove the identified items, `node del -f items.json`
 

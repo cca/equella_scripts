@@ -67,6 +67,23 @@ export function groupByOwner(items) {
     return output
 }
 
+
+/**
+ * Given a username, use the homeEmails global to find the best email address:
+ * home email for alums, work email for current employees, or simply username
+ * with @cca.edu domain for faculty/staff/current students.
+ * @param {String} username
+ * @returns {String} email address
+ */
+export function bestEmail(username) {
+    return global.homeEmails.reduce((accumulator, current) => {
+        if (current.Username === username) {
+            return current['Current Employee?'] ? current['Work Email Address'] : current['Home Email Address']
+        }
+        return accumulator
+    }, null) || `${username}@cca.edu`
+}
+
 /**
  * Email a user the list of their items to be removed.
  *
@@ -88,11 +105,6 @@ export function mailUser(username, items) {
         return `Skipping ${username} - none of their items to be removed are published.`
     }
 
-    // determine the user's email address
-    let email = null
-    const user = global.homeEmails.find(e => e.Username === username)
-    email = user ? user['Primary Home Email Address'] : `${username}@cca.edu`
-
     let items_html = items.reduce((accumulator, item) => {
         accumulator += `<li><a href="${item.links.view}">${item.title}</a>`
         return accumulator
@@ -103,7 +115,7 @@ export function mailUser(username, items) {
     let msg = {
         from: "vault@cca.edu",
         replyTo: "vault@cca.edu",
-        to: email,
+        to: bestEmail(username),
         subject: "Items will be removed from CCA VAULT in 6 months",
         html: `<p>Hello,</p>
         <p>You own items that will be removed from VAULT, CCA's digital archive, in six months. If you want to retain your works, you can <a href="https://portal.cca.edu/knowledge-base/vault/how-to-download-vault-items/">learn how to download them here</a>. Note that items can only be downloaded one at a time. We apologize for any inconvenience.</p>

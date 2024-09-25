@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import rc from 'rc'
 
 import Item from '../item.js'
-import { groupByOwner, mailUser } from '../contact.js'
+import { bestEmail, groupByOwner, mailUser } from '../contact.js'
 import chunk from '../chunk.js'
 import { deleteItem, unlockItem } from '../del.js'
 import { embedUser, getCollections } from '../embeddata.js'
@@ -128,6 +128,19 @@ describe('Chunk items', () => {
 })
 
 describe('Contact owner', () => {
+    it('chooses the best email address for a user', () => {
+        global.homeEmails = [
+            {"Username": "alum", "Student": "Al Alum", "Home Email Address": "alum@example.com", "Current Employee?": null, "Work Email Address": null},
+            {"Username": "employee", "Student": "Em Employee", "Home Email Address": "employee@exmaple.com", "Current Employee?": true, "Work Email Address": "employee@cca.edu"},
+        ]
+        // no email found -> username
+        assert.equal(bestEmail('1234'), '1234@cca.edu')
+        // alum -> home email
+        assert.equal(bestEmail('alum'), 'alum@example.com')
+        // current employee -> work email
+        assert.equal(bestEmail('employee'), 'employee@cca.edu')
+    })
+
     it('group multiple items by the same owner', () => {
         // item owned by ephetteplace, other 2 owned by same UUID user
         const list = [items.award.toJSON(), items.recent.toJSON(), items.recentAndExcluded.toJSON()]
@@ -215,6 +228,7 @@ describe('Delete item', () => {
     })
 })
 
+// TODO move these tests so they're in chronological order
 describe('Embed extra info in the item', () => {
     it('retrieves collections data', async () => {
         let collections = await getCollections()

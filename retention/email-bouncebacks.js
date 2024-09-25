@@ -7,18 +7,17 @@
 function getBouncebackEmails() {
   console.log(`${new Date().toISOString()} - scanning ephetteplace@cca.edu inbox for bounceback messages`)
   var threads = GmailApp.getInboxThreads()
-  // iterate over inbox threads and then over the messages inside them
-  // https://developers.google.com/apps-script/reference/gmail/gmail-app
   threads.forEach(thread => {
     var messages = thread.getMessages()
     messages.filter(m => m.getFrom().match('mailer-daemon@googlemail.com')).forEach(m => {
-      var matches = m.getBody().match(/<b>(.*@cca\.edu)<\/b>/)
-      if (matches) {
+      var failedRecipients = m.getHeader('X-Failed-Recipients')
+      if (failedRecipients) {
         // mark as read & archive the thread
-        thread.markRead() && thread.moveToArchive()
-        return console.log(`Email bounceback for address ${matches[1]}`)
+        thread.markRead()
+        thread.moveToArchive()
+        console.log(`Email bounceback for address ${failedRecipients}`)
       } else {
-        console.log('Unable to find CCA email address in message.')
+        console.log('Unable to find X-Failed-Recipients header in message.', m.getBody())
       }
     })
   })

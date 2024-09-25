@@ -94,7 +94,7 @@ export function bestEmail(username) {
  *
  */
 export function mailUser(username, items) {
-    // reasons to skip items: internal user, no username, no live items
+    // reasons to skip mail: internal user, no username, no live items
     if (items[0].internalOwner) {
         return `Skipping ${items.length} items owned by internal user with UUID ${username}.`
     }
@@ -105,7 +105,7 @@ export function mailUser(username, items) {
         return `Skipping ${username} - none of their items to be removed are published.`
     }
 
-    let items_html = items.reduce((accumulator, item) => {
+    let items_html = items.filter(i => i.status === 'live').reduce((accumulator, item) => {
         accumulator += `<li><a href="${item.links.view}">${item.title}</a>`
         return accumulator
     }, '<ul>')
@@ -128,7 +128,7 @@ export function mailUser(username, items) {
     }
 
     if (options.verbose || options.v) {
-        log(`Emailing ${username} about their ${items.length} live items to be removed.`)
+        log(`Emailing ${username} about their ${items.length} items to be removed.`)
     }
 
     return transporter.sendMail(msg)

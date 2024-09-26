@@ -21,6 +21,8 @@ We remove items from the VAULT digital archive that are older than 7 years old a
 
 If, after the fact, it comes out that certain items entered into the retention process should be removed from it, we can use the `exempt.js` script. Define a custom set of criteria in the `exemptionFilter` function, then input the files to process and the script removes the items that are no longer subject to the process.
 
+It seems like only a little under half of our alumni have home email addresses in Workday, so many emails will bounce back. See the [email section](#email) for more details.
+
 ## Configuration
 
 Create a JSON .retentionrc file (see example.retentionrc or code block below) with VAULT's root URL, an OAuth token with access to the appropriate permissions, an optional cutoff date (in "YYYY-MM-DD" format, which can left null to default to six years ago), and an array of collection UUIDs to exclude.

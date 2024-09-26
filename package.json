@@ -28,12 +28,12 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "eslint": "^9.10.0",
+    "eslint": "^9.11.1",
     "globals": "^15.9.0",
     "mocha": "^10.7.3"
   },
   "dependencies": {
-    "@xmldom/xmldom": "^0.9.2",
+    "@xmldom/xmldom": "^0.9.3",
     "async": "^3.2.6",
     "csv-reader": "^1.0.12",
     "csv-stringify": "^6.5.1",

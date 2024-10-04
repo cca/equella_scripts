@@ -4,7 +4,7 @@ See [#42](https://github.com/cca/equella_scripts/issues/42) — syllabi pushed f
 
 ## Setup
 
-Get _all_ course data since Fall 2019. Look in the gs://int_files_source_archive bucket.
+On the first iteration, we got _all_ course data since Fall 2019. Look in the gs://int_files_source_archive bucket. Going forward, we only need the current term's data.
 
 ```sh
 gsutil -m cp -r 'gs://int_files_source_archive/course_section_data_*.json' data

@@ -23,6 +23,7 @@ var map = {
     'CERAM': ['Ceramics (BFA)', 'Fine Arts'],
     'COMAR': ['Community Arts (BFA)', 'Fine Arts'],
     'COMIC': ['Comics (MFA)', 'Humanities & Sciences'],
+    'COMIX': ['Comics (BFA)', 'Humanities & Sciences'],
     // supposedly FYCST now but dept code is still CORES :shrug:
     'CORES': ['First Year Program', 'Humanities & Sciences'],
     'CRAFT': ['Craft Program', 'Fine Arts'],

@@ -23,6 +23,7 @@ if (options.help || options.h || (options._.length && options._[0].match(/^help$
     console.log('Options:')
     console.log('  --collection <UUID>  UUID of collection to export')
     console.log('  --item <UUID>        UUID of single item to export')
+    console.log('  --name               use item name for export folders instead of UUID')
     console.log('  --verbose            Print debug info')
     console.log('\nYou can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".\nSee https://vault.cca.edu/apidocs.do#operations-tag-Searching')
     process.exit(0)

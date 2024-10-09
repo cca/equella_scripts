@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "eslint": "^9.11.1",
-    "globals": "^15.9.0",
+    "eslint": "^9.12.0",
+    "globals": "^15.11.0",
     "mocha": "^10.7.3"
   },
   "dependencies": {

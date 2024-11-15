@@ -28,22 +28,22 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "eslint": "^9.12.0",
-    "globals": "^15.11.0",
-    "mocha": "^10.7.3"
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
+    "mocha": "^10.8.2"
   },
   "dependencies": {
-    "@xmldom/xmldom": "^0.9.3",
+    "@xmldom/xmldom": "^0.9.5",
     "async": "^3.2.6",
     "csv-reader": "^1.0.12",
     "csv-stringify": "^6.5.1",
     "filenamify": "~6.0.0",
     "luxon": "^3.5.0",
     "md5-file": "^5.0.0",
-    "nodemailer": "^6.9.15",
+    "nodemailer": "^6.9.16",
     "rc": "^1.2.8",
     "uglify-js": "^3.19.3",
     "xpath": "^0.0.34",
-    "yaml": "^2.5.1"
+    "yaml": "^2.6.0"
   }
 }

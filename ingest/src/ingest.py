@@ -20,8 +20,9 @@ APP_PREFIX = "INGEST"
 @click.option(
     "-c", "--collection", required=True, help="Name of collection to add items to"
 )
+@click.option("-t", "--token", required=True, help="VAULT access token")
 @click.option("-v", "--verbose", is_flag=True, help="Print diagnostic messages.")
-def main(csvfile: Path, collection="", verbose=False):
+def main(csvfile: Path, collection="", token="", verbose=False):
     collection_uuid: str | None = collections.get(collection, None)
     if not collection_uuid:
         click.echo(

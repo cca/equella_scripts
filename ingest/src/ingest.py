@@ -3,6 +3,11 @@ from pathlib import Path
 
 import click
 
+from coll import collections
+
+
+APP_PREFIX = "INGEST"
+
 
 @click.command("ingest")
 @click.help_option("-h", "--help")
@@ -12,8 +17,18 @@ import click
     metavar="input.csv",
     type=click.Path(exists=True, readable=True, dir_okay=False, path_type=Path),
 )
+@click.option(
+    "-c", "--collection", required=True, help="Name of collection to add items to"
+)
 @click.option("-v", "--verbose", is_flag=True, help="Print diagnostic messages.")
-def main(csvfile: Path, verbose=False):
+def main(csvfile: Path, collection="", verbose=False):
+    collection_uuid: str | None = collections.get(collection, None)
+    if not collection_uuid:
+        click.echo(
+            f"ERROR: unrecognized collection {collection}. Pass the name of a VAULT collection with the -c or --collection flag or use the {APP_PREFIX}_COLLECTION env var."
+        )
+        exit(1)
+
     root_dir = csvfile.parent.resolve()
     if verbose:
         click.echo(f"Root directory: {root_dir}")
@@ -48,4 +63,4 @@ def main(csvfile: Path, verbose=False):
 
 
 if __name__ == "__main__":
-    main()
+    main(auto_envvar_prefix=APP_PREFIX)

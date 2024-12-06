@@ -1,4 +1,5 @@
 import csv
+import mimetypes
 from pathlib import Path
 from typing import Any
 import xml.etree.ElementTree as ET
@@ -75,7 +76,7 @@ def main(
             wrapper: ET.Element = ET.SubElement(local, "courseInfo")
             for field in ["semester", "section_code", "course_title"]:
                 element: ET.Element = ET.SubElement(wrapper, field.split("_")[0])
-                element.text = row[name]
+                element.text = row[field]
             department: ET.Element = ET.SubElement(wrapper, "department")
             department.text = collection
             mods: ET.Element = ET.SubElement(metadata, "mods")
@@ -115,10 +116,21 @@ def main(
                 # ! uploaded files are zero bytes
                 # ? do we need to set content-length and content-type headers?
                 for file in files:
+                    upload_headers = headers
+                    # TODO use something that actually looks at file contents
+                    mt = mimetypes.guess_type(file.name)[0]
+                    if mt:
+                        upload_headers["Content-Type"] = mt
+                    else:
+                        click.echo(
+                            f"Unable to determine mime type for file {file.name}",
+                            err=True,
+                        )
+                    # httpx automatically adds content-length header
                     response = httpx.put(
                         f"https://vault.cca.edu/api/file/{filearea['uuid']}/content/{file.name}",
                         files={"file": open(file, "rb")},
-                        headers=headers,
+                        headers=upload_headers,
                     )
                     response.raise_for_status()
 

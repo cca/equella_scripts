@@ -117,19 +117,15 @@ def main(
                         click.echo(f"- {file}")
 
                 else:
-                    # create file area, add files (in parallel?), create item using filearea
-                    # can model after Portal syllabus integration
+                    # create file area, add files, create item using filearea, see Portal syllabus integration
                     # https://gitlab.com/california-college-of-the-arts/portal/-/blob/main/portal/apps/vault/syllabus.py
-
                     # Obtain a file area for attachments
-                    # ? should we use the /staging API route? /file is deprecated, apparently
                     response: httpx.Response = client.post("file")
                     debug_response(verbose, response)
                     response.raise_for_status()
                     filearea: dict[str, str] = response.json()
                     # Upload files to the file area
-                    # ? parallelize?
-                    # ? do we need to set content-length and content-type headers?
+                    # TODO parallelize?
                     for file in files:
                         upload_headers = headers
                         # TODO use something that actually looks at file contents
@@ -151,7 +147,6 @@ def main(
                         response.raise_for_status()
 
                     # Create an item using the file area
-                    # Probably something to do with the structure of the item dict
                     item: dict[str, Any] = {
                         "attachments": [],
                         "collection": {"uuid": collection_uuid},

@@ -110,9 +110,9 @@ def main(
                 )
 
                 if debug:
-                    click.echo(f"Item no. {index} XML:")
+                    click.echo(f"Item no. {index + 1} XML:")
                     click.echo(ET.tostring(metadata, encoding="unicode"))
-                    click.echo(f"Item no. {index} attachments:")
+                    click.echo(f"Item no. {index + 1} attachments:")
                     for file in files:
                         click.echo(f"- {file}")
 

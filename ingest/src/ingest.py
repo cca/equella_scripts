@@ -25,12 +25,14 @@ APP_PREFIX = "INGEST"
     "-c", "--collection", required=True, help="Name of collection to add items to"
 )
 @click.option("-d", "--debug", is_flag=True, help="Debug (do not create items)")
+@click.option("--draft", is_flag=True, help="Create draft item")
 @click.option("-t", "--token", required=True, help="VAULT access token")
 @click.option("-v", "--verbose", is_flag=True, help="Print diagnostic messages.")
 def main(
     csvfile: Path,
     collection: str = "",
     debug: bool = False,
+    draft: bool = False,
     token: str = "",
     verbose: bool = False,
 ):
@@ -153,11 +155,10 @@ def main(
                     )
                 # This is necessary or EQUELLA throws an Unsupported Media Type error
                 headers["Content-Type"] = "application/json"
-                response = httpx.post(
-                    f"https://vault.cca.edu/api/item?file={filearea['uuid']}",
-                    json=item,
-                    headers=headers,
-                )
+                url = f"https://vault.cca.edu/api/item?file={filearea['uuid']}"
+                if draft:
+                    url += "&draft=true"
+                response = httpx.post(url, json=item, headers=headers)
                 response.raise_for_status()
                 # EQUELLA adds the new item's API URL in the Location header
                 click.echo(

@@ -15,7 +15,7 @@ APP_PREFIX = "INGEST"
 
 def debug_response(debug: bool, r: httpx.Response):
     if debug:
-        click.echo(r.request.url)
+        click.echo(f"{r.request.method} {r.request.url}")
         click.echo(r.headers)
 
 

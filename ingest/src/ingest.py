@@ -45,7 +45,8 @@ def main(
     collection_uuid: str | None = collections.get(collection, None)
     if not collection_uuid:
         click.echo(
-            f"ERROR: unrecognized collection {collection}. Pass the name of a VAULT collection with the -c or --collection flag or use the {APP_PREFIX}_COLLECTION env var."
+            f"ERROR: unrecognized collection {collection}. Pass the name of a VAULT collection with the -c or --collection flag or use the {APP_PREFIX}_COLLECTION env var.",
+            err=True,
         )
         exit(1)
 

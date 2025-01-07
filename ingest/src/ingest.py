@@ -1,11 +1,11 @@
 import csv
-import mimetypes
 from pathlib import Path
 from typing import Any
 import xml.etree.ElementTree as ET
 
 import click
 import httpx
+import magic
 
 from coll import collections
 
@@ -128,8 +128,7 @@ def main(
                     # TODO parallelize?
                     for file in files:
                         upload_headers = headers
-                        # TODO use something that actually looks at file contents
-                        mt = mimetypes.guess_type(file.name)[0]
+                        mt = magic.from_file(file.name, mime=True)
                         if mt:
                             upload_headers["Content-Type"] = mt
                         else:

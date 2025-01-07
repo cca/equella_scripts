@@ -128,7 +128,7 @@ def main(
                     # TODO parallelize?
                     for file in files:
                         upload_headers = headers
-                        mt = magic.from_file(file.name, mime=True)
+                        mt = magic.from_file(file, mime=True)
                         if mt:
                             upload_headers["Content-Type"] = mt
                         else:

@@ -12,6 +12,8 @@ uv sync # create venv and install dependencies
 source .venv/bin/activate.fish # enter venv
 ```
 
+We also need a VAULT OAuth token with appropriate permissions (e.g. can create/draft items in a given collection).
+
 ## Usage
 
 ```sh
@@ -26,7 +28,7 @@ Options:
   --draft                Create draft item
   -t, --token TEXT       VAULT access token  [required]
   -v, --verbose          Print diagnostic messages.
-> # create draft items in Test Collection with verbose output
+> # create draft items in Test Collection with verbose output (using token in .equellarc file)
 > python src/ingest.py -c "Test Collection" -v --draft -t (jq -r .token ~/.equellarc ) items.csv
 ```
 

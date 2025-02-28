@@ -16,6 +16,7 @@ export default [
                 jQuery: 'readonly',
                 $: 'readonly',
                 logger: 'readonly',
+                page: 'readonly',
                 user: 'readonly',
                 xml: 'readonly'
             },

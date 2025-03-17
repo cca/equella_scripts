@@ -17,9 +17,9 @@ if (selection !== '') {
         if (CrsNameKey !== null) {
             xml.set('local/courseInfo/courseName', CrsNameKey)
         }
-        var facultyIDKey = courseTerm.getData('facultyID')
-        if (facultyIDKey !== null) {
-            xml.set('local/courseInfo/facultyID', facultyIDKey)
+        var facultyIDs = courseTerm.getData('facultyID')
+        if (facultyIDs !== null) {
+            xml.set('local/courseInfo/facultyID', facultyIDs)
         }
     }
 }

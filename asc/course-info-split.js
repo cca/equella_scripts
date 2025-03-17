@@ -4,7 +4,7 @@
 // this parses that tree out & inserts into pertinent local/courseInfo nodes
 var cxp = 'local/courseInfo/'
 var courseInfo = xml.get(cxp + 'courseinfo')
-// change this to the department-specific COURSE LIST taxonomy UUID
+// ! change this to the department-specific COURSE LIST taxonomy UUID
 var courseListUuid = ''
 function set (path, str) {
     if (str) xml.set(path, str)
@@ -25,9 +25,19 @@ if (courseInfo != "") {
         var tax = data.getTaxonomyByUuid(courseListUuid)
         var courseTerm = tax.getTerm(courseInfo)
         if (courseTerm !== null) {
-            set(cxp +  'XList', courseTerm.getData('XList'))
-            set(cxp +  'courseName', courseTerm.getData('CrsName'))
-            set(cxp +  'facultyID', courseTerm.getData('facultyID'))
+            set('local/courseInfo/XList', courseTerm.getData('XList'))
+            set('local/courseInfo/courseName', courseTerm.getData('CrsName'))
+
+            var facultyIDs = courseTerm.getData('facultyID')
+            if (facultyIDs !== null) {
+                set('local/courseInfo/facultyID', facultyIDs)
+                // only some collections need individual nodes to notify faculty members
+                var faculties = facultyIDs.split(", ")
+                xml.deleteAll('local/notify')
+                for (var i = 0; i < faculties.length; i++) {
+                    xml.add('local/notify', faculties[i])
+                }
+            }
         }
     }
 }

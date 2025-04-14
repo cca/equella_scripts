@@ -18,6 +18,7 @@ We remove items from the VAULT digital archive that are older than 7 years old a
     1. The script logs to stdout, so realistically we run it like `node contact -f data/items-1.json -e email.json | tee -a data/log.txt` so we can record the logs
     1. Repeat this step for each "chunk" of items
 1. Wait six months and then bulk remove the identified items, `node del -f items.json`
+    1. Optionally, wait a week and verify files were purged with `purge-check.fish`
 
 If, after the fact, it comes out that certain items entered into the retention process should be removed from it, we can use the `exempt.js` script. Define a custom set of criteria in the `exemptionFilter` function, then input the files to process and the script removes the items that are no longer subject to the process.
 

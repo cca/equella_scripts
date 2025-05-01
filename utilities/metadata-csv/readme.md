@@ -21,14 +21,6 @@ To edit items, the CSV passed to the modify script can't use the labels. It need
 |---|---|---|---
 | bb3190c6-b63a-4955-a9bf-a4b140df6b30 | 1 | "Eric Phetteplace" | "Example CSV"
 
-## To Do / Questions
-
-* How to handle multiple metadata nodes? E.g. multiple /mods/name/namePart
-  * Currently, we can map columns one-by-one like `"/mods/name[1]/namePart": "Creator 1"`
-* Bring the scripts into alignment
-  * index.js's JSON map applies an `/xml` prefix on its own while modify & create expects the user to supply it
-  * the CSV expects UUID & version columns but the exported metadata uses a single URL column instead
-
 ## Downloading Metadata to a CSV
 
 Download all items matching a search into a CSV with selected metadata nodes included. See the "contribution-count" readme for search filters.
@@ -37,8 +29,10 @@ Download all items matching a search into a CSV with selected metadata nodes inc
 >  # example of downloading from a specific collection
 > node index --collections=5e6a957b-80d4-4dee-9081-7186586fbbe5 --metadataMap map.json > coll.csv
 > # getting Hamaguchi items from within Libraries collection
-> node index --metadataMap hamaguchi-map.json \
-> --where="/xml/mods/relatedItem/title = 'Hamaguchi Study Print Collection'" > hamaguchi.csv
+> node index --collections=6b755832-4070-73d2-77b3-3febcc1f5fad --metadataMap hamaguchi-map.json \
+--where="/xml/mods/relatedItem/title = 'Hamaguchi Study Print Collection'" > hamaguchi.csv
+> # Fine Arts Junior Reviews
+> node index --collections=ecee0984-73fd-4a89-af1d-3d9b67af92d8 --metadataMap fajr-map.json > fajr.csv
 ```
 
 Any of the parameters we can pass to the openEQUELLA Search API route are accepted on the command line: https://vault.cca.edu/apidocs.do#!/search/searchItems_get_0
@@ -49,7 +43,7 @@ Secondly, write a JSON map of XML paths to CSV column headers. Examples for the 
 
 Use the CSV of modifications described in the **Setup** section with the `modify` script. The script has usage information `node modify -h`:
 
-```
+```sh
 Usage:
  node modify --csv input.csv [--debug] [--dryrun]
 
@@ -71,7 +65,7 @@ Only records where a change in one of the metadata fields is detected are modifi
 
 We can create new items from a CSV like the one described in the **Setup** section, with XPath column headers but no "uuid" nor "version" columns. These are _metadata-only_ items for now. We could develop the ability to add attachments, but it would add substantial complexity.
 
-```
+```sh
 Usage:
  node create --csv input.csv [--draft] [--dryrun]
 
@@ -89,3 +83,11 @@ Options:
 For testing (creates draft items in a test collection) try:
 
 `node create --csv data/create.csv --collection e1722640-f782-4a53-b20d-cda384f1aa22 --draft`
+
+## To Do / Questions
+
+* How to handle multiple metadata nodes? E.g. multiple /mods/name/namePart
+  * Currently, we can map columns one-by-one like `"/mods/name[1]/namePart": "Creator 1"`
+* Bring the scripts into alignment
+  * index.js's JSON map applies an `/xml` prefix on its own while modify & create expects the user to supply it
+  * the CSV expects UUID & version columns but the exported metadata uses a single URL column instead

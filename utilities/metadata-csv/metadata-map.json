@@ -4,5 +4,6 @@
     "/local/courseInfo/section": "Section",
     "/local/courseInfo/course": "Course Title",
     "/local/courseInfo/faculty": "Instructor(s)",
-    "/mods/abstract": "Description"
+    "/mods/abstract": "Description",
+    "/local/viewLevel": "Permissions"
 }

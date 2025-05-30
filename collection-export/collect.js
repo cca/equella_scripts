@@ -175,6 +175,7 @@ function getAttachments(item, itemDir) {
 
 function writeXML(item, dir) {
     debug(`Writing XML metadata for item ${item.links.view}`)
+    // TODO should we validate this is harmless XML before writing to disk?
     fs.writeFile(path.join(dir, 'metadata', 'metadata.xml'), item.metadata, handleErr)
 }
 

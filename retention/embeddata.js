@@ -19,7 +19,8 @@ let options = rc('retention')
 const agent = new https.Agent({
     keepAlive: true,
     maxSockets: 10,
-    rejectUnauthorized: false,
+    // uncomment below if we have VAULT certificate problems
+    // rejectUnauthorized: false,
 })
 const headers = {
     'Accept': 'application/json',

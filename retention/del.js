@@ -27,7 +27,8 @@ options.verbose = options.v || options.verbose
 const agent = new https.Agent({
     keepAlive: true,
     maxSockets: 5,
-    rejectUnauthorized: false,
+    // uncomment below if we have VAULT certificate problems
+    // rejectUnauthorized: false,
 })
 const headers = {
     'Accept': 'application/json',

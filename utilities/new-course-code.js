@@ -2,6 +2,8 @@
  * create the necessary EQUELLA taxonomies for an entirely new course code
  * e.g. we used this when Comics added an undergraduate degree, COMIX
  *
+ * usage: node new-course-code ABCDE
+ *
  * Requires a configured .equellarc file.
  */
 import rc from 'rc'

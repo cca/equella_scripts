@@ -38,7 +38,7 @@ console.log(`Creating course information taxonomies for department code ${DEPT}`
         if (res.ok) console.log(`Successfully created taxonomy "${taxo}"`)
         return res.text()
     }).then(text => {
-        console.log(text)
+        if (text.trim()) console.log(text)
     }).catch(err => {
         console.error(`Error creating "${taxo}" taxonomy`)
         console.error(err)

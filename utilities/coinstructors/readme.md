@@ -2,7 +2,18 @@
 
 See [#42](https://github.com/cca/equella_scripts/issues/42) — syllabi pushed from Portal only have the name and username of the faculty member who uploaded the syllabus, their coinstructors are missing. We iterate over accurate course data and update syllabi records in VAULT.
 
-## Setup
+## Usage
+
+The script assumes our data is at data/courses.json but we can specify a different file with the `--courses` flag. Download course data from the `int_files_source` bucket.
+
+```sh
+gsutil cp gs://int_files_source/course_section_data_AP_Fall_2025.json data/courses.json
+node fix --courses courses.json [ --dryrun ] [ --verbose ] [ --limit 10 ]
+```
+
+The script writes a CSV of courses without matching items in the Syllabus Collection to data/missing-syllabi.csv.
+
+## Initial Run
 
 On the first iteration, we got _all_ course data since Fall 2019. Look in the gs://int_files_source_archive bucket. Going forward, we only need the current term's data.
 
@@ -19,13 +30,3 @@ mlr --json cat data/*.json > courses.json
 ```
 
 Don't cat to a file in the same directory as the globbed source files to avoid an infinite loop.
-
-## Usage
-
-The script assumes our data is at data/courses.json but we can specify a different file with the `--courses` flag.
-
-```sh
-node fix --courses courses.json [ --dryrun ] [ --verbose ] [ --limit 10 ]
-```
-
-The script writes a CSV of courses without matching items in the Syllabus Collection to data/missing-syllabi.csv.

@@ -9,19 +9,19 @@ The taxonomy data is used in the FAJR contribution wizard to autofill fields lik
 
 ## Setup
 
-Uses [poetry](https://python-poetry.org) for virtual environment and dependency management.
+Uses uv for virtual environment and dependency management.
 
 ```sh
-> poetry install # install dependencies
-> poetry shell # enter virtual env
+uv install # install dependencies
+source .venv/bin/activate.fish # enter virtual env
 ```
 
-Analogous to pipenv, we can prefix commands with `poetry run` rather than entering the venv.
+We can prefix commands with `uv run` rather than entering the venv.
 
 ## Execution
 
 - obtain a CSV[^1] & name it fajr.csv
-- `poetry run fajr fajr.csv`
+- `uv run fajr/process.py fajr.csv`
 - this adds usernames to the two permissions groups & generates a taxonomy CSV named "taxo.csv", then runs `upload.sh` to upload the taxonomy to EQUELLA
 - afterwards the upload script offers to archive fajr.csv & taxo.csv in a "data" directory
 

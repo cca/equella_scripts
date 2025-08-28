@@ -4,3 +4,4 @@
 .testretentionrc
 utilities/*.json
 .tmp.driveupload
+.venv

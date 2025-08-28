@@ -1,20 +1,9 @@
-[tool.poetry]
-name = "fajr"
+[project]
+name = "fine-arts-jr-review"
 version = "0.1.0"
-description = "scripts for handling Fine Arts Junior Review in VAULT"
-authors = ["Eric Phetteplace <phette23@gmail.com>"]
-license = "ECL-2.0"
-package-mode = false
-
-[tool.poetry.dependencies]
-python = "^3.11"
-requests = "==2.32.2"
-
-[tool.poetry.dev-dependencies]
-
-[tool.poetry.scripts]
-fajr = "fajr.process:start"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32.5",
+]

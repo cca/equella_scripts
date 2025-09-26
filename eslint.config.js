@@ -1,5 +1,6 @@
 import globals from 'globals'
 import js from "@eslint/js"
+import {globalIgnores} from "eslint/config"
 
 export default [
     js.configs.recommended,
@@ -28,5 +29,6 @@ export default [
             'no-unused-vars': 'off',
             'no-empty': 'off'
         }
-    }
+    },
+    globalIgnores(["fine-arts-jr-review/.venv"])
 ]

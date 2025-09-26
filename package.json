@@ -19,7 +19,7 @@
     "equella"
   ],
   "engines": {
-    "node": ">=14.16"
+    "node": ">=20"
   },
   "author": "phette23 <phette23@gmail.com> (http://phette.net/)",
   "license": "MIT",
@@ -28,9 +28,9 @@
   },
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
-    "@eslint/js": "^9.34.0",
-    "eslint": "^9.34.0",
-    "globals": "^16.3.0",
+    "@eslint/js": "^9.36.0",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
     "mocha": "^11.7.2"
   },
   "dependencies": {
@@ -38,8 +38,8 @@
     "async": "^3.2.6",
     "csv-reader": "^1.0.12",
     "csv-stringify": "^6.6.0",
-    "filenamify": "~6.0.0",
-    "luxon": "^3.7.1",
+    "filenamify": "~7.0.0",
+    "luxon": "^3.7.2",
     "md5-file": "^5.0.0",
     "nodemailer": "^7.0.6",
     "rc": "^1.2.8",

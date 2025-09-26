@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    commit-message:
+      prefix: "chore"
+    directory: "/"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: uv
+    commit-message:
+      prefix: "chore"
+    directory: "/fine-arts-jr-review"
+    schedule:
+      interval: weekly

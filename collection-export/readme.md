@@ -53,6 +53,6 @@ TODO I should write real tests for this.
 node collect --item 2e9ee5f7-9308-4d33-8b85-ba034e7015ae
 # clean data dir
 rm --rf data/*
-# last few items of PHOTO collection
-node collect --collection dd83789b-f726-47e1-8a5f-626450d226a0 --modifiedAfter 2022-01-01 --length 2
+# last couple items of PHOTO collection
+node collect --collection dd83789b-f726-47e1-8a5f-626450d226a0 --modifiedAfter 2022-01-01 --limit 2
 ```

@@ -13,7 +13,7 @@ const defaults = {
     // "basic" is a nicety, gives item.name
     // "detail" gives owner, dates, collaborators, & some other unneeded item properties
     info: 'attachment,basic,detail,metadata',
-    length: 50,
+    limit: Infinity,
 }
 const options = rc('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
@@ -37,13 +37,12 @@ if ((!options.collection || !options.collection.match(UUIDRegex)) && (!options.i
 // query string parameters for API, mostly defined in rc options, see apidocs.do
 let params = {
     collections: options.collection,
-    info: options.info,
-    // maximum no. of items we can get in an API request
-    length: options.length,
+    info: options.info
 };
 
 // more search params which we omit rather than supplying a default value
 [
+    'length',
     'modifiedAfter', // ISO dates, YYYY-MM-DD
     'modifiedBefore',
     'order', // relevance, modified, name, rating
@@ -56,6 +55,14 @@ let params = {
 ].forEach(prop => {
     if (options[prop]) params[prop] = options[prop]
 })
+
+// length is either options.limit if we have it & it's < length
+// or options.length if we have it and it's < 50 or 50 (maximum)
+if (options.limit && params.length && options.limit < params.length) {
+    params.length = options.limit
+} else if (!params.length || params.length > 50) {
+    params.length = 50
+}
 
 function debug() {
     if (options.debug || options.verbose) console.log(...arguments)
@@ -175,7 +182,6 @@ function getAttachments(item, itemDir) {
 
 function writeXML(item, dir) {
     debug(`Writing XML metadata for item ${item.links.view}`)
-    // TODO should we validate this is harmless XML before writing to disk?
     fs.writeFile(path.join(dir, 'metadata', 'metadata.xml'), item.metadata, handleErr)
 }
 
@@ -233,7 +239,7 @@ search().then(r => r.json())
             total = 1
             items = Array.isArray(data) ? data : [data] // is array if no --version otherwise object
         } else {
-            total = data.available > options.length ? options.length : data.available
+            total = data.available > options.limit ? options.limit : data.available
             items = data.results
             console.log(`Found ${total} search results`)
         }
@@ -246,7 +252,7 @@ search().then(r => r.json())
             // we need data for the items not in the first page of results
             debug('Iterating through search results pages to get all item data')
 
-            for (let i = data.results.length; i < total; i += options.length) {
+            for (let i = data.results.length; i < total; i += params.length) {
                 search(i).then(r => r.json())
                     .then(data => {
                         items = items.concat(data.results)

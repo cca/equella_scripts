@@ -41,7 +41,7 @@
     "filenamify": "~7.0.0",
     "luxon": "^3.7.2",
     "md5-file": "^5.0.0",
-    "nodemailer": "^7.0.9",
+    "nodemailer": "^7.0.10",
     "rc": "^1.2.8",
     "uglify-js": "^3.19.3",
     "xpath": "^0.0.34",

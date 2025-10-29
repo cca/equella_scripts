@@ -21,4 +21,4 @@ for name in (cat $file)
 end
 
 # remove .DS_Store before we upload to Drive
-rm -f faculty/.DS_Store
+find . -name .DS_Store -type f -delete

@@ -29,7 +29,7 @@
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
     "@eslint/js": "^9.39.0",
-    "eslint": "^9.39.0",
+    "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "mocha": "^11.7.4"
   },

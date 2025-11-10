@@ -21,8 +21,8 @@ importers:
         specifier: ^6.6.0
         version: 6.6.0
       filenamify:
-        specifier: ~7.0.0
-        version: 7.0.0
+        specifier: ~7.0.1
+        version: 7.0.1
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
@@ -320,8 +320,8 @@ packages:
     resolution: {integrity: sha512-9ZT504KxEQDamsOogZImAWGEN24R1uFAxU3ZS4AZqn2ooidmN68Olh7n4/RcA4lLatZztjA0ZSuxeLHVoCc8JA==}
     engines: {node: '>=20'}
 
-  filenamify@7.0.0:
-    resolution: {integrity: sha512-nfY7iUozEErS4qKYu5X/DT+rafo43o642xAG/3AmZFp7chhVB20gsU4kH8KJZLDhyEZ2o4kHMSBDLDNBJ4r/cw==}
+  filenamify@7.0.1:
+    resolution: {integrity: sha512-9b4rfnaX2MkJCgp27wypV6DAMvj4WMOSgJ+TdcpJIO84Dql+Cv6iJjdG4XDTLubOWkfNiBv3joO59sau/TXw+Q==}
     engines: {node: '>=20'}
 
   find-up@5.0.0:
@@ -916,7 +916,7 @@ snapshots:
 
   filename-reserved-regex@4.0.0: {}
 
-  filenamify@7.0.0:
+  filenamify@7.0.1:
     dependencies:
       filename-reserved-regex: 4.0.0
 

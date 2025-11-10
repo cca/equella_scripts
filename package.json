@@ -38,7 +38,7 @@
     "async": "^3.2.6",
     "csv-reader": "^1.0.12",
     "csv-stringify": "^6.6.0",
-    "filenamify": "~7.0.0",
+    "filenamify": "~7.0.1",
     "luxon": "^3.7.2",
     "md5-file": "^5.0.0",
     "nodemailer": "^7.0.10",

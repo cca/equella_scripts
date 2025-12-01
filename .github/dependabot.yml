@@ -1,6 +1,8 @@
 version: 2
 updates:
   - package-ecosystem: npm
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore"
     directory: "/"
@@ -8,6 +10,8 @@ updates:
       interval: weekly
 
   - package-ecosystem: uv
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore"
     directory: "/fine-arts-jr-review"

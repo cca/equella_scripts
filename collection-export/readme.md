@@ -56,3 +56,18 @@ rm --rf data/*
 # last couple items of PHOTO collection
 node collect --collection dd83789b-f726-47e1-8a5f-626450d226a0 --modifiedAfter 2022-01-01 --limit 2
 ```
+
+## Export N Random Items
+
+The fish shell code below exports N random items from a given collection. The trick is to search for only one item (`--length` 1) and set the `start` parameter to a random number between 0 and the size of the collection. Repeats are possible, especially in smaller collections. Exporting a small set of random items is useful when smoketesting importing a collection into Invenio.
+
+```fish
+set collection 6b755832-4070-73d2-77b3-3febcc1f5fad # Libraries
+set size (eq search -c $collection -l 1 | jq .available)
+set n 8
+for i in (seq 1 $n)
+    echo "Downloading item #$i"
+    set item (eq search -c $collection -l 1 --start (random 0 $size) | jq .results[0])
+    echo -n $item | jq -r ".uuid, .name" ; node collect --item (echo $item | jq -r .uuid)
+end
+```

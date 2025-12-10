@@ -6,17 +6,27 @@ Download all (or a subset) of items from a VAULT collection. Each item becomes i
 
 1. `pnpm install` or `npm install` dependencies
 2. create an .apprc file with an OAuth token and the root URL of the openEQUELLA instance
-3. optionally edit the collection and filtering options you want into the .apprc
-4. edit the `itemToHTML` function in collect.js if you want to capture particular metadata fields
+3. optionally edit collection and filtering options into the .apprc
 
 ## Usage
 
 ```sh
-# most search parameters can be passed to the script to select which items
+node collect --help
+Usage: node collect.js [options]
+
+Options:
+  --collection <UUID>  UUID of collection to export
+  --html               Write a brief HTML index for each item
+  --item <UUID>        UUID of single item to export
+  --name               Use item name for export folders instead of UUID
+  --verbose            Print debug info
+
+You can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".
+See https://vault.cca.edu/apidocs.do#operations-tag-Searching
 # a collection or item is required
 node collect --collection $UUID
-node collect --item $UUID
-# example of a more complicated search
+node collect --item $UUID --version 1
+# a more complicated search
 node collect --collection $UUID --status DRAFT,ARCHIVE --modifiedBefore 2020-01-01
 # download items into folders that use the items' titles
 node collect  --collection $UUID --name
@@ -24,7 +34,7 @@ node collect  --collection $UUID --name
 node collect --collection 6b755832-4070-73d2-77b3-3febcc1f5fad --where "/xml/mods/relatedItem/title = 'Robert Sommer Mudflats Collection'"
 ```
 
-By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is append to the folder name if it would collide with an existing folder (NOTE: not yet, but this is a planned development).
+By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is append to the folder name if it would collide with an existing folder.
 
 ## Metadata Evaluation
 
@@ -45,8 +55,6 @@ ZIPs can exist as unpacked individual files or a zip attachment, we download bot
 Attachments that reference URLs or other EQUELLA items are not downloaded but present in the exported metadata.
 
 ## Testing
-
-TODO I should write real tests for this.
 
 ```sh
 # single item test

@@ -22,8 +22,9 @@ if (options.help || options.h || (options._.length && options._[0].match(/^help$
     console.log('Usage: node collect.js [options]\n')
     console.log('Options:')
     console.log('  --collection <UUID>  UUID of collection to export')
+    console.log('  --html               Write a brief HTML index for each item')
     console.log('  --item <UUID>        UUID of single item to export')
-    console.log('  --name               use item name for export folders instead of UUID')
+    console.log('  --name               Use item name for export folders instead of UUID')
     console.log('  --verbose            Print debug info')
     console.log('\nYou can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".\nSee https://vault.cca.edu/apidocs.do#operations-tag-Searching')
     process.exit(0)
@@ -123,7 +124,7 @@ function writeItemDirs(items) {
             getAttachments(i, dir)
             writeXML(i, dir)
             writeJSON(i, dir)
-            writeHTML(i, dir)
+            if (options.html) writeHTML(i, dir)
         })
     })
 }
@@ -214,7 +215,6 @@ function itemToHTML(item) {
     html += `<html><head><title>${escapeHTML(item.name)} | CCA VAULT</title></head><body>`
     html += `<h1><a href="${item.links.view}">${escapeHTML(item.name)}</a></h1><dl>`
 
-    // TODO this part should be created from a hash in options
     html += labelIfExists('Creator(s)', '//mods/name/namePart', xml)
     html += labelIfExists('Date', '//mods/dateCreatedWrapper/dateCreated', xml)
     html += labelIfExists('Type', '//local/courseWorkWrapper/courseWorkType', xml)

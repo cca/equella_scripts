@@ -4,10 +4,10 @@ Use a CSV with metadata columns and relative paths of attachments to create VAUL
 
 ## Setup
 
-This tool uses [uv](https://docs.astral.sh/uv/).
+This tool uses [uv](https://docs.astral.sh/uv/). `libmagic` is needed for file mime type detection.
 
 ```sh
-brew install uv # make uv globally available
+brew install libmagic uv # make uv globally available
 uv sync # create venv and install dependencies
 source .venv/bin/activate.fish # enter venv
 ```

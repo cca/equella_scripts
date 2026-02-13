@@ -42,7 +42,7 @@ function writeCollections(data) {
 
 // load downloaded collections JSON or, if we don't have it, get it from API
 export async function getCollections() {
-    let collections = []
+    let collections
     try {
         collections = JSON.parse(fs.readFileSync(collections_file))
         if (collections.length) debug(options.debug, `Found collections data in ${collections_file}`)

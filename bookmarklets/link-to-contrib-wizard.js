@@ -3,7 +3,7 @@
  * output the URL for its contribution wizard. Run `npm run contrib-wiz` to
  * crreate it & copy to your clipboard.
  */
-var uuid = ''
+var uuid
     , stem = 'https://vault.cca.edu/access/runwizard.do?method=newitem&itemdefUuid=';
 try {
     // for <XML> pages

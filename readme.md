@@ -6,8 +6,6 @@ Various scripts used in VAULT (our openEQUELLA instance). The scripts are catego
 
 **bookmarklets** are browser-side JS meant to aid in copying useful oE URLs.
 
-**fine-arts-jr-review** is a script for biannual updates to certain data in oE.
-
 **retention** scripts are tools for applying the [VAULT Retention Policy](https://portal.cca.edu/essentials/technology-services/web-services/vault/vault-retention-policy/).
 
 **user-scripts** contains bulk metadata update tools meant to be run from the _Manage Resources_ section.
@@ -17,8 +15,6 @@ Various scripts used in VAULT (our openEQUELLA instance). The scripts are catego
 ## Setup
 
 Most of these are node scripts which share dependencies. Run `pnpm install` or `npm install` to get them.
-
-The fine arts junior review directory is a python project using [Poetry](https://python-poetry.org/). Run `poetry install` inside the directory to get the dependencies.
 
 Most tools require their own rc file with settings, OAuth tokens, and other secrets. Each directory has an example and a readme with instructions.
 

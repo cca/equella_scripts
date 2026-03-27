@@ -18,8 +18,8 @@ importers:
         specifier: ^1.0.12
         version: 1.0.12
       csv-stringify:
-        specifier: ^6.6.0
-        version: 6.6.0
+        specifier: ^6.7.0
+        version: 6.7.0
       filenamify:
         specifier: ~7.0.1
         version: 7.0.1
@@ -219,8 +219,8 @@ packages:
     resolution: {integrity: sha512-0AAgazKJUywtjvZbclNuovIiQY/WyvojWw15Y2k3kPixE+pDiOFnfg5FcH3CfDqqnrB2f3p5oPAc446EXD01Tw==}
     engines: {node: '>=8.0.0'}
 
-  csv-stringify@6.6.0:
-    resolution: {integrity: sha512-YW32lKOmIBgbxtu3g5SaiqWNwa/9ISQt2EcgOq0+RAIFufFp9is6tqNnKahqE5kuKvrnYAzs28r+s6pXJR8Vcw==}
+  csv-stringify@6.7.0:
+    resolution: {integrity: sha512-UdtziYp5HuTz7e5j8Nvq+a/3HQo+2/aJZ9xntNTpmRRIg/3YYqDVgiS9fvAhtNbnyfbv2ZBe0bqCHqzhE7FqWQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -784,7 +784,7 @@ snapshots:
 
   csv-reader@1.0.12: {}
 
-  csv-stringify@6.6.0: {}
+  csv-stringify@6.7.0: {}
 
   debug@4.4.3(supports-color@8.1.1):
     dependencies:

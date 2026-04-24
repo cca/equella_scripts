@@ -9,6 +9,7 @@ const opts = rc('group', {})
 
 describe('Get groups', () => {
     it('should get groups by UUID', async function () {
+        this.slow(500)
         this.timeout(10000)
         const group = await getGroupByUUID(opts.test_group_uuid)
         assert.ok(group)
@@ -17,6 +18,7 @@ describe('Get groups', () => {
     })
 
     it('should get groups by name', async function () {
+        this.slow(500)
         this.timeout(10000)
         const group = await getGroupByName(opts.test_group_name)
         assert.ok(group)
@@ -25,6 +27,7 @@ describe('Get groups', () => {
     })
 })
 
+// TODO actual group modification tests
 // describe('Add and remove users from groups', () => {
 //     it('should add a user to a group', async function () {})
 

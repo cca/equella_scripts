@@ -153,6 +153,7 @@ describe('Contact owner', () => {
 
     it('sends an email to the owner', async function () {
         // email is _very_ slow so we use https://mochajs.org/#timeouts
+        this.slow(5000)
         this.timeout(10000)
         let result = await mailUser(items.email.owner.id, [items.email.toJSON()])
         // nodemailer result looks like
@@ -194,7 +195,8 @@ describe('Delete item', () => {
         })
     })
 
-    it('unlocks the item if it is locked', () => {
+    it('unlocks the item if it is locked', function () {
+        this.slow(1000)
         return unlockItem(testItem)
             .then(res => {
                 assert.ok(res.ok)
@@ -204,7 +206,8 @@ describe('Delete item', () => {
             })
     })
 
-    it('deletes the unlocked item', () => {
+    it('deletes the unlocked item', function () {
+        this.slow(1000)
         return deleteItem(testItem)
             .then(res => {
                 assert.ok(res.ok)

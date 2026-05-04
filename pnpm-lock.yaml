@@ -30,8 +30,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       nodemailer:
-        specifier: ^8.0.5
-        version: 8.0.5
+        specifier: ^8.0.7
+        version: 8.0.7
       rc:
         specifier: ^1.2.8
         version: 1.2.8
@@ -478,8 +478,8 @@ packages:
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
-  nodemailer@8.0.5:
-    resolution: {integrity: sha512-0PF8Yb1yZuQfQbq+5/pZJrtF6WQcjTd5/S4JOHs9PGFxuTqoB/icwuB44pOdURHJbRKX1PPoJZtY7R4VUoCC8w==}
+  nodemailer@8.0.7:
+    resolution: {integrity: sha512-pkjE4mkBzQjdJT4/UmlKl3pX0rC9fZmjh7c6C9o7lv66Ac6w9WCnzPzhbPNxwZAzlF4mdq4CSWB5+FbK6FWCow==}
     engines: {node: '>=6.0.0'}
 
   optionator@0.9.4:
@@ -1033,7 +1033,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  nodemailer@8.0.5: {}
+  nodemailer@8.0.7: {}
 
   optionator@0.9.4:
     dependencies:

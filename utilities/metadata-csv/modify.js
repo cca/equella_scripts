@@ -138,7 +138,9 @@ function prepChanges(item, changes) {
             return xml
         }
     } else {
-        console.log(`No changes to item ${options.root.replace(/api$/, '')}${item.uuid}/${item.version}/`)
+        if (process.env.NODE_ENV !== 'test') {
+            console.log(`No changes to item ${options.root.replace(/api$/, '')}${item.uuid}/${item.version}/`)
+        }
         return null
     }
 }

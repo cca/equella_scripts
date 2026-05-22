@@ -9,7 +9,7 @@ const opts = rc('group', {})
 
 describe('Get groups', () => {
     it('should get groups by UUID', async function () {
-        this.slow(500)
+        this.slow(1000)
         this.timeout(10000)
         const group = await getGroupByUUID(opts.test_group_uuid)
         assert.ok(group)
@@ -18,7 +18,7 @@ describe('Get groups', () => {
     })
 
     it('should get groups by name', async function () {
-        this.slow(500)
+        this.slow(1000)
         this.timeout(10000)
         const group = await getGroupByName(opts.test_group_name)
         assert.ok(group)

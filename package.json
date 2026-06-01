@@ -29,7 +29,7 @@
   "homepage": "https://github.com/cca/equella_scripts",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.4.0",
+    "eslint": "^10.4.1",
     "globals": "^17.6.0",
     "mocha": "^11.7.6"
   },
@@ -41,7 +41,7 @@
     "filenamify": "~7.0.1",
     "luxon": "^3.7.2",
     "md5-file": "^5.0.0",
-    "nodemailer": "^8.0.7",
+    "nodemailer": "^8.0.10",
     "rc": "^1.2.8",
     "uglify-js": "^3.19.3",
     "xpath": "^0.0.34",

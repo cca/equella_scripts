@@ -7,5 +7,7 @@ JOIN item_definition id ON i.item_definition_id = id.id
 JOIN base_entity be ON id.id = be.id
 LEFT JOIN language_string ls on be.name_id = ls.bundle_id
 WHERE a.value1 NOT IN ('youtube', 'resource', 'itunesu', 'false')
+-- uncomment below for only published/live items
+-- AND i.status = 'LIVE'
 GROUP BY ls.text
 ORDER BY SUM(CAST(a.value1 AS BIGINT)) DESC

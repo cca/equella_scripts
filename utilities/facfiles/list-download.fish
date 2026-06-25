@@ -4,6 +4,7 @@ set file $argv[1]
 [ -z $file ] && set file faculty.txt
 
 mkdir -p faculty
+mkdir -p files
 
 for name in (cat $file)
     echo (date) "Downloading syllabi for $name"

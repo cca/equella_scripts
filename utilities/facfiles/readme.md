@@ -13,6 +13,8 @@ To run the script:
 
 If running multiple times, remember to clean out the files directory in between. Included is a "list-download.fish" script to iterate over a list of names in a "faculty.txt" file, creating a folder for each instructor's syllabi.
 
+Generally, for APT requests for multiple faculty, we set the start/stop terms in .facfilesrc, paste the faculty names into faculty.txt, and run `./list-download.fish`. Be aware if a faculty member has changed their name we'll need all name forms in the list.
+
 ## Sections
 
 For requests for particular section codes, use `node sections --match ARTED-1002` where the `--match` parameter is checked against the section code. The sections script also supports a `modifiedAfter` parameter to filter search results a little further. If we want all 2023-24 DSMBA syllabi, for instance, we can run `node sections --match DSMBA --modifiedAfter 2023-08-01` since all syllabi would be uploaded after that date.

@@ -37,7 +37,7 @@
     "@xmldom/xmldom": "^0.9.10",
     "async": "^3.2.6",
     "csv-reader": "^1.0.12",
-    "csv-stringify": "^6.8.0",
+    "csv-stringify": "^6.8.1",
     "filenamify": "~7.0.2",
     "luxon": "^3.7.2",
     "md5-file": "^5.0.0",

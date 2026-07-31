@@ -242,6 +242,67 @@ export function wrapElement(doc, parentPath, childElement, wrapperElement) {
 }
 
 /**
+ * Wrap text content of an element with a child element and move attributes
+ * e.g., <language authority="iso639-2b">eng</language> -> 
+ *       <language><languageTerm authority="iso639-2b">eng</languageTerm></language>
+ *
+ * @param {Document} doc - XML DOM document
+ * @param {string} parentPath - XPath to parent elements (e.g., '//language')
+ * @param {string} childElement - Name of child element to create (e.g., 'languageTerm')
+ * @param {string[]} attributesToMove - Array of attribute names to move to child (e.g., ['authority'])
+ * @returns {Document} Modified document
+ */
+export function wrapTextWithChild(doc, parentPath, childElement, attributesToMove = []) {
+    if (!doc || !parentPath || !childElement) {
+        return doc
+    }
+
+    const select = xpath.useNamespaces({})
+    const parents = select(parentPath, doc)
+
+    for (let parent of parents) {
+        // Only process if element has direct text content (not already wrapped)
+        let hasDirectText = false
+        for (let node of parent.childNodes) {
+            if (node.nodeType === 3 && node.nodeValue.trim()) { // TEXT_NODE
+                hasDirectText = true
+                break
+            }
+        }
+        
+        if (!hasDirectText) {
+            continue
+        }
+
+        // Create child element
+        const child = doc.createElement(childElement)
+        
+        // Move text content to child
+        while (parent.firstChild) {
+            if (parent.firstChild.nodeType === 3) { // TEXT_NODE
+                child.appendChild(parent.firstChild)
+            } else {
+                // If there's already an element child, don't wrap
+                break
+            }
+        }
+        
+        // Move specified attributes from parent to child
+        for (let attrName of attributesToMove) {
+            if (parent.hasAttribute(attrName)) {
+                child.setAttribute(attrName, parent.getAttribute(attrName))
+                parent.removeAttribute(attrName)
+            }
+        }
+        
+        // Add child to parent
+        parent.appendChild(child)
+    }
+
+    return doc
+}
+
+/**
  * Convert custom authority-specific topic elements to standard topic with authority attribute
  * e.g., topicCONA -> topic with authority="cona"
  *
@@ -420,6 +481,9 @@ export function toStrictMODS(xmlString) {
     
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
+    
+    // Wrap language text content with languageTerm and move authority attribute
+    wrapTextWithChild(doc, '//mods/language', 'languageTerm', ['authority'])
 
     // Extract mods element and add namespace (for validation)
     const select = xpath.useNamespaces({})

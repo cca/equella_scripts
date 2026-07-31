@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, wrapElement, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -719,6 +719,81 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('wrapTextWithChild', () => {
+        it('should wrap language text with languageTerm and move authority', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <language authority="iso639-2b">eng</language>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//mods/language', 'languageTerm', ['authority'])
+            
+            const select = xpath.useNamespaces({})
+            const languages = select('//mods/language', doc)
+            const languageTerms = select('//mods/language/languageTerm', doc)
+            
+            assert.strictEqual(languages.length, 1, 'language element should exist')
+            assert.strictEqual(languageTerms.length, 1, 'languageTerm should exist')
+            assert.strictEqual(languageTerms[0].textContent, 'eng')
+            assert.strictEqual(languageTerms[0].getAttribute('authority'), 'iso639-2b')
+            assert.strictEqual(languages[0].hasAttribute('authority'), false, 'authority should be removed from language')
+        })
+        
+        it('should handle multiple language elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <language authority="iso639-2b">eng</language>
+                <language authority="iso639-2b">spa</language>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//mods/language', 'languageTerm', ['authority'])
+            
+            const select = xpath.useNamespaces({})
+            const languageTerms = select('//mods/language/languageTerm', doc)
+            
+            assert.strictEqual(languageTerms.length, 2)
+            assert.strictEqual(languageTerms[0].textContent, 'eng')
+            assert.strictEqual(languageTerms[1].textContent, 'spa')
+        })
+        
+        it('should not wrap already wrapped language elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <language>
+                    <languageTerm authority="iso639-2b">eng</languageTerm>
+                </language>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//mods/language', 'languageTerm', ['authority'])
+            
+            const select = xpath.useNamespaces({})
+            const languageTerms = select('//mods/language/languageTerm', doc)
+            const doubleWrapped = select('//mods/language/languageTerm/languageTerm', doc)
+            
+            assert.strictEqual(languageTerms.length, 1)
+            assert.strictEqual(doubleWrapped.length, 0, 'Should not double-wrap')
+        })
+        
+        it('should work without attributes to move', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <language>eng</language>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//mods/language', 'languageTerm', [])
+            
+            const select = xpath.useNamespaces({})
+            const languageTerms = select('//mods/language/languageTerm', doc)
+            
+            assert.strictEqual(languageTerms.length, 1)
+            assert.strictEqual(languageTerms[0].textContent, 'eng')
+        })
+    })
+    
     describe('toStrictMODS', () => {
         it('should extract mods element and add namespace by default', () => {
             const input = `<xml><mods>
@@ -841,6 +916,48 @@ describe('Strict MODS Conversion', () => {
             
             assert.ok(!result.includes('artstorClassification'), 'Should remove artstorClassification')
             assert.ok(result.includes('<title>Test</title>'), 'Should preserve other content')
+        })
+        
+        it('should wrap relatedItem/title with titleInfo', () => {
+            const input = `<xml><mods>
+                <relatedItem>
+                    <title>Related Work Title</title>
+                </relatedItem>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<relatedItem>'), 'Should have relatedItem')
+            assert.ok(result.includes('<titleInfo>'), 'Should have titleInfo wrapper')
+            assert.ok(result.includes('<title>Related Work Title</title>'), 'Should have title')
+            assert.ok(result.includes('</titleInfo>'), 'titleInfo should be closed')
+        })
+        
+        it('should move formBroad and formSpecific to genre', () => {
+            const input = `<xml><mods>
+                <physicalDescription>
+                    <formBroad>correspondence</formBroad>
+                    <formSpecific>personal</formSpecific>
+                </physicalDescription>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('formBroad'), 'Should remove formBroad')
+            assert.ok(!result.includes('formSpecific'), 'Should remove formSpecific')
+            assert.ok(result.includes('<genre>correspondence</genre>'), 'Should have correspondence genre')
+            assert.ok(result.includes('<genre>personal</genre>'), 'Should have personal genre')
+        })
+        
+        it('should wrap language text with languageTerm and move authority', () => {
+            const input = `<xml><mods>
+                <language authority="iso639-2b">eng</language>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<language>'), 'Should have language')
+            assert.ok(result.includes('<languageTerm authority="iso639-2b">eng</languageTerm>'), 
+                'Should wrap text with languageTerm and move authority')
+            assert.ok(!result.includes('<language authority'), 
+                'Language should not have authority attribute')
         })
         
         it('should wrap relatedItem/title with titleInfo', () => {

@@ -177,6 +177,70 @@ export function renameElement(doc, oldName, newName, xpathContext = '//mods') {
 }
 
 /**
+ * Recursively remove empty elements (no attributes, no text, no meaningful children)
+ * This prevents validation errors from empty required elements and cleans up output
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function removeEmptyElements(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    /**
+     * Check if an element is empty (recursively)
+     * Empty = no attributes AND no text content AND all children are empty
+     */
+    function isElementEmpty(element) {
+        // Has attributes? Not empty
+        if (element.attributes && element.attributes.length > 0) {
+            return false
+        }
+
+        // Check all child nodes
+        for (let node of element.childNodes) {
+            if (node.nodeType === 3) { // TEXT_NODE
+                if (node.nodeValue.trim()) {
+                    return false // Has text content
+                }
+            } else if (node.nodeType === 1) { // ELEMENT_NODE
+                if (!isElementEmpty(node)) {
+                    return false // Has non-empty child element
+                }
+            }
+        }
+
+        return true // No attributes, no text, all children empty
+    }
+
+    /**
+     * Remove empty elements recursively (bottom-up)
+     */
+    function removeEmpty(element) {
+        // Process children first (bottom-up)
+        const children = Array.from(element.childNodes).filter(n => n.nodeType === 1)
+        for (let child of children) {
+            removeEmpty(child)
+        }
+
+        // Now check if this element is empty and remove it
+        if (isElementEmpty(element) && element.parentNode) {
+            element.parentNode.removeChild(element)
+        }
+    }
+
+    // Start from root
+    const select = xpath.useNamespaces({})
+    const modsElements = select('//mods', doc)
+    for (let mods of modsElements) {
+        removeEmpty(mods)
+    }
+
+    return doc
+}
+
+/**
  * Remove an attribute from elements
  * e.g., remove href from accessCondition
  *
@@ -513,6 +577,9 @@ export function toStrictMODS(xmlString) {
     
     // Remove non-standard attributes
     removeAttribute(doc, '//accessCondition', 'href')
+    
+    // Remove all empty elements (no attributes, no text, no meaningful children)
+    removeEmptyElements(doc)
 
     // Extract mods element and add namespace (for validation)
     const select = xpath.useNamespaces({})

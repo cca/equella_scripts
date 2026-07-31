@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeAttribute, convertAuthorityElement, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -526,6 +526,130 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('removeEmptyElements', () => {
+        it('should remove completely empty elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <originInfo><place/><publisher/></originInfo>
+                <genre/>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeEmptyElements(doc)
+            
+            const select = xpath.useNamespaces({})
+            const places = select('//place', doc)
+            const publishers = select('//publisher', doc)
+            const genres = select('//genre', doc)
+            const originInfos = select('//originInfo', doc)
+            const titleInfos = select('//titleInfo', doc)
+            
+            assert.strictEqual(places.length, 0, 'Empty place should be removed')
+            assert.strictEqual(publishers.length, 0, 'Empty publisher should be removed')
+            assert.strictEqual(genres.length, 0, 'Empty genre should be removed')
+            assert.strictEqual(originInfos.length, 0, 'originInfo with only empty children should be removed')
+            assert.strictEqual(titleInfos.length, 1, 'titleInfo with content should be preserved')
+        })
+        
+        it('should preserve elements with attributes', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <language authority="iso639-2b"/>
+                <relatedItem type="host"/>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeEmptyElements(doc)
+            
+            const select = xpath.useNamespaces({})
+            const languages = select('//language', doc)
+            const relatedItems = select('//relatedItem', doc)
+            
+            assert.strictEqual(languages.length, 1, 'Element with attribute should be preserved')
+            assert.strictEqual(relatedItems.length, 1, 'Element with attribute should be preserved')
+        })
+        
+        it('should preserve elements with text content', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <abstract>Some text</abstract>
+                <note>  Another note  </note>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeEmptyElements(doc)
+            
+            const select = xpath.useNamespaces({})
+            const abstracts = select('//abstract', doc)
+            const notes = select('//note', doc)
+            
+            assert.strictEqual(abstracts.length, 1)
+            assert.strictEqual(notes.length, 1)
+        })
+        
+        it('should remove whitespace-only elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <genre>   </genre>
+                <note>
+                </note>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeEmptyElements(doc)
+            
+            const select = xpath.useNamespaces({})
+            const genres = select('//genre', doc)
+            const notes = select('//note', doc)
+            
+            assert.strictEqual(genres.length, 0, 'Whitespace-only genre should be removed')
+            assert.strictEqual(notes.length, 0, 'Whitespace-only note should be removed')
+        })
+        
+        it('should recursively remove empty parent elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <originInfo>
+                    <place/>
+                    <publisher/>
+                    <dateOther/>
+                </originInfo>
+                <subject>
+                    <topic>Valid topic</topic>
+                </subject>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeEmptyElements(doc)
+            
+            const select = xpath.useNamespaces({})
+            const originInfos = select('//originInfo', doc)
+            const subjects = select('//subject', doc)
+            
+            assert.strictEqual(originInfos.length, 0, 'originInfo with only empty children should be removed')
+            assert.strictEqual(subjects.length, 1, 'subject with content should be preserved')
+        })
+        
+        it('should handle nested empty structures', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <relatedItem>
+                    <titleInfo><title/></titleInfo>
+                    <location/>
+                </relatedItem>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeEmptyElements(doc)
+            
+            const select = xpath.useNamespaces({})
+            const relatedItems = select('//relatedItem', doc)
+            
+            assert.strictEqual(relatedItems.length, 0, 'Entire nested empty structure should be removed')
+        })
+    })
+    
     describe('convertAuthorityElement', () => {
         it('should convert topicCONA to topic with authority="cona"', () => {
             const parser = new xmldom()
@@ -1024,6 +1148,25 @@ describe('Strict MODS Conversion', () => {
             assert.ok(!result.includes('href='), 'Should not have href attribute')
             assert.ok(result.includes('type="use and reproduction"'), 'Should preserve type attribute')
             assert.ok(result.includes('>CC-BY</accessCondition>'), 'Should preserve text content')
+        })
+        
+        it('should remove all empty elements', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <originInfo><place/><publisher/><dateCreated>2024</dateCreated></originInfo>
+                <genre/>
+                <subject/>
+                <note>Has content</note>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('<place'), 'Empty place should be removed')
+            assert.ok(!result.includes('<publisher'), 'Empty publisher should be removed')
+            assert.ok(!result.includes('<genre'), 'Empty genre should be removed')
+            assert.ok(!result.includes('<subject'), 'Empty subject should be removed')
+            assert.ok(result.includes('<originInfo>'), 'originInfo with content should be preserved')
+            assert.ok(result.includes('<dateCreated>2024</dateCreated>'), 'dateCreated with content should be preserved')
+            assert.ok(result.includes('<note>Has content</note>'), 'note with content should be preserved')
         })
         
         it('should wrap relatedItem/title with titleInfo', () => {

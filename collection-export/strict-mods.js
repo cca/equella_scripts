@@ -12,11 +12,12 @@ import { DOMParser as xmldom } from '@xmldom/xmldom'
  *
  * @param {Document} doc - XML DOM document
  * @param {string} wrapperName - Name of the wrapper element to unwrap
+ * @param {string} [context='//mods'] - XPath context to search within (default: //mods)
  * @returns {Document} Modified document
  */
-export function unwrapSimpleElement(doc, wrapperName) {
+export function unwrapSimpleElement(doc, wrapperName, context = '//mods') {
     const select = xpath.useNamespaces({})
-    const wrappers = select(`//mods/${wrapperName}`, doc)
+    const wrappers = select(`${context}//${wrapperName}`, doc)
 
     for (let wrapper of wrappers) {
         const parent = wrapper.parentNode
@@ -43,8 +44,10 @@ export function toStrictMODS(xmlString) {
     const parser = new xmldom()
     const doc = parser.parseFromString(xmlString, 'text/xml')
 
-    // typeOfResourceWrapper -> typeOfResource
-    unwrapSimpleElement(doc, "typeOfResourceWrapper")
+    // Apply simple unwrapping transformations
+    unwrapSimpleElement(doc, 'typeOfResourceWrapper')
+    unwrapSimpleElement(doc, 'genreWrapper')
+    unwrapSimpleElement(doc, 'noteWrapper')
 
     // Serialize back to string
     return doc.toString()

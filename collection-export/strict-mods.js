@@ -572,6 +572,9 @@ export function toStrictMODS(xmlString) {
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)
     renameElement(doc, CASE_FIXES.RELATEDITEM.old, CASE_FIXES.RELATEDITEM.new)
     
+    // Fix element names for MODS compliance
+    renameElement(doc, 'title', 'text', '//part')
+    
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
     

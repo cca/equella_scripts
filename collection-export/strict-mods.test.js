@@ -1190,6 +1190,21 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('digitalOrigin'), 'Should preserve existing physicalDescription content')
         })
         
+        it('should rename part/title to part/text', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test Item</title></titleInfo>
+                <part>
+                    <title>filename.pdf</title>
+                    <number>12345</number>
+                </part>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<part>'), 'Should have part element')
+            assert.ok(result.includes('<text>filename.pdf</text>'), 'Should rename title to text in part')
+            assert.ok(!result.includes('<part><title>'), 'Should not have title directly in part')
+        })
+        
         it('should wrap relatedItem/title with titleInfo', () => {
             const input = `<xml><mods>
                 <titleInfo><title>Main Item</title></titleInfo>

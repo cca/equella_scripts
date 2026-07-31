@@ -88,7 +88,7 @@ The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XM
 
 ```sh
 # Run strict MODS tests
-npm run testmods
+npm run modstest
 ```
 
 You can also download item XML to run the strict MODS conversion on your own.

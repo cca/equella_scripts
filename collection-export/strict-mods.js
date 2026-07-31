@@ -564,6 +564,9 @@ export function toStrictMODS(xmlString) {
     // Move form elements from physicalDescription to genre
     moveAndRenameElement(doc, '//physicalDescription/formBroad', '//mods', 'genre')
     moveAndRenameElement(doc, '//physicalDescription/formSpecific', '//mods', 'genre')
+    
+    // Move notes from physicalDescriptionNote wrapper to physicalDescription
+    moveAndRenameElement(doc, '//physicalDescriptionNote/note', '//physicalDescription', 'note')
 
     // Fix case sensitivity
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)

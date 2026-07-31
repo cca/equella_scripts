@@ -1169,6 +1169,27 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('<note>Has content</note>'), 'note with content should be preserved')
         })
         
+        it('should move physicalDescriptionNote/note to physicalDescription/note', () => {
+            const input = `<xml><mods>
+                <physicalDescription>
+                    <digitalOrigin>reformatted digital</digitalOrigin>
+                </physicalDescription>
+                <physicalDescriptionNote>
+                    <note type="medium">marked draft</note>
+                </physicalDescriptionNote>
+                <physicalDescriptionNote>
+                    <note type="condition">poor</note>
+                </physicalDescriptionNote>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('physicalDescriptionNote'), 'physicalDescriptionNote wrapper should be removed')
+            assert.ok(result.includes('<physicalDescription>'), 'Should have physicalDescription')
+            assert.ok(result.includes('<note type="medium">marked draft</note>'), 'Should have medium note')
+            assert.ok(result.includes('<note type="condition">poor</note>'), 'Should have condition note')
+            assert.ok(result.includes('digitalOrigin'), 'Should preserve existing physicalDescription content')
+        })
+        
         it('should wrap relatedItem/title with titleInfo', () => {
             const input = `<xml><mods>
                 <titleInfo><title>Main Item</title></titleInfo>

@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, fixOriginInfoCase, removeElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -111,6 +111,75 @@ const fixtures = {
             <genre>correspondence</genre>
             <note>Test note</note>
             <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+    
+    dateCreatedSingle: {
+        input: `<xml><mods>
+            <origininfo>
+                <dateType>dateCreated</dateType>
+                <dateCreatedWrapper>
+                    <dateCreated keyDate="yes">1925-01-20</dateCreated>
+                    <pointStart/>
+                    <pointEnd/>
+                </dateCreatedWrapper>
+            </origininfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <originInfo>
+                <dateCreated keyDate="yes">1925-01-20</dateCreated>
+            </originInfo>
+        </mods></xml>`
+    },
+    
+    dateCreatedRange: {
+        input: `<xml><mods>
+            <origininfo>
+                <dateType>dateCreated</dateType>
+                <dateCreatedWrapper>
+                    <dateCreated keyDate="yes"/>
+                    <pointStart>2022</pointStart>
+                    <pointEnd>2023</pointEnd>
+                </dateCreatedWrapper>
+            </origininfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <originInfo>
+                <dateCreated encoding="edtf" keyDate="yes">2022/2023</dateCreated>
+            </originInfo>
+        </mods></xml>`
+    },
+    
+    dateCreatedRangeNoKeyDate: {
+        input: `<xml><mods>
+            <origininfo>
+                <dateCreatedWrapper>
+                    <dateCreated/>
+                    <pointStart>2024-01</pointStart>
+                    <pointEnd>2025-12</pointEnd>
+                </dateCreatedWrapper>
+            </origininfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <originInfo>
+                <dateCreated encoding="edtf">2024-01/2025-12</dateCreated>
+            </originInfo>
+        </mods></xml>`
+    },
+    
+    dateCreatedEmpty: {
+        input: `<xml><mods>
+            <origininfo>
+                <dateType>dateCreated</dateType>
+                <dateCreatedWrapper>
+                    <dateCreated/>
+                    <pointStart/>
+                    <pointEnd/>
+                </dateCreatedWrapper>
+            </origininfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <originInfo/>
         </mods></xml>`
     }
 }
@@ -234,6 +303,106 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('unwrapDateCreated', () => {
+        it('should unwrap single date and preserve keyDate attribute', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.dateCreatedSingle.input, 'text/xml')
+            
+            unwrapDateCreated(doc)
+            removeElement(doc, 'dateType', '//origininfo')
+            
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+            
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].textContent, '1925-01-20')
+            assert.strictEqual(dateElements[0].getAttribute('keyDate'), 'yes')
+            
+            // Verify wrapper is gone
+            const wrappers = select('//origininfo/dateCreatedWrapper', doc)
+            assert.strictEqual(wrappers.length, 0)
+        })
+        
+        it('should convert date range to EDTF format', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.dateCreatedRange.input, 'text/xml')
+            
+            unwrapDateCreated(doc)
+            
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+            
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].textContent, '2022/2023')
+            assert.strictEqual(dateElements[0].getAttribute('encoding'), 'edtf')
+            assert.strictEqual(dateElements[0].getAttribute('keyDate'), 'yes')
+        })
+        
+        it('should handle date range without keyDate attribute', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.dateCreatedRangeNoKeyDate.input, 'text/xml')
+            
+            unwrapDateCreated(doc)
+            
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+            
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].textContent, '2024-01/2025-12')
+            assert.strictEqual(dateElements[0].getAttribute('encoding'), 'edtf')
+            assert.strictEqual(dateElements[0].hasAttribute('keyDate'), false)
+        })
+        
+        it('should remove empty dateCreatedWrapper', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.dateCreatedEmpty.input, 'text/xml')
+            
+            unwrapDateCreated(doc)
+            removeElement(doc, 'dateType', '//origininfo')
+            
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+            const wrappers = select('//origininfo/dateCreatedWrapper', doc)
+            
+            assert.strictEqual(dateElements.length, 0)
+            assert.strictEqual(wrappers.length, 0)
+        })
+    })
+    
+    describe('fixOriginInfoCase', () => {
+        it('should convert origininfo to originInfo', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods><origininfo><place/></origininfo></mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            fixOriginInfoCase(doc)
+            
+            const result = doc.toString()
+            
+            assert.ok(result.includes('<originInfo>'))
+            assert.ok(result.includes('</originInfo>'))
+            assert.ok(!result.includes('<origininfo>'))
+            assert.ok(!result.includes('</origininfo>'))
+        })
+    })
+    
+    describe('removeElement', () => {
+        it('should remove specified element', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods><origininfo><dateType>dateCreated</dateType><place/></origininfo></mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeElement(doc, 'dateType', '//origininfo')
+            
+            const select = xpath.useNamespaces({})
+            const dateTypes = select('//origininfo/dateType', doc)
+            const places = select('//origininfo/place', doc)
+            
+            assert.strictEqual(dateTypes.length, 0)
+            assert.strictEqual(places.length, 1)
+        })
+    })
+    
     describe('toStrictMODS', () => {
         it('should convert XML string with typeOfResourceWrapper', () => {
             const result = normalizeXML(toStrictMODS(fixtures.typeOfResourceWrapper.input))
@@ -259,6 +428,20 @@ describe('Strict MODS Conversion', () => {
         it('should convert XML with all wrapper types', () => {
             const result = normalizeXML(toStrictMODS(fixtures.allWrappers.input))
             const expected = normalizeXML(fixtures.allWrappers.expected)
+            
+            assert.strictEqual(result, expected)
+        })
+        
+        it('should convert single date with originInfo case fix', () => {
+            const result = normalizeXML(toStrictMODS(fixtures.dateCreatedSingle.input))
+            const expected = normalizeXML(fixtures.dateCreatedSingle.expected)
+            
+            assert.strictEqual(result, expected)
+        })
+        
+        it('should convert date range to EDTF', () => {
+            const result = normalizeXML(toStrictMODS(fixtures.dateCreatedRange.input))
+            const expected = normalizeXML(fixtures.dateCreatedRange.expected)
             
             assert.strictEqual(result, expected)
         })

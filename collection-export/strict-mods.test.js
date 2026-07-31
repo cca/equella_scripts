@@ -527,4 +527,289 @@ describe('Strict MODS Conversion', () => {
             assert.ok(!result.includes('<relateditem>'))
         })
     })
+
+    describe('Edge cases and error handling', () => {
+        describe('unwrapDateCreated edge cases', () => {
+            it('should remove wrapper with only pointStart (incomplete range)', () => {
+                const input = `<xml><mods>
+                    <origininfo>
+                        <dateCreatedWrapper>
+                            <dateCreated/>
+                            <pointStart>2024-01</pointStart>
+                            <pointEnd/>
+                        </dateCreatedWrapper>
+                    </origininfo>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                unwrapDateCreated(doc)
+                
+                const select = xpath.useNamespaces({})
+                const wrappers = select('//origininfo/dateCreatedWrapper', doc)
+                const dateElements = select('//origininfo/dateCreated', doc)
+                
+                assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
+                assert.strictEqual(dateElements.length, 0, 'No dateCreated should be created for incomplete range')
+            })
+            
+            it('should remove wrapper with only pointEnd (incomplete range)', () => {
+                const input = `<xml><mods>
+                    <origininfo>
+                        <dateCreatedWrapper>
+                            <dateCreated/>
+                            <pointStart/>
+                            <pointEnd>2025-12</pointEnd>
+                        </dateCreatedWrapper>
+                    </origininfo>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                unwrapDateCreated(doc)
+                
+                const select = xpath.useNamespaces({})
+                const wrappers = select('//origininfo/dateCreatedWrapper', doc)
+                const dateElements = select('//origininfo/dateCreated', doc)
+                
+                assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
+                assert.strictEqual(dateElements.length, 0, 'No dateCreated should be created for incomplete range')
+            })
+            
+            it('should handle whitespace-only values as empty', () => {
+                const input = `<xml><mods>
+                    <origininfo>
+                        <dateCreatedWrapper>
+                            <dateCreated>   </dateCreated>
+                            <pointStart>  </pointStart>
+                            <pointEnd>  </pointEnd>
+                        </dateCreatedWrapper>
+                    </origininfo>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                unwrapDateCreated(doc)
+                
+                const select = xpath.useNamespaces({})
+                const wrappers = select('//origininfo/dateCreatedWrapper', doc)
+                const dateElements = select('//origininfo/dateCreated', doc)
+                
+                assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
+                assert.strictEqual(dateElements.length, 0, 'No dateCreated should be created for whitespace-only values')
+            })
+            
+            it('should handle mixed case: date value with whitespace', () => {
+                const input = `<xml><mods>
+                    <origininfo>
+                        <dateCreatedWrapper>
+                            <dateCreated keyDate="yes">  2024-05  </dateCreated>
+                            <pointStart/>
+                            <pointEnd/>
+                        </dateCreatedWrapper>
+                    </origininfo>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                unwrapDateCreated(doc)
+                
+                const select = xpath.useNamespaces({})
+                const dateElements = select('//origininfo/dateCreated', doc)
+                
+                assert.strictEqual(dateElements.length, 1)
+                assert.strictEqual(dateElements[0].textContent.trim(), '2024-05')
+                assert.strictEqual(dateElements[0].getAttribute('keyDate'), 'yes')
+            })
+            
+            it('should handle date range with whitespace in points', () => {
+                const input = `<xml><mods>
+                    <origininfo>
+                        <dateCreatedWrapper>
+                            <dateCreated/>
+                            <pointStart>  2022-01  </pointStart>
+                            <pointEnd>  2023-12  </pointEnd>
+                        </dateCreatedWrapper>
+                    </origininfo>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                unwrapDateCreated(doc)
+                
+                const select = xpath.useNamespaces({})
+                const dateElements = select('//origininfo/dateCreated', doc)
+                
+                assert.strictEqual(dateElements.length, 1)
+                assert.strictEqual(dateElements[0].textContent, '2022-01/2023-12')
+                assert.strictEqual(dateElements[0].getAttribute('encoding'), 'edtf')
+            })
+        })
+        
+        describe('unwrapSimpleElement edge cases', () => {
+            it('should handle wrapper with multiple children', () => {
+                const input = `<xml><mods>
+                    <typeOfResourceWrapper>
+                        <typeOfResource>text</typeOfResource>
+                        <typeOfResource>still image</typeOfResource>
+                    </typeOfResourceWrapper>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                unwrapSimpleElement(doc, 'typeOfResourceWrapper')
+                
+                const select = xpath.useNamespaces({})
+                const wrappers = select('//mods/typeOfResourceWrapper', doc)
+                const resources = select('//mods/typeOfResource', doc)
+                
+                assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
+                assert.strictEqual(resources.length, 2, 'Both children should be preserved')
+            })
+            
+            it('should handle nested wrappers', () => {
+                const input = `<xml><mods>
+                    <genreWrapper>
+                        <genreWrapper>
+                            <genre>photographs</genre>
+                        </genreWrapper>
+                    </genreWrapper>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                // First unwrap should remove outer wrapper
+                unwrapSimpleElement(doc, 'genreWrapper')
+                
+                const result = doc.toString()
+                
+                // After unwrapping, genre should exist
+                assert.ok(result.includes('<genre>photographs</genre>'))
+                assert.ok(!result.includes('genreWrapper'))
+            })
+            
+            it('should handle empty wrapper (no children)', () => {
+                const input = `<xml><mods>
+                    <typeOfResourceWrapper></typeOfResourceWrapper>
+                    <titleInfo><title>Test</title></titleInfo>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                unwrapSimpleElement(doc, 'typeOfResourceWrapper')
+                
+                const select = xpath.useNamespaces({})
+                const wrappers = select('//mods/typeOfResourceWrapper', doc)
+                
+                assert.strictEqual(wrappers.length, 0, 'Empty wrapper should be removed')
+            })
+        })
+        
+        describe('Error handling', () => {
+            it('should handle malformed XML gracefully', () => {
+                const malformedXML = '<xml><mods><unclosed>'
+                
+                // Should throw a parse error, not crash silently
+                assert.throws(() => {
+                    toStrictMODS(malformedXML)
+                }, /error/i, 'Should throw an error for malformed XML')
+            })
+            
+            it('should handle empty string input', () => {
+                // Empty input should throw an error
+                assert.throws(() => {
+                    toStrictMODS('')
+                }, /empty/i, 'Should throw an error for empty input')
+            })
+            
+            it('should handle whitespace-only input', () => {
+                assert.throws(() => {
+                    toStrictMODS('   \n\t  ')
+                }, /empty/i, 'Should throw an error for whitespace-only input')
+            })
+            
+            it('should handle null input', () => {
+                assert.throws(() => {
+                    toStrictMODS(null)
+                }, /must be a string/i, 'Should throw an error for null input')
+            })
+            
+            it('should handle undefined input', () => {
+                assert.throws(() => {
+                    toStrictMODS(undefined)
+                }, /must be a string/i, 'Should throw an error for undefined input')
+            })
+            
+            it('should handle non-string input', () => {
+                assert.throws(() => {
+                    toStrictMODS({xml: 'test'})
+                }, /must be a string/i, 'Should throw an error for object input')
+                
+                assert.throws(() => {
+                    toStrictMODS(123)
+                }, /must be a string/i, 'Should throw an error for number input')
+            })
+            
+            it('should handle XML without mods element', () => {
+                const input = '<xml><other>content</other></xml>'
+                const result = toStrictMODS(input)
+                
+                // Should not crash, just return the unchanged XML
+                assert.ok(result.includes('<other>content</other>'))
+            })
+        })
+        
+        describe('renameElement XPath behavior', () => {
+            it('should rename direct children only with default XPath', () => {
+                const input = `<xml><mods>
+                    <origininfo>
+                        <place/>
+                    </origininfo>
+                    <subject>
+                        <origininfo>
+                            <nested/>
+                        </origininfo>
+                    </subject>
+                </mods></xml>`
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                // Default context searches from //mods with / (direct child)
+                renameElement(doc, 'origininfo', 'originInfo')
+                
+                const result = doc.toString()
+                
+                // Direct child under mods should be renamed
+                const select = xpath.useNamespaces({})
+                const originInfos = select('//mods/originInfo', doc)
+                
+                assert.strictEqual(originInfos.length, 1, 'Should rename direct child')
+            })
+            
+            it('should handle elements with no parent gracefully', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<xml><mods></mods></xml>', 'text/xml')
+                
+                // Try to rename element that doesn't exist
+                assert.doesNotThrow(() => {
+                    renameElement(doc, 'nonexistent', 'newName')
+                })
+            })
+        })
+        
+        describe('removeElement edge cases', () => {
+            it('should handle removing non-existent elements', () => {
+                const input = '<xml><mods><title>Test</title></mods></xml>'
+                const parser = new xmldom()
+                const doc = parser.parseFromString(input, 'text/xml')
+                
+                assert.doesNotThrow(() => {
+                    removeElement(doc, 'nonexistent')
+                })
+                
+                const result = doc.toString()
+                assert.ok(result.includes('<title>Test</title>'), 'Original content should be preserved')
+            })
+        })
+    })
 })

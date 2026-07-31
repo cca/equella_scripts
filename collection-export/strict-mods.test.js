@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, wrapElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, wrapElement, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -618,6 +618,107 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('moveAndRenameElement', () => {
+        it('should move formBroad to genre', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <physicalDescription>
+                    <formBroad>correspondence</formBroad>
+                    <digitalOrigin>born digital</digitalOrigin>
+                </physicalDescription>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveAndRenameElement(doc, '//physicalDescription/formBroad', '//mods', 'genre')
+            
+            const select = xpath.useNamespaces({})
+            const formBroads = select('//physicalDescription/formBroad', doc)
+            const genres = select('//mods/genre', doc)
+            
+            assert.strictEqual(formBroads.length, 0, 'formBroad should be removed')
+            assert.strictEqual(genres.length, 1, 'genre should exist')
+            assert.strictEqual(genres[0].textContent, 'correspondence')
+        })
+        
+        it('should move formSpecific to genre', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <physicalDescription>
+                    <formSpecific>personal</formSpecific>
+                </physicalDescription>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveAndRenameElement(doc, '//physicalDescription/formSpecific', '//mods', 'genre')
+            
+            const select = xpath.useNamespaces({})
+            const formSpecifics = select('//physicalDescription/formSpecific', doc)
+            const genres = select('//mods/genre', doc)
+            
+            assert.strictEqual(formSpecifics.length, 0, 'formSpecific should be removed')
+            assert.strictEqual(genres.length, 1, 'genre should exist')
+            assert.strictEqual(genres[0].textContent, 'personal')
+        })
+        
+        it('should handle both formBroad and formSpecific', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <physicalDescription>
+                    <formBroad>photographs</formBroad>
+                    <formSpecific>portrait</formSpecific>
+                </physicalDescription>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveAndRenameElement(doc, '//physicalDescription/formBroad', '//mods', 'genre')
+            moveAndRenameElement(doc, '//physicalDescription/formSpecific', '//mods', 'genre')
+            
+            const select = xpath.useNamespaces({})
+            const genres = select('//mods/genre', doc)
+            
+            assert.strictEqual(genres.length, 2, 'Should have two genres')
+            assert.strictEqual(genres[0].textContent, 'photographs')
+            assert.strictEqual(genres[1].textContent, 'portrait')
+        })
+        
+        it('should preserve attributes on moved elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <physicalDescription>
+                    <formBroad authority="local">special-type</formBroad>
+                </physicalDescription>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveAndRenameElement(doc, '//physicalDescription/formBroad', '//mods', 'genre')
+            
+            const select = xpath.useNamespaces({})
+            const genres = select('//mods/genre', doc)
+            
+            assert.strictEqual(genres.length, 1)
+            assert.strictEqual(genres[0].getAttribute('authority'), 'local')
+        })
+        
+        it('should skip empty elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <physicalDescription>
+                    <formBroad/>
+                    <formSpecific>  </formSpecific>
+                </physicalDescription>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveAndRenameElement(doc, '//physicalDescription/formBroad', '//mods', 'genre')
+            moveAndRenameElement(doc, '//physicalDescription/formSpecific', '//mods', 'genre')
+            
+            const select = xpath.useNamespaces({})
+            const genres = select('//mods/genre', doc)
+            
+            assert.strictEqual(genres.length, 0, 'Should not create genres for empty elements')
+        })
+    })
+    
     describe('toStrictMODS', () => {
         it('should extract mods element and add namespace by default', () => {
             const input = `<xml><mods>
@@ -753,6 +854,24 @@ describe('Strict MODS Conversion', () => {
                 'Should wrap relatedItem title with titleInfo')
             assert.ok(!result.includes('<relatedItem type="host"><title>'), 
                 'Should not have direct title under relatedItem')
+        })
+        
+        it('should move formBroad and formSpecific to genre', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test Item</title></titleInfo>
+                <physicalDescription>
+                    <formBroad>correspondence</formBroad>
+                    <formSpecific>personal</formSpecific>
+                    <digitalOrigin>born digital</digitalOrigin>
+                </physicalDescription>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('formBroad'), 'Should not contain formBroad')
+            assert.ok(!result.includes('formSpecific'), 'Should not contain formSpecific')
+            assert.ok(result.includes('<genre>correspondence</genre>'), 'Should have genre from formBroad')
+            assert.ok(result.includes('<genre>personal</genre>'), 'Should have genre from formSpecific')
+            assert.ok(result.includes('digitalOrigin'), 'Should preserve other physicalDescription content')
         })
     })
     

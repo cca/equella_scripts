@@ -288,6 +288,80 @@ export function convertAuthorityElement(doc, customElement, standardElement, aut
 }
 
 /**
+ * Move elements from one location to another and optionally rename them
+ * e.g., physicalDescription/formBroad -> mods/genre
+ *
+ * @param {Document} doc - XML DOM document
+ * @param {string} sourcePath - XPath to source elements (e.g., '//physicalDescription/formBroad')
+ * @param {string} targetParentPath - XPath to target parent (e.g., '//mods')
+ * @param {string} newElementName - Name for moved elements (e.g., 'genre')
+ * @returns {Document} Modified document
+ */
+export function moveAndRenameElement(doc, sourcePath, targetParentPath, newElementName) {
+    if (!doc || !sourcePath || !targetParentPath || !newElementName) {
+        return doc
+    }
+
+    const select = xpath.useNamespaces({})
+    const sourceElements = select(sourcePath, doc)
+    const targetParents = select(targetParentPath, doc)
+    
+    if (targetParents.length === 0) {
+        return doc
+    }
+    
+    const targetParent = targetParents[0]
+
+    for (let sourceElement of sourceElements) {
+        // Skip if no text content (empty elements)
+        if (!sourceElement.textContent || !sourceElement.textContent.trim()) {
+            continue
+        }
+        
+        // Create new element with new name
+        const newElement = doc.createElement(newElementName)
+        newElement.textContent = sourceElement.textContent
+        
+        // Copy attributes
+        for (let i = 0; i < sourceElement.attributes.length; i++) {
+            const attr = sourceElement.attributes[i]
+            newElement.setAttribute(attr.name, attr.value)
+        }
+        
+        // Add to target parent
+        targetParent.appendChild(newElement)
+        
+        // Remove source element
+        if (sourceElement.parentNode) {
+            sourceElement.parentNode.removeChild(sourceElement)
+        }
+    }
+
+    return doc
+}
+
+/**
+ * Main conversion function to convert custom MODS to strict MODS
+        
+        // Add authority attribute
+        newElement.setAttribute('authority', authority)
+        
+        // Copy any existing attributes (except if they conflict)
+        for (let i = 0; i < element.attributes.length; i++) {
+            const attr = element.attributes[i]
+            if (attr.name !== 'authority') {
+                newElement.setAttribute(attr.name, attr.value)
+            }
+        }
+        
+        // Replace old element with new
+        element.parentNode.replaceChild(newElement, element)
+    }
+
+    return doc
+}
+
+/**
  * Main conversion function to convert custom MODS to strict MODS
  *
  * @param {string} xmlString - XML string to convert
@@ -335,6 +409,10 @@ export function toStrictMODS(xmlString) {
     
     // Convert authority-specific topic elements
     convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')
+    
+    // Move form elements from physicalDescription to genre
+    moveAndRenameElement(doc, '//physicalDescription/formBroad', '//mods', 'genre')
+    moveAndRenameElement(doc, '//physicalDescription/formSpecific', '//mods', 'genre')
 
     // Fix case sensitivity
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)

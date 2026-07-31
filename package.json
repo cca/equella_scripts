@@ -9,6 +9,7 @@
     "test": "mocha retention/test --config retention/test/.testretentionrc",
     "csvtest": "NODE_ENV=test mocha utilities/metadata-csv/tests",
     "grouptest": "mocha utilities/test/group --config utilities/test/.grouprc",
+    "testmods": "mocha collection-export/strict-mods.test.js",
     "lint": "eslint . --cache"
   },
   "repository": {

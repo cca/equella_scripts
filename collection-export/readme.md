@@ -54,7 +54,7 @@ ZIPs can exist as unpacked individual files or a zip attachment, we download bot
 
 Attachments that reference URLs or other EQUELLA items are not downloaded but present in the exported metadata.
 
-## Testing
+## Testing the Collection Export
 
 ```sh
 # single item test
@@ -79,3 +79,16 @@ for i in (seq 1 $n)
     echo -n $item | jq -r ".uuid, .name" ; node collect --item (echo $item | jq -r .uuid)
 end
 ```
+
+## Strict MODS Module
+
+The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XML to strict MODS schema-compliant XML by unwrapping custom wrapper elements and removing non-standard elements. Our MODS implementation uses custom "wrapper" elements (like `typeOfResourceWrapper`, `genreWrapper`, `noteWrapper`) that are not part of the official MODS schema to work with EQUELLA's contribution form repeaters.
+
+### Strict MODS Testing
+
+```sh
+# Run strict MODS tests
+npm run testmods
+```
+
+You can also download item XML to run the strict MODS conversion on your own.

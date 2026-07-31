@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeAttribute, convertAuthorityElement, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -469,6 +469,60 @@ describe('Strict MODS Conversion', () => {
             assert.strictEqual(subjectTypes.length, 0)
             assert.strictEqual(temporals.length, 1)
             assert.strictEqual(topics.length, 1)
+        })
+    })
+    
+    describe('removeAttribute', () => {
+        it('should remove href attribute from accessCondition', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <accessCondition href="https://example.com" type="use and reproduction">License text</accessCondition>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeAttribute(doc, '//accessCondition', 'href')
+            
+            const select = xpath.useNamespaces({})
+            const accessConditions = select('//accessCondition', doc)
+            
+            assert.strictEqual(accessConditions.length, 1)
+            assert.strictEqual(accessConditions[0].hasAttribute('href'), false, 'href should be removed')
+            assert.strictEqual(accessConditions[0].getAttribute('type'), 'use and reproduction', 'other attributes should be preserved')
+            assert.strictEqual(accessConditions[0].textContent, 'License text')
+        })
+        
+        it('should handle multiple elements with attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <accessCondition href="https://example.com" type="restriction">One</accessCondition>
+                <accessCondition href="https://other.com" type="use">Two</accessCondition>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeAttribute(doc, '//accessCondition', 'href')
+            
+            const select = xpath.useNamespaces({})
+            const accessConditions = select('//accessCondition', doc)
+            
+            assert.strictEqual(accessConditions.length, 2)
+            assert.strictEqual(accessConditions[0].hasAttribute('href'), false)
+            assert.strictEqual(accessConditions[1].hasAttribute('href'), false)
+        })
+        
+        it('should handle elements without the attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <accessCondition type="use">No href here</accessCondition>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            removeAttribute(doc, '//accessCondition', 'href')
+            
+            const select = xpath.useNamespaces({})
+            const accessConditions = select('//accessCondition', doc)
+            
+            assert.strictEqual(accessConditions.length, 1)
+            assert.strictEqual(accessConditions[0].textContent, 'No href here')
         })
     })
     
@@ -958,6 +1012,18 @@ describe('Strict MODS Conversion', () => {
                 'Should wrap text with languageTerm and move authority')
             assert.ok(!result.includes('<language authority'), 
                 'Language should not have authority attribute')
+        })
+        
+        it('should remove href attribute from accessCondition', () => {
+            const input = `<xml><mods>
+                <accessCondition href="https://creativecommons.org/licenses/by/4.0/" type="use and reproduction">CC-BY</accessCondition>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<accessCondition'), 'Should have accessCondition')
+            assert.ok(!result.includes('href='), 'Should not have href attribute')
+            assert.ok(result.includes('type="use and reproduction"'), 'Should preserve type attribute')
+            assert.ok(result.includes('>CC-BY</accessCondition>'), 'Should preserve text content')
         })
         
         it('should wrap relatedItem/title with titleInfo', () => {

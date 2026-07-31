@@ -177,6 +177,32 @@ export function renameElement(doc, oldName, newName, xpathContext = '//mods') {
 }
 
 /**
+ * Remove an attribute from elements
+ * e.g., remove href from accessCondition
+ *
+ * @param {Document} doc - XML DOM document
+ * @param {string} elementPath - XPath to elements (e.g., '//accessCondition')
+ * @param {string} attributeName - Name of attribute to remove
+ * @returns {Document} Modified document
+ */
+export function removeAttribute(doc, elementPath, attributeName) {
+    if (!doc || !elementPath || !attributeName) {
+        return doc
+    }
+
+    const select = xpath.useNamespaces({})
+    const elements = select(elementPath, doc)
+
+    for (let element of elements) {
+        if (element.hasAttribute(attributeName)) {
+            element.removeAttribute(attributeName)
+        }
+    }
+
+    return doc
+}
+
+/**
  * Remove non-MODS elements like dateType and subjectType
  *
  * @param {Document} doc - XML DOM document
@@ -484,6 +510,9 @@ export function toStrictMODS(xmlString) {
     
     // Wrap language text content with languageTerm and move authority attribute
     wrapTextWithChild(doc, '//mods/language', 'languageTerm', ['authority'])
+    
+    // Remove non-standard attributes
+    removeAttribute(doc, '//accessCondition', 'href')
 
     // Extract mods element and add namespace (for validation)
     const select = xpath.useNamespaces({})

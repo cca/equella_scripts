@@ -439,6 +439,71 @@ export function convertAuthorityElement(doc, customElement, standardElement, aut
 }
 
 /**
+ * Move classification elements to subject/topic with authority attribute
+ * e.g., mods/photoClassification -> mods/subject/topic with authority="local"
+ *
+ * @param {Document} doc - XML DOM document
+ * @param {string} classificationElement - Name of classification element (e.g., 'photoClassification')
+ * @param {string} authority - Authority value to add (e.g., 'local')
+ * @returns {Document} Modified document
+ */
+export function moveClassificationToSubject(doc, classificationElement, authority) {
+    if (!doc || !classificationElement || !authority) {
+        return doc
+    }
+
+    const select = xpath.useNamespaces({})
+    const classifications = select(`//mods/${classificationElement}`, doc)
+    
+    if (classifications.length === 0) {
+        return doc
+    }
+
+    // Get or find the mods element
+    const modsElements = select('//mods', doc)
+    if (modsElements.length === 0) {
+        return doc
+    }
+    const modsElement = modsElements[0]
+
+    for (let classification of classifications) {
+        // Skip empty elements
+        if (!classification.textContent || !classification.textContent.trim()) {
+            continue
+        }
+
+        // Create subject wrapper
+        const subject = doc.createElement('subject')
+        
+        // Create topic element with authority
+        const topic = doc.createElement('topic')
+        topic.textContent = classification.textContent
+        topic.setAttribute('authority', authority)
+        
+        // Copy any existing attributes from classification (except authority which we set)
+        for (let i = 0; i < classification.attributes.length; i++) {
+            const attr = classification.attributes[i]
+            if (attr.name !== 'authority') {
+                topic.setAttribute(attr.name, attr.value)
+            }
+        }
+        
+        // Build structure: subject > topic
+        subject.appendChild(topic)
+        
+        // Add subject to mods
+        modsElement.appendChild(subject)
+        
+        // Remove original classification element
+        if (classification.parentNode) {
+            classification.parentNode.removeChild(classification)
+        }
+    }
+
+    return doc
+}
+
+/**
  * Move elements from one location to another and optionally rename them
  * e.g., physicalDescription/formBroad -> mods/genre
  *
@@ -580,6 +645,10 @@ export function toStrictMODS(xmlString) {
     
     // Wrap language text content with languageTerm and move authority attribute
     wrapTextWithChild(doc, '//mods/language', 'languageTerm', ['authority'])
+    
+    // Move classification elements to subject/topic
+    moveClassificationToSubject(doc, 'photoClassification', 'local')
+    removeElement(doc, 'photoClassification')  // Remove any remaining classification elements
     
     // Remove non-standard attributes
     removeAttribute(doc, '//accessCondition', 'href')

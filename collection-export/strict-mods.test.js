@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -725,6 +725,85 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('moveClassificationToSubject', () => {
+        it('should move photoClassification to subject/topic with authority', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <photoClassification>photographs</photoClassification>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveClassificationToSubject(doc, 'photoClassification', 'local')
+            
+            const select = xpath.useNamespaces({})
+            const photoClassifications = select('//photoClassification', doc)
+            const subjects = select('//subject', doc)
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(photoClassifications.length, 0, 'photoClassification should be removed')
+            assert.strictEqual(subjects.length, 1, 'subject should be created')
+            assert.strictEqual(topics.length, 1, 'topic should be created')
+            assert.strictEqual(topics[0].textContent, 'photographs')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'local')
+        })
+        
+        it('should handle multiple photoClassification elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <photoClassification>portraits</photoClassification>
+                <photoClassification>landscapes</photoClassification>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveClassificationToSubject(doc, 'photoClassification', 'local')
+            
+            const select = xpath.useNamespaces({})
+            const subjects = select('//subject', doc)
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(subjects.length, 2, 'Two subjects should be created')
+            assert.strictEqual(topics.length, 2, 'Two topics should be created')
+            assert.strictEqual(topics[0].textContent, 'portraits')
+            assert.strictEqual(topics[1].textContent, 'landscapes')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'local')
+            assert.strictEqual(topics[1].getAttribute('authority'), 'local')
+        })
+        
+        it('should skip empty photoClassification elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <photoClassification/>
+                <photoClassification>  </photoClassification>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveClassificationToSubject(doc, 'photoClassification', 'local')
+            
+            const select = xpath.useNamespaces({})
+            const subjects = select('//subject', doc)
+            
+            assert.strictEqual(subjects.length, 0, 'No subjects should be created for empty classifications')
+        })
+        
+        it('should preserve existing attributes from photoClassification', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <photoClassification type="genre">architectural</photoClassification>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            moveClassificationToSubject(doc, 'photoClassification', 'local')
+            
+            const select = xpath.useNamespaces({})
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(topics.length, 1)
+            assert.strictEqual(topics[0].getAttribute('authority'), 'local')
+            assert.strictEqual(topics[0].getAttribute('type'), 'genre')
+        })
+    })
+    
     describe('wrapElement', () => {
         it('should wrap relatedItem/title with titleInfo', () => {
             const parser = new xmldom()
@@ -1203,6 +1282,21 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('<part>'), 'Should have part element')
             assert.ok(result.includes('<text>filename.pdf</text>'), 'Should rename title to text in part')
             assert.ok(!result.includes('<part><title>'), 'Should not have title directly in part')
+        })
+        
+        it('should move photoClassification to subject/topic', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <photoClassification>architectural photography</photoClassification>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('photoClassification'), 'Should not have photoClassification')
+            assert.ok(result.includes('<subject>'), 'Should have subject wrapper')
+            assert.ok(result.includes('<topic authority="local">architectural photography</topic>'), 'Should have topic with authority')
+        })
+        
+        it('should wrap relatedItem/title with titleInfo', () => {
         })
         
         it('should wrap relatedItem/title with titleInfo', () => {

@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -444,31 +444,106 @@ describe('Strict MODS Conversion', () => {
             const parser = new xmldom()
             const input = `<xml><mods><origininfo><dateType>dateCreated</dateType><place/></origininfo></mods></xml>`
             const doc = parser.parseFromString(input, 'text/xml')
-            
+
             removeElement(doc, 'dateType', '//origininfo')
-            
+
             const select = xpath.useNamespaces({})
             const dateTypes = select('//origininfo/dateType', doc)
             const places = select('//origininfo/place', doc)
-            
+
             assert.strictEqual(dateTypes.length, 0)
             assert.strictEqual(places.length, 1)
         })
-        
+
         it('should remove subjectType elements', () => {
             const parser = new xmldom()
             const doc = parser.parseFromString(fixtures.subjectWithType.input, 'text/xml')
-            
+
             removeElement(doc, 'subjectType', '//subject')
-            
+
             const select = xpath.useNamespaces({})
             const subjectTypes = select('//subject/subjectType', doc)
             const temporals = select('//subject/temporal', doc)
             const topics = select('//subject/topic', doc)
-            
+
             assert.strictEqual(subjectTypes.length, 0)
             assert.strictEqual(temporals.length, 1)
             assert.strictEqual(topics.length, 1)
+        })
+    })
+    
+    describe('convertAuthorityElement', () => {
+        it('should convert topicCONA to topic with authority="cona"', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <subject><topicCONA>Architecture</topicCONA></subject>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')
+            
+            const select = xpath.useNamespaces({})
+            const topicCONAs = select('//subject/topicCONA', doc)
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(topicCONAs.length, 0, 'topicCONA should be removed')
+            assert.strictEqual(topics.length, 1, 'topic should exist')
+            assert.strictEqual(topics[0].textContent, 'Architecture')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'cona')
+        })
+        
+        it('should handle multiple topicCONA elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <subject><topicCONA>Architecture</topicCONA></subject>
+                <subject><topicCONA>Sculpture</topicCONA></subject>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')
+            
+            const select = xpath.useNamespaces({})
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(topics.length, 2)
+            assert.strictEqual(topics[0].textContent, 'Architecture')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'cona')
+            assert.strictEqual(topics[1].textContent, 'Sculpture')
+            assert.strictEqual(topics[1].getAttribute('authority'), 'cona')
+        })
+        
+        it('should preserve existing attributes on custom element', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <subject><topicCONA type="genre">Painting</topicCONA></subject>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')
+            
+            const select = xpath.useNamespaces({})
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(topics.length, 1)
+            assert.strictEqual(topics[0].getAttribute('authority'), 'cona')
+            assert.strictEqual(topics[0].getAttribute('type'), 'genre')
+        })
+        
+        it('should handle empty topicCONA elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <subject><topicCONA/></subject>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')
+            
+            const select = xpath.useNamespaces({})
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(topics.length, 1)
+            assert.strictEqual(topics[0].textContent, '')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'cona')
         })
     })
     
@@ -566,10 +641,23 @@ describe('Strict MODS Conversion', () => {
                 <relateditem><title>Test</title></relateditem>
             </mods></xml>`
             const result = toStrictMODS(input)
-            
+
             assert.ok(!result.includes('subjectType'))
             assert.ok(result.includes('<relatedItem>'))
             assert.ok(!result.includes('<relateditem>'))
+        })
+        
+        it('should convert topicCONA to topic with authority', () => {
+            const input = `<xml><mods>
+                <subject><topicCONA>Architecture</topicCONA></subject>
+                <subject><topicCONA>Sculpture</topicCONA></subject>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('topicCONA'), 'Should not contain topicCONA')
+            assert.ok(result.includes('<topic authority="cona">Architecture</topic>'), 
+                'Should convert to topic with authority="cona"')
+            assert.ok(result.includes('<topic authority="cona">Sculpture</topic>'))
         })
     })
     

@@ -202,6 +202,52 @@ export function removeElement(doc, elementName, context = '//mods') {
 }
 
 /**
+ * Convert custom authority-specific topic elements to standard topic with authority attribute
+ * e.g., topicCONA -> topic with authority="cona"
+ *
+ * @param {Document} doc - XML DOM document
+ * @param {string} customElement - Name of custom element (e.g., 'topicCONA')
+ * @param {string} standardElement - Name of standard element (e.g., 'topic')
+ * @param {string} authority - Authority value to add (e.g., 'cona')
+ * @returns {Document} Modified document
+ */
+export function convertAuthorityElement(doc, customElement, standardElement, authority) {
+    if (!doc || !customElement || !standardElement || !authority) {
+        return doc
+    }
+
+    const select = xpath.useNamespaces({})
+    const elements = select(`//subject/${customElement}`, doc)
+
+    for (let element of elements) {
+        if (!element.parentNode) {
+            continue
+        }
+
+        const newElement = doc.createElement(standardElement)
+        
+        // Copy text content
+        newElement.textContent = element.textContent
+        
+        // Add authority attribute
+        newElement.setAttribute('authority', authority)
+        
+        // Copy any existing attributes (except if they conflict)
+        for (let i = 0; i < element.attributes.length; i++) {
+            const attr = element.attributes[i]
+            if (attr.name !== 'authority') {
+                newElement.setAttribute(attr.name, attr.value)
+            }
+        }
+        
+        // Replace old element with new
+        element.parentNode.replaceChild(newElement, element)
+    }
+
+    return doc
+}
+
+/**
  * Main conversion function to convert custom MODS to strict MODS
  *
  * @param {string} xmlString - XML string to convert
@@ -245,6 +291,9 @@ export function toStrictMODS(xmlString) {
     // Remove non-MODS elements
     removeElement(doc, CUSTOM_ELEMENTS.DATE_TYPE, XPATH_CONTEXTS.ORIGININFO)
     removeElement(doc, CUSTOM_ELEMENTS.SUBJECT_TYPE, XPATH_CONTEXTS.SUBJECT)
+    
+    // Convert authority-specific topic elements
+    convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')
 
     // Fix case sensitivity
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)

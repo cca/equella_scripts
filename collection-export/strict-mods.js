@@ -92,17 +92,20 @@ export function unwrapDateCreated(doc) {
 }
 
 /**
- * Fix case sensitivity issues: origininfo -> originInfo
- *
+ * Helper function to rename elements while preserving attributes and children
+ * 
  * @param {Document} doc - XML DOM document
+ * @param {string} oldName - Current element name
+ * @param {string} newName - New element name
+ * @param {string} [xpath='//mods'] - XPath context to search within
  * @returns {Document} Modified document
  */
-export function fixOriginInfoCase(doc) {
+export function renameElement(doc, oldName, newName, xpathContext = '//mods') {
     const select = xpath.useNamespaces({})
-    const elements = select('//mods/origininfo', doc)
+    const elements = select(`${xpathContext}/${oldName}`, doc)
 
     for (let element of elements) {
-        const newElement = doc.createElement('originInfo')
+        const newElement = doc.createElement(newName)
 
         // Copy all attributes
         for (let i = 0; i < element.attributes.length; i++) {
@@ -158,12 +161,14 @@ export function toStrictMODS(xmlString) {
 
     // Handle date wrappers and ranges
     unwrapDateCreated(doc)
-
+    
     // Remove non-MODS elements
     removeElement(doc, 'dateType', '//origininfo')
-
+    removeElement(doc, 'subjectType', '//subject')
+    
     // Fix case sensitivity
-    fixOriginInfoCase(doc)
+    renameElement(doc, 'origininfo', 'originInfo')
+    renameElement(doc, 'relateditem', 'relatedItem')
 
     // Serialize back to string
     return doc.toString()

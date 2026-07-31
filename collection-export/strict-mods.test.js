@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, fixOriginInfoCase, removeElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -180,6 +180,28 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <originInfo/>
+        </mods></xml>`
+    },
+    
+    subjectWithType: {
+        input: `<xml><mods>
+            <subject><subjectType>temporal</subjectType><temporal>1922-1935</temporal></subject>
+            <subject><subjectType>topic</subjectType><topic authority="lcsh">Test</topic></subject>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <subject><temporal>1922-1935</temporal></subject>
+            <subject><topic authority="lcsh">Test</topic></subject>
+        </mods></xml>`
+    },
+    
+    relateditemCase: {
+        input: `<xml><mods>
+            <relateditem type="host"><title>Host Title</title></relateditem>
+            <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <relatedItem type="host"><title>Host Title</title></relatedItem>
+            <titleInfo><title>Test Item</title></titleInfo>
         </mods></xml>`
     }
 }
@@ -369,13 +391,29 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
-    describe('fixOriginInfoCase', () => {
+    describe('renameElement', () => {
+        it('should rename element while preserving attributes and children', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods><oldname attr="test"><child>content</child></oldname></mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            renameElement(doc, 'oldname', 'newName')
+            
+            const result = doc.toString()
+            
+            assert.ok(result.includes('<newName'))
+            assert.ok(result.includes('</newName>'))
+            assert.ok(!result.includes('<oldname'))
+            assert.ok(result.includes('attr="test"'))
+            assert.ok(result.includes('<child>content</child>'))
+        })
+        
         it('should convert origininfo to originInfo', () => {
             const parser = new xmldom()
             const input = `<xml><mods><origininfo><place/></origininfo></mods></xml>`
             const doc = parser.parseFromString(input, 'text/xml')
             
-            fixOriginInfoCase(doc)
+            renameElement(doc, 'origininfo', 'originInfo')
             
             const result = doc.toString()
             
@@ -383,6 +421,21 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('</originInfo>'))
             assert.ok(!result.includes('<origininfo>'))
             assert.ok(!result.includes('</origininfo>'))
+        })
+        
+        it('should convert relateditem to relatedItem', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.relateditemCase.input, 'text/xml')
+            
+            renameElement(doc, 'relateditem', 'relatedItem')
+            
+            const result = doc.toString()
+            
+            assert.ok(result.includes('<relatedItem'))
+            assert.ok(result.includes('</relatedItem>'))
+            assert.ok(!result.includes('<relateditem'))
+            assert.ok(!result.includes('</relateditem>'))
+            assert.ok(result.includes('type="host"'))
         })
     })
     
@@ -400,6 +453,22 @@ describe('Strict MODS Conversion', () => {
             
             assert.strictEqual(dateTypes.length, 0)
             assert.strictEqual(places.length, 1)
+        })
+        
+        it('should remove subjectType elements', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subjectWithType.input, 'text/xml')
+            
+            removeElement(doc, 'subjectType', '//subject')
+            
+            const select = xpath.useNamespaces({})
+            const subjectTypes = select('//subject/subjectType', doc)
+            const temporals = select('//subject/temporal', doc)
+            const topics = select('//subject/topic', doc)
+            
+            assert.strictEqual(subjectTypes.length, 0)
+            assert.strictEqual(temporals.length, 1)
+            assert.strictEqual(topics.length, 1)
         })
     })
     
@@ -444,6 +513,18 @@ describe('Strict MODS Conversion', () => {
             const expected = normalizeXML(fixtures.dateCreatedRange.expected)
             
             assert.strictEqual(result, expected)
+        })
+        
+        it('should remove subjectType and fix relateditem case', () => {
+            const input = `<xml><mods>
+                <subject><subjectType>topic</subjectType><topic>Test</topic></subject>
+                <relateditem><title>Test</title></relateditem>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('subjectType'))
+            assert.ok(result.includes('<relatedItem>'))
+            assert.ok(!result.includes('<relateditem>'))
         })
     })
 })

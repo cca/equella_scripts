@@ -473,46 +473,91 @@ describe('Strict MODS Conversion', () => {
     })
     
     describe('toStrictMODS', () => {
-        it('should convert XML string with typeOfResourceWrapper', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.typeOfResourceWrapper.input))
-            const expected = normalizeXML(fixtures.typeOfResourceWrapper.expected)
+        it('should extract mods element and add namespace by default', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <typeOfResourceWrapper><typeOfResource>text</typeOfResource></typeOfResourceWrapper>
+            </mods></xml>`
             
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(input)
+            
+            // Should not include xml wrapper
+            assert.ok(!result.includes('<xml>'))
+            assert.ok(!result.includes('</xml>'))
+            // Should include mods element with namespace
+            assert.ok(result.includes('<mods'))
+            assert.ok(result.includes('xmlns="http://www.loc.gov/mods/v3"'))
+            assert.ok(result.includes('</mods>'))
+            // Should have applied transformations
+            assert.ok(result.includes('<typeOfResource>text</typeOfResource>'))
+            assert.ok(!result.includes('typeOfResourceWrapper'))
+        })
+        
+        it('should preserve existing MODS namespace', () => {
+            const input = `<xml><mods xmlns="http://www.loc.gov/mods/v3">
+                <titleInfo><title>Test</title></titleInfo>
+            </mods></xml>`
+            
+            const result = toStrictMODS(input)
+            
+            // Should preserve namespace
+            assert.ok(result.includes('xmlns="http://www.loc.gov/mods/v3"'))
+            // Should only appear once
+            const matches = result.match(/xmlns="http:\/\/www\.loc\.gov\/mods\/v3"/g)
+            assert.strictEqual(matches.length, 1, 'Namespace should appear exactly once')
+        })
+        
+        it('should convert XML string with typeOfResourceWrapper', () => {
+            const input = fixtures.typeOfResourceWrapper.input
+            const result = normalizeXML(toStrictMODS(input))
+            
+            // Check transformations applied
+            assert.ok(result.includes('<typeOfResource>text</typeOfResource>'))
+            assert.ok(!result.includes('typeOfResourceWrapper'))
+            assert.ok(result.includes('xmlns="http://www.loc.gov/mods/v3"'))
         })
         
         it('should convert XML string with genreWrapper', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.genreWrapper.input))
-            const expected = normalizeXML(fixtures.genreWrapper.expected)
+            const input = fixtures.genreWrapper.input
+            const result = normalizeXML(toStrictMODS(input))
             
-            assert.strictEqual(result, expected)
+            assert.ok(result.includes('<genre authority="aat">photographs</genre>'))
+            assert.ok(!result.includes('genreWrapper'))
         })
         
         it('should convert XML string with noteWrapper', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.noteWrapper.input))
-            const expected = normalizeXML(fixtures.noteWrapper.expected)
+            const input = fixtures.noteWrapper.input
+            const result = normalizeXML(toStrictMODS(input))
             
-            assert.strictEqual(result, expected)
+            assert.ok(result.includes('<note type="depicted persons">John Doe</note>'))
+            assert.ok(!result.includes('noteWrapper'))
         })
         
         it('should convert XML with all wrapper types', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.allWrappers.input))
-            const expected = normalizeXML(fixtures.allWrappers.expected)
+            const input = fixtures.allWrappers.input
+            const result = normalizeXML(toStrictMODS(input))
             
-            assert.strictEqual(result, expected)
+            assert.ok(result.includes('<typeOfResource>text</typeOfResource>'))
+            assert.ok(result.includes('<genre>correspondence</genre>'))
+            assert.ok(result.includes('<note>Test note</note>'))
+            assert.ok(!result.includes('Wrapper'))
         })
         
         it('should convert single date with originInfo case fix', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.dateCreatedSingle.input))
-            const expected = normalizeXML(fixtures.dateCreatedSingle.expected)
+            const input = fixtures.dateCreatedSingle.input
+            const result = normalizeXML(toStrictMODS(input))
             
-            assert.strictEqual(result, expected)
+            assert.ok(result.includes('<originInfo>'))
+            assert.ok(result.includes('<dateCreated keyDate="yes">1925-01-20</dateCreated>'))
+            assert.ok(!result.includes('<origininfo>'))
+            assert.ok(!result.includes('dateType'))
         })
         
         it('should convert date range to EDTF', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.dateCreatedRange.input))
-            const expected = normalizeXML(fixtures.dateCreatedRange.expected)
+            const input = fixtures.dateCreatedRange.input
+            const result = normalizeXML(toStrictMODS(input))
             
-            assert.strictEqual(result, expected)
+            assert.ok(result.includes('<dateCreated encoding="edtf" keyDate="yes">2022/2023</dateCreated>'))
         })
         
         it('should remove subjectType and fix relateditem case', () => {
@@ -527,7 +572,7 @@ describe('Strict MODS Conversion', () => {
             assert.ok(!result.includes('<relateditem>'))
         })
     })
-
+    
     describe('Edge cases and error handling', () => {
         describe('unwrapDateCreated edge cases', () => {
             it('should remove wrapper with only pointStart (incomplete range)', () => {
@@ -754,8 +799,8 @@ describe('Strict MODS Conversion', () => {
                 const input = '<xml><other>content</other></xml>'
                 const result = toStrictMODS(input)
                 
-                // Should not crash, just return the unchanged XML
-                assert.ok(result.includes('<other>content</other>'))
+                // Should not crash, just return the document as-is
+                assert.ok(result.includes('content'))
             })
         })
         

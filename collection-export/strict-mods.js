@@ -205,7 +205,7 @@ export function removeElement(doc, elementName, context = '//mods') {
  * Main conversion function to convert custom MODS to strict MODS
  *
  * @param {string} xmlString - XML string to convert
- * @returns {string} Converted XML string
+ * @returns {string} Converted MODS XML string with namespace, ready for validation
  * @throws {Error} If XML is malformed, cannot be parsed, or input is invalid
  */
 export function toStrictMODS(xmlString) {
@@ -250,6 +250,53 @@ export function toStrictMODS(xmlString) {
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)
     renameElement(doc, CASE_FIXES.RELATEDITEM.old, CASE_FIXES.RELATEDITEM.new)
 
-    // Serialize back to string
+    // Extract mods element and add namespace (for validation)
+    const select = xpath.useNamespaces({})
+    const modsElements = select('//mods', doc)
+    if (modsElements.length > 0) {
+        const modsElement = modsElements[0]
+
+        // Add MODS namespace if not present (required for schema validation)
+        if (!modsElement.getAttribute('xmlns')) {
+            modsElement.setAttribute('xmlns', 'http://www.loc.gov/mods/v3')
+        }
+
+        return modsElement.toString()
+    }
+
+    // Fallback: return full document if no mods element found
     return doc.toString()
+}
+
+// CLI functionality - run when executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    const fs = await import('fs')
+    const path = await import('path')
+
+    const args = process.argv.slice(2)
+
+    if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+        console.error(`Usage: node strict-mods.js <input-file>
+
+Convert EQUELLA custom MODS XML to strict MODS schema-compliant XML.
+Extracts the <mods> element with proper namespace for validation.
+`)
+        process.exit(args.includes('--help') || args.includes('-h') ? 0 : 1)
+    }
+
+    const inputFile = args.find(arg => !arg.startsWith('--'))
+
+    if (!inputFile) {
+        console.error('Error: No input file specified')
+        process.exit(1)
+    }
+
+    try {
+        const xmlString = fs.readFileSync(inputFile, 'utf-8')
+        const result = toStrictMODS(xmlString)
+        console.log(result)
+    } catch (error) {
+        console.error(`Error: ${error.message}`)
+        process.exit(1)
+    }
 }

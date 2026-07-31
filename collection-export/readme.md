@@ -92,3 +92,18 @@ npm run testmods
 ```
 
 You can also download item XML to run the strict MODS conversion on your own.
+
+### Converting & Validating MODS Files
+
+The strict-mods module can be run as a command-line tool to convert and validate MODS metadata. It automatically extracts the `<mods>` element and adds the required MODS namespace.
+
+```sh
+# Convert an item's metadata to strict MODS (outputs <mods> element with namespace)
+node strict-mods.js data/item-uuid/metadata/metadata.xml
+
+# Validate against the MODS 3.8 schema (requires xmllint)
+# First download the MODS schema: https://www.loc.gov/standards/mods/mods-schemas.html
+wget https://www.loc.gov/standards/mods/v3/mods-3-8.xsd -O data/mods.xsd
+node strict-mods.js data/item-uuid/metadata/metadata.xml | \
+    xmllint --noout --schema data/mods.xsd -
+```

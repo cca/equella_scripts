@@ -291,6 +291,7 @@ export function toStrictMODS(xmlString) {
     // Remove non-MODS elements
     removeElement(doc, CUSTOM_ELEMENTS.DATE_TYPE, XPATH_CONTEXTS.ORIGININFO)
     removeElement(doc, CUSTOM_ELEMENTS.SUBJECT_TYPE, XPATH_CONTEXTS.SUBJECT)
+    removeElement(doc, 'artstorClassification')
     
     // Convert authority-specific topic elements
     convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')

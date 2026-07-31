@@ -659,6 +659,17 @@ describe('Strict MODS Conversion', () => {
                 'Should convert to topic with authority="cona"')
             assert.ok(result.includes('<topic authority="cona">Sculpture</topic>'))
         })
+        
+        it('should remove artstorClassification elements', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <artstorClassification authority="artstor">photographs</artstorClassification>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('artstorClassification'), 'Should remove artstorClassification')
+            assert.ok(result.includes('<title>Test</title>'), 'Should preserve other content')
+        })
     })
     
     describe('Edge cases and error handling', () => {

@@ -1,5 +1,14 @@
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
+import {
+    safeSelect,
+    copyAttributes,
+    moveChildren,
+    isEmptyOrWhitespace,
+    moveAndTransformElement,
+    createElement,
+    isElementEmpty
+} from './strict-mods-helpers.js'
 
 /**
  * Convert VAULT's custom MODS XML to strict MODS schema-compliant XML
@@ -9,22 +18,31 @@ import { DOMParser as xmldom } from '@xmldom/xmldom'
 
 // XPath contexts for different element types
 const XPATH_CONTEXTS = {
+    ACCESS_CONDITION: '//accessCondition',
+    LANGUAGE: '//mods/language',
     MODS: '//mods',
+    ORIGININFO_CAMEL: '//originInfo',
     ORIGININFO: '//origininfo',
+    PART: '//part',
+    PHYSICAL_DESCRIPTION: '//physicalDescription',
+    RELATEDITEM: '//relatedItem',
     SUBJECT: '//subject',
 }
 
 // Custom EQUELLA wrapper elements to unwrap
 const WRAPPER_ELEMENTS = {
-    TYPE_OF_RESOURCE: 'typeOfResourceWrapper',
+    DATE_CREATED: 'dateCreatedWrapper',
     GENRE: 'genreWrapper',
     NOTE: 'noteWrapper',
-    DATE_CREATED: 'dateCreatedWrapper',
+    PHYSICAL_DESCRIPTION_NOTE: 'physicalDescriptionNote',
+    TYPE_OF_RESOURCE: 'typeOfResourceWrapper',
 }
 
 // Non-standard elements to remove
 const CUSTOM_ELEMENTS = {
+    ARTSTOR_CLASSIFICATION: 'artstorClassification',
     DATE_TYPE: 'dateType',
+    PHOTO_CLASSIFICATION: 'photoClassification',
     SUBJECT_TYPE: 'subjectType',
 }
 
@@ -32,6 +50,17 @@ const CUSTOM_ELEMENTS = {
 const CASE_FIXES = {
     ORIGININFO: { old: 'origininfo', new: 'originInfo' },
     RELATEDITEM: { old: 'relateditem', new: 'relatedItem' },
+}
+
+// Element names for transformations
+const ELEMENT_NAMES = {
+    GENRE: 'genre',
+    LANGUAGE_TERM: 'languageTerm',
+    NOTE: 'note',
+    SUBJECT: 'subject',
+    TEXT: 'text',
+    TITLE_INFO: 'titleInfo',
+    TOPIC: 'topic',
 }
 
 /**
@@ -43,27 +72,19 @@ const CASE_FIXES = {
  * @param {string} [context='//mods'] - XPath context to search within (default: //mods)
  * @returns {Document} Modified document
  */
-export function unwrapSimpleElement(doc, wrapperName, context = '//mods') {
+export function unwrapSimpleElement(doc, wrapperName, context = XPATH_CONTEXTS.MODS) {
     if (!doc || !wrapperName) {
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const wrappers = select(`${context}//${wrapperName}`, doc)
+    const wrappers = safeSelect(`${context}//${wrapperName}`, doc)
 
     for (let wrapper of wrappers) {
         const parent = wrapper.parentNode
-
-        if (!parent) {
-            continue
-        }
-
-        // Move all child nodes to the parent, replacing the wrapper
+        // Move all children to parent, inserting before the wrapper to preserve order
         while (wrapper.firstChild) {
             parent.insertBefore(wrapper.firstChild, wrapper)
         }
-
-        // Remove the now-empty wrapper
         parent.removeChild(wrapper)
     }
 
@@ -85,17 +106,13 @@ export function unwrapDateCreated(doc) {
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const wrappers = select('//origininfo/dateCreatedWrapper', doc)
+    const wrappers = safeSelect(`${XPATH_CONTEXTS.ORIGININFO}/${WRAPPER_ELEMENTS.DATE_CREATED}`, doc)
 
     for (let wrapper of wrappers) {
         const parent = wrapper.parentNode
+        const select = xpath.useNamespaces({})
 
-        if (!parent) {
-            continue
-        }
-
-        // Get child elements (reuse select from outer scope)
+        // Get child elements
         const dateCreated = select('dateCreated', wrapper)[0]
         const pointStart = select('pointStart', wrapper)[0]
         const pointEnd = select('pointEnd', wrapper)[0]
@@ -113,15 +130,11 @@ export function unwrapDateCreated(doc) {
         // Case 2: Has a date range (pointStart AND pointEnd both present)
         else if (startValue && endValue) {
             // Create new dateCreated element with EDTF range
-            const newDate = doc.createElement('dateCreated')
-            newDate.textContent = `${startValue}/${endValue}`
-            newDate.setAttribute('encoding', 'edtf')
-
-            // Copy keyDate attribute if present
+            const attributes = { encoding: 'edtf' }
             if (dateCreated?.hasAttribute('keyDate')) {
-                newDate.setAttribute('keyDate', dateCreated.getAttribute('keyDate'))
+                attributes.keyDate = dateCreated.getAttribute('keyDate')
             }
-
+            const newDate = createElement(doc, 'dateCreated', `${startValue}/${endValue}`, attributes)
             parent.insertBefore(newDate, wrapper)
         }
         // Case 3: Empty, or only has pointStart OR pointEnd (incomplete range)
@@ -143,33 +156,17 @@ export function unwrapDateCreated(doc) {
  * @param {string} [xpathContext='//mods'] - XPath context to search within (searches direct children by default)
  * @returns {Document} Modified document
  */
-export function renameElement(doc, oldName, newName, xpathContext = '//mods') {
+export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEXTS.MODS) {
     if (!doc || !oldName || !newName) {
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const elements = select(`${xpathContext}/${oldName}`, doc)
+    const elements = safeSelect(`${xpathContext}/${oldName}`, doc)
 
     for (let element of elements) {
-        if (!element.parentNode) {
-            continue
-        }
-
         const newElement = doc.createElement(newName)
-
-        // Copy all attributes
-        for (let i = 0; i < element.attributes.length; i++) {
-            const attr = element.attributes[i]
-            newElement.setAttribute(attr.name, attr.value)
-        }
-
-        // Move all children
-        while (element.firstChild) {
-            newElement.appendChild(element.firstChild)
-        }
-
-        // Replace in parent
+        copyAttributes(element, newElement)
+        moveChildren(element, newElement)
         element.parentNode.replaceChild(newElement, element)
     }
 
@@ -189,32 +186,6 @@ export function removeEmptyElements(doc) {
     }
 
     /**
-     * Check if an element is empty (recursively)
-     * Empty = no attributes AND no text content AND all children are empty
-     */
-    function isElementEmpty(element) {
-        // Has attributes? Not empty
-        if (element.attributes && element.attributes.length > 0) {
-            return false
-        }
-
-        // Check all child nodes
-        for (let node of element.childNodes) {
-            if (node.nodeType === 3) { // TEXT_NODE
-                if (node.nodeValue.trim()) {
-                    return false // Has text content
-                }
-            } else if (node.nodeType === 1) { // ELEMENT_NODE
-                if (!isElementEmpty(node)) {
-                    return false // Has non-empty child element
-                }
-            }
-        }
-
-        return true // No attributes, no text, all children empty
-    }
-
-    /**
      * Remove empty elements recursively (bottom-up)
      */
     function removeEmpty(element) {
@@ -231,8 +202,7 @@ export function removeEmptyElements(doc) {
     }
 
     // Start from root
-    const select = xpath.useNamespaces({})
-    const modsElements = select('//mods', doc)
+    const modsElements = safeSelect(XPATH_CONTEXTS.MODS, doc)
     for (let mods of modsElements) {
         removeEmpty(mods)
     }
@@ -254,8 +224,7 @@ export function removeAttribute(doc, elementPath, attributeName) {
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const elements = select(elementPath, doc)
+    const elements = safeSelect(elementPath, doc)
 
     for (let element of elements) {
         if (element.hasAttribute(attributeName)) {
@@ -274,18 +243,15 @@ export function removeAttribute(doc, elementPath, attributeName) {
  * @param {string} [context='//mods'] - XPath context to search within
  * @returns {Document} Modified document
  */
-export function removeElement(doc, elementName, context = '//mods') {
+export function removeElement(doc, elementName, context = XPATH_CONTEXTS.MODS) {
     if (!doc || !elementName) {
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const elements = select(`${context}//${elementName}`, doc)
+    const elements = safeSelect(`${context}//${elementName}`, doc)
 
     for (let element of elements) {
-        if (element.parentNode) {
-            element.parentNode.removeChild(element)
-        }
+        element.parentNode.removeChild(element)
     }
 
     return doc
@@ -306,8 +272,8 @@ export function wrapElement(doc, parentPath, childElement, wrapperElement) {
         return doc
     }
 
+    const parents = safeSelect(parentPath, doc)
     const select = xpath.useNamespaces({})
-    const parents = select(parentPath, doc)
 
     for (let parent of parents) {
         // Find direct child elements with the specified name
@@ -333,7 +299,7 @@ export function wrapElement(doc, parentPath, childElement, wrapperElement) {
 
 /**
  * Wrap text content of an element with a child element and move attributes
- * e.g., <language authority="iso639-2b">eng</language> -> 
+ * e.g., <language authority="iso639-2b">eng</language> ->
  *       <language><languageTerm authority="iso639-2b">eng</languageTerm></language>
  *
  * @param {Document} doc - XML DOM document
@@ -347,8 +313,7 @@ export function wrapTextWithChild(doc, parentPath, childElement, attributesToMov
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const parents = select(parentPath, doc)
+    const parents = safeSelect(parentPath, doc)
 
     for (let parent of parents) {
         // Only process if element has direct text content (not already wrapped)
@@ -359,14 +324,14 @@ export function wrapTextWithChild(doc, parentPath, childElement, attributesToMov
                 break
             }
         }
-        
+
         if (!hasDirectText) {
             continue
         }
 
         // Create child element
         const child = doc.createElement(childElement)
-        
+
         // Move text content to child
         while (parent.firstChild) {
             if (parent.firstChild.nodeType === 3) { // TEXT_NODE
@@ -376,7 +341,7 @@ export function wrapTextWithChild(doc, parentPath, childElement, attributesToMov
                 break
             }
         }
-        
+
         // Move specified attributes from parent to child
         for (let attrName of attributesToMove) {
             if (parent.hasAttribute(attrName)) {
@@ -384,7 +349,7 @@ export function wrapTextWithChild(doc, parentPath, childElement, attributesToMov
                 parent.removeAttribute(attrName)
             }
         }
-        
+
         // Add child to parent
         parent.appendChild(child)
     }
@@ -407,31 +372,11 @@ export function convertAuthorityElement(doc, customElement, standardElement, aut
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const elements = select(`//subject/${customElement}`, doc)
+    const elements = safeSelect(`${XPATH_CONTEXTS.SUBJECT}/${customElement}`, doc)
 
     for (let element of elements) {
-        if (!element.parentNode) {
-            continue
-        }
-
-        const newElement = doc.createElement(standardElement)
-        
-        // Copy text content
-        newElement.textContent = element.textContent
-        
-        // Add authority attribute
-        newElement.setAttribute('authority', authority)
-        
-        // Copy any existing attributes (except if they conflict)
-        for (let i = 0; i < element.attributes.length; i++) {
-            const attr = element.attributes[i]
-            if (attr.name !== 'authority') {
-                newElement.setAttribute(attr.name, attr.value)
-            }
-        }
-        
-        // Replace old element with new
+        const newElement = createElement(doc, standardElement, element.textContent, { authority })
+        copyAttributes(element, newElement, ['authority']) // Skip authority since we're setting it
         element.parentNode.replaceChild(newElement, element)
     }
 
@@ -452,55 +397,17 @@ export function moveClassificationToSubject(doc, classificationElement, authorit
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const classifications = select(`//mods/${classificationElement}`, doc)
-    
-    if (classifications.length === 0) {
-        return doc
-    }
-
-    // Get or find the mods element
-    const modsElements = select('//mods', doc)
-    if (modsElements.length === 0) {
-        return doc
-    }
-    const modsElement = modsElements[0]
-
-    for (let classification of classifications) {
-        // Skip empty elements
-        if (!classification.textContent || !classification.textContent.trim()) {
-            continue
+    return moveAndTransformElement(
+        doc,
+        `${XPATH_CONTEXTS.MODS}/${classificationElement}`,
+        XPATH_CONTEXTS.MODS,
+        ELEMENT_NAMES.TOPIC,
+        {
+            wrapperElement: ELEMENT_NAMES.SUBJECT,
+            addAttributes: { authority },
+            skipEmpty: true
         }
-
-        // Create subject wrapper
-        const subject = doc.createElement('subject')
-        
-        // Create topic element with authority
-        const topic = doc.createElement('topic')
-        topic.textContent = classification.textContent
-        topic.setAttribute('authority', authority)
-        
-        // Copy any existing attributes from classification (except authority which we set)
-        for (let i = 0; i < classification.attributes.length; i++) {
-            const attr = classification.attributes[i]
-            if (attr.name !== 'authority') {
-                topic.setAttribute(attr.name, attr.value)
-            }
-        }
-        
-        // Build structure: subject > topic
-        subject.appendChild(topic)
-        
-        // Add subject to mods
-        modsElement.appendChild(subject)
-        
-        // Remove original classification element
-        if (classification.parentNode) {
-            classification.parentNode.removeChild(classification)
-        }
-    }
-
-    return doc
+    )
 }
 
 /**
@@ -518,63 +425,7 @@ export function moveAndRenameElement(doc, sourcePath, targetParentPath, newEleme
         return doc
     }
 
-    const select = xpath.useNamespaces({})
-    const sourceElements = select(sourcePath, doc)
-    const targetParents = select(targetParentPath, doc)
-    
-    if (targetParents.length === 0) {
-        return doc
-    }
-    
-    const targetParent = targetParents[0]
-
-    for (let sourceElement of sourceElements) {
-        // Skip if no text content (empty elements)
-        if (!sourceElement.textContent || !sourceElement.textContent.trim()) {
-            continue
-        }
-        
-        // Create new element with new name
-        const newElement = doc.createElement(newElementName)
-        newElement.textContent = sourceElement.textContent
-        
-        // Copy attributes
-        for (let i = 0; i < sourceElement.attributes.length; i++) {
-            const attr = sourceElement.attributes[i]
-            newElement.setAttribute(attr.name, attr.value)
-        }
-        
-        // Add to target parent
-        targetParent.appendChild(newElement)
-        
-        // Remove source element
-        if (sourceElement.parentNode) {
-            sourceElement.parentNode.removeChild(sourceElement)
-        }
-    }
-
-    return doc
-}
-
-/**
- * Main conversion function to convert custom MODS to strict MODS
-        
-        // Add authority attribute
-        newElement.setAttribute('authority', authority)
-        
-        // Copy any existing attributes (except if they conflict)
-        for (let i = 0; i < element.attributes.length; i++) {
-            const attr = element.attributes[i]
-            if (attr.name !== 'authority') {
-                newElement.setAttribute(attr.name, attr.value)
-            }
-        }
-        
-        // Replace old element with new
-        element.parentNode.replaceChild(newElement, element)
-    }
-
-    return doc
+    return moveAndTransformElement(doc, sourcePath, targetParentPath, newElementName, { skipEmpty: true })
 }
 
 /**
@@ -621,44 +472,43 @@ export function toStrictMODS(xmlString) {
     // Remove non-MODS elements
     removeElement(doc, CUSTOM_ELEMENTS.DATE_TYPE, XPATH_CONTEXTS.ORIGININFO)
     removeElement(doc, CUSTOM_ELEMENTS.SUBJECT_TYPE, XPATH_CONTEXTS.SUBJECT)
-    removeElement(doc, 'artstorClassification')
-    
+    removeElement(doc, CUSTOM_ELEMENTS.ARTSTOR_CLASSIFICATION)
+
     // Convert authority-specific topic elements
-    convertAuthorityElement(doc, 'topicCONA', 'topic', 'cona')
-    
+    convertAuthorityElement(doc, 'topicCONA', ELEMENT_NAMES.TOPIC, 'cona')
+
     // Move form elements from physicalDescription to genre
-    moveAndRenameElement(doc, '//physicalDescription/formBroad', '//mods', 'genre')
-    moveAndRenameElement(doc, '//physicalDescription/formSpecific', '//mods', 'genre')
-    
+    moveAndRenameElement(doc, `${XPATH_CONTEXTS.PHYSICAL_DESCRIPTION}/formBroad`, XPATH_CONTEXTS.MODS, ELEMENT_NAMES.GENRE)
+    moveAndRenameElement(doc, `${XPATH_CONTEXTS.PHYSICAL_DESCRIPTION}/formSpecific`, XPATH_CONTEXTS.MODS, ELEMENT_NAMES.GENRE)
+
     // Move notes from physicalDescriptionNote wrapper to physicalDescription
-    moveAndRenameElement(doc, '//physicalDescriptionNote/note', '//physicalDescription', 'note')
+    moveAndRenameElement(doc, `//${WRAPPER_ELEMENTS.PHYSICAL_DESCRIPTION_NOTE}/${ELEMENT_NAMES.NOTE}`, XPATH_CONTEXTS.PHYSICAL_DESCRIPTION, ELEMENT_NAMES.NOTE)
 
     // Fix case sensitivity
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)
     renameElement(doc, CASE_FIXES.RELATEDITEM.old, CASE_FIXES.RELATEDITEM.new)
-    
+
     // Fix element names for MODS compliance
-    renameElement(doc, 'title', 'text', '//part')
-    
+    renameElement(doc, 'title', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
+
     // Wrap title elements that are direct children of relatedItem with titleInfo
-    wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
-    
+    wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, 'title', ELEMENT_NAMES.TITLE_INFO)
+
     // Wrap language text content with languageTerm and move authority attribute
-    wrapTextWithChild(doc, '//mods/language', 'languageTerm', ['authority'])
-    
+    wrapTextWithChild(doc, XPATH_CONTEXTS.LANGUAGE, ELEMENT_NAMES.LANGUAGE_TERM, ['authority'])
+
     // Move classification elements to subject/topic
-    moveClassificationToSubject(doc, 'photoClassification', 'local')
-    removeElement(doc, 'photoClassification')  // Remove any remaining classification elements
-    
+    moveClassificationToSubject(doc, CUSTOM_ELEMENTS.PHOTO_CLASSIFICATION, 'local')
+    removeElement(doc, CUSTOM_ELEMENTS.PHOTO_CLASSIFICATION)  // Remove any remaining classification elements
+
     // Remove non-standard attributes
-    removeAttribute(doc, '//accessCondition', 'href')
-    
+    removeAttribute(doc, XPATH_CONTEXTS.ACCESS_CONDITION, 'href')
+
     // Remove all empty elements (no attributes, no text, no meaningful children)
     removeEmptyElements(doc)
 
     // Extract mods element and add namespace (for validation)
-    const select = xpath.useNamespaces({})
-    const modsElements = select('//mods', doc)
+    const modsElements = safeSelect(XPATH_CONTEXTS.MODS, doc)
     if (modsElements.length > 0) {
         const modsElement = modsElements[0]
 
@@ -682,12 +532,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const args = process.argv.slice(2)
 
     if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
-        console.error(`Usage: node strict-mods.js <input-file>
+        const helpText = `Usage: node strict-mods.js <input-file>
 
 Convert EQUELLA custom MODS XML to strict MODS schema-compliant XML.
 Extracts the <mods> element with proper namespace for validation.
-`)
-        process.exit(args.includes('--help') || args.includes('-h') ? 0 : 1)
+`
+        if (args.includes('--help') || args.includes('-h')) {
+            console.log(helpText)
+            process.exit(0)
+        } else {
+            console.error(helpText)
+            process.exit(1)
+        }
     }
 
     const inputFile = args.find(arg => !arg.startsWith('--'))

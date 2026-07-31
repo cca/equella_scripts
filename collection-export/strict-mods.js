@@ -202,6 +202,46 @@ export function removeElement(doc, elementName, context = '//mods') {
 }
 
 /**
+ * Wrap an element with a parent element
+ * e.g., relatedItem/title -> relatedItem/titleInfo/title
+ *
+ * @param {Document} doc - XML DOM document
+ * @param {string} parentPath - XPath to the parent element (e.g., '//relatedItem')
+ * @param {string} childElement - Name of child element to wrap (e.g., 'title')
+ * @param {string} wrapperElement - Name of wrapper element to create (e.g., 'titleInfo')
+ * @returns {Document} Modified document
+ */
+export function wrapElement(doc, parentPath, childElement, wrapperElement) {
+    if (!doc || !parentPath || !childElement || !wrapperElement) {
+        return doc
+    }
+
+    const select = xpath.useNamespaces({})
+    const parents = select(parentPath, doc)
+
+    for (let parent of parents) {
+        // Find direct child elements with the specified name
+        const children = select(childElement, parent)
+
+        for (let child of children) {
+            // Only wrap if it's a direct child
+            if (child.parentNode === parent) {
+                // Create wrapper element
+                const wrapper = doc.createElement(wrapperElement)
+
+                // Insert wrapper before the child
+                parent.insertBefore(wrapper, child)
+
+                // Move child into wrapper
+                wrapper.appendChild(child)
+            }
+        }
+    }
+
+    return doc
+}
+
+/**
  * Convert custom authority-specific topic elements to standard topic with authority attribute
  * e.g., topicCONA -> topic with authority="cona"
  *
@@ -299,6 +339,9 @@ export function toStrictMODS(xmlString) {
     // Fix case sensitivity
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)
     renameElement(doc, CASE_FIXES.RELATEDITEM.old, CASE_FIXES.RELATEDITEM.new)
+    
+    // Wrap title elements that are direct children of relatedItem with titleInfo
+    wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
 
     // Extract mods element and add namespace (for validation)
     const select = xpath.useNamespaces({})

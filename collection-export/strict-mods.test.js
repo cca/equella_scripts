@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, convertAuthorityElement, wrapElement, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -547,6 +547,77 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('wrapElement', () => {
+        it('should wrap relatedItem/title with titleInfo', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <relatedItem type="host"><title>Parent Collection</title></relatedItem>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
+            
+            const select = xpath.useNamespaces({})
+            const directTitles = select('//relatedItem/title', doc)
+            const wrappedTitles = select('//relatedItem/titleInfo/title', doc)
+            
+            assert.strictEqual(directTitles.length, 0, 'Direct title should not exist')
+            assert.strictEqual(wrappedTitles.length, 1, 'Wrapped title should exist')
+            assert.strictEqual(wrappedTitles[0].textContent, 'Parent Collection')
+        })
+        
+        it('should handle multiple relatedItem elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <relatedItem type="host"><title>Collection A</title></relatedItem>
+                <relatedItem type="series"><title>Collection B</title></relatedItem>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
+            
+            const select = xpath.useNamespaces({})
+            const wrappedTitles = select('//relatedItem/titleInfo/title', doc)
+            
+            assert.strictEqual(wrappedTitles.length, 2)
+            assert.strictEqual(wrappedTitles[0].textContent, 'Collection A')
+            assert.strictEqual(wrappedTitles[1].textContent, 'Collection B')
+        })
+        
+        it('should not wrap already wrapped titles', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <relatedItem><titleInfo><title>Already Wrapped</title></titleInfo></relatedItem>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
+            
+            const select = xpath.useNamespaces({})
+            const wrappedTitles = select('//relatedItem/titleInfo/title', doc)
+            const doubleWrapped = select('//relatedItem/titleInfo/titleInfo', doc)
+            
+            assert.strictEqual(wrappedTitles.length, 1)
+            assert.strictEqual(doubleWrapped.length, 0, 'Should not double-wrap')
+        })
+        
+        it('should preserve attributes on title element', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <relatedItem><title type="alternative">Alt Title</title></relatedItem>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapElement(doc, '//relatedItem', 'title', 'titleInfo')
+            
+            const select = xpath.useNamespaces({})
+            const wrappedTitles = select('//relatedItem/titleInfo/title', doc)
+            
+            assert.strictEqual(wrappedTitles.length, 1)
+            assert.strictEqual(wrappedTitles[0].getAttribute('type'), 'alternative')
+        })
+    })
+    
     describe('toStrictMODS', () => {
         it('should extract mods element and add namespace by default', () => {
             const input = `<xml><mods>
@@ -669,6 +740,19 @@ describe('Strict MODS Conversion', () => {
             
             assert.ok(!result.includes('artstorClassification'), 'Should remove artstorClassification')
             assert.ok(result.includes('<title>Test</title>'), 'Should preserve other content')
+        })
+        
+        it('should wrap relatedItem/title with titleInfo', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Main Item</title></titleInfo>
+                <relatedItem type="host"><title>Parent Collection</title></relatedItem>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<relatedItem type="host"><titleInfo><title>Parent Collection</title></titleInfo></relatedItem>'), 
+                'Should wrap relatedItem title with titleInfo')
+            assert.ok(!result.includes('<relatedItem type="host"><title>'), 
+                'Should not have direct title under relatedItem')
         })
     })
     

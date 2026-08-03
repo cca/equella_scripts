@@ -89,9 +89,12 @@ The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XM
 ```sh
 # Run strict MODS tests
 npm run modstest
+
+# Test random samples from exported JSON files
+node test-collection-samples.js data/mudflats.json 10
 ```
 
-You can also download item XML to run the strict MODS conversion on your own.
+The `test-collection-samples.js` script tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly. You can also download item XML to run the strict MODS conversion on your own.
 
 ### Converting & Validating MODS Files
 

@@ -172,18 +172,13 @@ export function createElement(doc, elementName, textContent = '', attributes = {
 }
 
 /**
- * Check if an element is truly empty (no attributes, no text, all children empty)
+ * Check if an element is truly empty (no text, all children empty)
  * Used by removeEmptyElements - extracted for reusability
  *
  * @param {Element} element - Element to check
  * @returns {boolean} True if element is completely empty
  */
 export function isElementEmpty(element) {
-    // Has attributes? Not empty
-    if (element.attributes && element.attributes.length > 0) {
-        return false
-    }
-
     // Check all child nodes
     for (let node of element.childNodes) {
         if (node.nodeType === 3) { // TEXT_NODE
@@ -197,49 +192,5 @@ export function isElementEmpty(element) {
         }
     }
 
-    return true // No attributes, no text, all children empty
-}
-
-/**
- * Iterative alternative to recursive removeEmptyElements
- * More efficient for very large or deeply nested documents
- *
- * @param {Document} doc - XML DOM document
- * @param {string} [rootPath='//mods'] - XPath to root elements to clean
- * @returns {Document} Modified document
- */
-export function removeEmptyElementsIterative(doc, rootPath = '//mods') {
-    if (!doc) {
-        return doc
-    }
-
-    const modsElements = safeSelect(rootPath, doc)
-
-    for (let root of modsElements) {
-        // Collect all elements to check (bottom-up)
-        const elementsToCheck = []
-        const stack = [root]
-
-        while (stack.length > 0) {
-            const current = stack.pop()
-            elementsToCheck.push(current)
-
-            // Add children to stack (in reverse order for correct processing)
-            const children = Array.from(current.childNodes)
-                .filter(n => n.nodeType === 1)
-                .reverse()
-            stack.push(...children)
-        }
-
-        // Process bottom-up (children before parents)
-        elementsToCheck.reverse()
-
-        for (let element of elementsToCheck) {
-            if (isElementEmpty(element) && element.parentNode && element !== root) {
-                element.parentNode.removeChild(element)
-            }
-        }
-    }
-
-    return doc
+    return true // No text, all children empty
 }

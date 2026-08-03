@@ -238,14 +238,14 @@ export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEX
     for (let element of elements) {
         const newElement = doc.createElement(newName)
         copyAttributes(element, newElement)
-        
+
         // Add new attributes if specified
         if (attributes && typeof attributes === 'object') {
             Object.entries(attributes).forEach(([name, value]) => {
                 newElement.setAttribute(name, value)
             })
         }
-        
+
         moveChildren(element, newElement)
         element.parentNode.replaceChild(newElement, element)
     }
@@ -254,7 +254,7 @@ export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEX
 }
 
 /**
- * Recursively remove empty elements (no attributes, no text, no meaningful children)
+ * Recursively remove empty elements (no text, no children with text)
  * This prevents validation errors from empty required elements and cleans up output
  *
  * @param {Document} doc - XML DOM document
@@ -525,13 +525,13 @@ export function convertNamePartDate(doc) {
     for (let element of namePartDates) {
         const newElement = doc.createElement('namePart')
         newElement.setAttribute('type', 'date')
-        
+
         // Copy attributes from original element
         copyAttributes(element, newElement)
-        
+
         // Move children (text nodes and elements)
         moveChildren(element, newElement)
-        
+
         // Replace the old element with the new one
         element.parentNode.replaceChild(newElement, element)
     }
@@ -632,7 +632,7 @@ export function toStrictMODS(xmlString) {
     // Remove non-standard attributes
     removeAttribute(doc, XPATH_CONTEXTS.ACCESS_CONDITION, 'href')
 
-    // Remove all empty elements (no attributes, no text, no meaningful children)
+    // Remove all empty elements (no text, no children with text)
     removeEmptyElements(doc)
 
     // Extract mods element and add namespace (for validation)

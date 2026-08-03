@@ -437,6 +437,64 @@ describe('Strict MODS Conversion', () => {
             assert.ok(!result.includes('</relateditem>'))
             assert.ok(result.includes('type="host"'))
         })
+        
+        it('should add single attribute from map', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <part>
+                    <number>abc-123-def-456</number>
+                </part>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            renameElement(doc, 'number', 'text', '//part', { type: 'attachment-uuid' })
+            
+            const select = xpath.useNamespaces({})
+            const textElements = select('//part/text', doc)
+            
+            assert.strictEqual(textElements.length, 1, 'text element should exist')
+            assert.strictEqual(textElements[0].getAttribute('type'), 'attachment-uuid')
+            assert.strictEqual(textElements[0].textContent, 'abc-123-def-456')
+        })
+        
+        it('should add multiple attributes from map', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <part>
+                    <number>abc-123</number>
+                </part>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            renameElement(doc, 'number', 'text', '//part', { type: 'attachment-uuid', encoding: 'utf-8', lang: 'en' })
+            
+            const select = xpath.useNamespaces({})
+            const textElements = select('//part/text', doc)
+            
+            assert.strictEqual(textElements.length, 1)
+            assert.strictEqual(textElements[0].getAttribute('type'), 'attachment-uuid')
+            assert.strictEqual(textElements[0].getAttribute('encoding'), 'utf-8')
+            assert.strictEqual(textElements[0].getAttribute('lang'), 'en')
+        })
+        
+        it('should preserve existing attributes when adding new ones from map', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <part>
+                    <number id="123">abc-123</number>
+                </part>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            renameElement(doc, 'number', 'text', '//part', { type: 'attachment-uuid' })
+            
+            const select = xpath.useNamespaces({})
+            const textElements = select('//part/text', doc)
+            
+            assert.strictEqual(textElements.length, 1)
+            assert.strictEqual(textElements[0].getAttribute('type'), 'attachment-uuid')
+            assert.strictEqual(textElements[0].getAttribute('id'), '123', 'Should preserve original attribute')
+        })
     })
     
     describe('removeElement', () => {

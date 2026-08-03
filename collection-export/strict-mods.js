@@ -156,16 +156,17 @@ export function unwrapDateCreated(doc) {
 
 /**
  * Helper function to rename elements while preserving attributes and children
- * Optionally adds a type attribute to the new element
+ * Optionally adds new attributes to the renamed elements
  *
  * @param {Document} doc - XML DOM document
  * @param {string} oldName - Current element name
  * @param {string} newName - New element name
  * @param {string} [xpathContext='//mods'] - XPath context to search within (searches direct children by default)
- * @param {string} [typeAttribute] - Optional type attribute value to add to renamed elements
+ * @param {Object} [attributes={}] - Optional map of attribute names to values to add to renamed elements
+ *                                    e.g., { type: 'attachment-uuid', encoding: 'utf-8' }
  * @returns {Document} Modified document
  */
-export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEXTS.MODS, typeAttribute) {
+export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEXTS.MODS, attributes = {}) {
     if (!doc || !oldName || !newName) {
         return doc
     }
@@ -176,9 +177,11 @@ export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEX
         const newElement = doc.createElement(newName)
         copyAttributes(element, newElement)
         
-        // Add type attribute if specified
-        if (typeAttribute) {
-            newElement.setAttribute('type', typeAttribute)
+        // Add new attributes if specified
+        if (attributes && typeof attributes === 'object') {
+            Object.entries(attributes).forEach(([name, value]) => {
+                newElement.setAttribute(name, value)
+            })
         }
         
         moveChildren(element, newElement)
@@ -542,7 +545,7 @@ export function toStrictMODS(xmlString) {
     // part/title -> part/text
     renameElement(doc, 'title', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
     // part/number contains attachment UUIDs, map to part/text with type="attachment-uuid"
-    renameElement(doc, 'number', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, 'attachment-uuid')
+    renameElement(doc, 'number', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, { type: 'attachment-uuid' })
 
     // Convert namePartDate to namePart with type="date" attribute
     convertNamePartDate(doc)

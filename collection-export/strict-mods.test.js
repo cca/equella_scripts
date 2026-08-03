@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -391,6 +391,103 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('unwrapDateOther', () => {
+        it('should unwrap single dateOther and preserve encoding and type attributes', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateOtherWrapper>
+                        <dateOther encoding="w3cdtf" type="exhibit">2016-12-05</dateOther>
+                    </dateOtherWrapper>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            unwrapDateOther(doc)
+            
+            const select = xpath.useNamespaces({})
+            const dateOthers = select('//origininfo/dateOther', doc)
+            const wrappers = select('//origininfo/dateOtherWrapper', doc)
+            
+            assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
+            assert.strictEqual(dateOthers.length, 1, 'Should have one dateOther')
+            assert.strictEqual(dateOthers[0].textContent, '2016-12-05')
+            assert.strictEqual(dateOthers[0].getAttribute('encoding'), 'w3cdtf')
+            assert.strictEqual(dateOthers[0].getAttribute('type'), 'exhibit')
+        })
+        
+        it('should convert dateOther range to EDTF format and preserve type', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateOtherWrapper>
+                        <dateOther encoding="w3cdtf" type="In use"/>
+                        <pointStart>1907</pointStart>
+                        <pointEnd>2027</pointEnd>
+                    </dateOtherWrapper>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            unwrapDateOther(doc)
+            
+            const select = xpath.useNamespaces({})
+            const dateOthers = select('//origininfo/dateOther', doc)
+            const wrappers = select('//origininfo/dateOtherWrapper', doc)
+            
+            assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
+            assert.strictEqual(dateOthers.length, 1, 'Should have one dateOther')
+            assert.strictEqual(dateOthers[0].textContent, '1907/2027', 'Should be in EDTF format')
+            assert.strictEqual(dateOthers[0].getAttribute('encoding'), 'edtf')
+            assert.strictEqual(dateOthers[0].getAttribute('type'), 'In use', 'Type should be preserved')
+        })
+        
+        it('should handle dateOther range without type attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateOtherWrapper>
+                        <dateOther encoding="w3cdtf"/>
+                        <pointStart>2014-12-01</pointStart>
+                        <pointEnd>2014-12-12</pointEnd>
+                    </dateOtherWrapper>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            unwrapDateOther(doc)
+            
+            const select = xpath.useNamespaces({})
+            const dateOthers = select('//origininfo/dateOther', doc)
+            
+            assert.strictEqual(dateOthers.length, 1)
+            assert.strictEqual(dateOthers[0].textContent, '2014-12-01/2014-12-12')
+            assert.strictEqual(dateOthers[0].getAttribute('encoding'), 'edtf')
+            assert.strictEqual(dateOthers[0].hasAttribute('type'), false, 'Should not have type if not in original')
+        })
+        
+        it('should remove empty dateOtherWrapper', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateOtherWrapper>
+                        <dateOther encoding="w3cdtf" type="exhibit"/>
+                    </dateOtherWrapper>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            unwrapDateOther(doc)
+            
+            const select = xpath.useNamespaces({})
+            const dateOthers = select('//origininfo/dateOther', doc)
+            const wrappers = select('//origininfo/dateOtherWrapper', doc)
+            
+            assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
+            assert.strictEqual(dateOthers.length, 0, 'Empty dateOther should not be created')
+        })
+    })
+
     describe('renameElement', () => {
         it('should rename element while preserving attributes and children', () => {
             const parser = new xmldom()
@@ -1416,6 +1513,44 @@ describe('Strict MODS Conversion', () => {
             const result = normalizeXML(toStrictMODS(input))
             
             assert.ok(result.includes('<dateCreated encoding="edtf" keyDate="yes">2022/2023</dateCreated>'))
+        })
+        
+        it('should convert dateOther range to EDTF and preserve type', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test Item</title></titleInfo>
+                <origininfo>
+                    <dateType>Other</dateType>
+                    <dateOtherWrapper>
+                        <dateOther encoding="w3cdtf" type="In use"/>
+                        <pointStart>1907</pointStart>
+                        <pointEnd>2027</pointEnd>
+                    </dateOtherWrapper>
+                </origininfo>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<dateOther encoding="edtf" type="In use">1907/2027</dateOther>'),
+                'Should convert dateOther range to EDTF and preserve type attribute')
+            assert.ok(!result.includes('dateOtherWrapper'), 'Should remove wrapper')
+            assert.ok(!result.includes('pointStart'), 'Should remove pointStart')
+            assert.ok(!result.includes('pointEnd'), 'Should remove pointEnd')
+        })
+        
+        it('should convert single dateOther and preserve attributes', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test Item</title></titleInfo>
+                <origininfo>
+                    <dateType>Other</dateType>
+                    <dateOtherWrapper>
+                        <dateOther encoding="w3cdtf" type="exhibit">2016-12-05</dateOther>
+                    </dateOtherWrapper>
+                </origininfo>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<dateOther encoding="w3cdtf" type="exhibit">2016-12-05</dateOther>'),
+                'Should preserve single dateOther with its attributes')
+            assert.ok(!result.includes('dateOtherWrapper'), 'Should remove wrapper')
         })
         
         it('should remove subjectType and fix relateditem case', () => {

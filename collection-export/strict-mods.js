@@ -35,6 +35,7 @@ const XPATH_CONTEXTS = {
 // Custom EQUELLA wrapper elements to unwrap
 const WRAPPER_ELEMENTS = {
     DATE_CREATED: 'dateCreatedWrapper',
+    DATE_OTHER: 'dateOtherWrapper',
     GENRE: 'genreWrapper',
     NOTE: 'noteWrapper',
     PHYSICAL_DESCRIPTION_NOTE: 'physicalDescriptionNote',
@@ -146,6 +147,63 @@ export function unwrapDateCreated(doc) {
                 attributes.keyDate = dateCreated.getAttribute('keyDate')
             }
             const newDate = createElement(doc, 'dateCreated', `${startValue}/${endValue}`, attributes)
+            parent.insertBefore(newDate, wrapper)
+        }
+        // Case 3: Empty, or only has pointStart OR pointEnd (incomplete range)
+        // Just remove the wrapper without creating a new element
+
+        // Remove the wrapper
+        parent.removeChild(wrapper)
+    }
+
+    return doc
+}
+
+/**
+ * Unwrap dateOtherWrapper and convert date ranges to EDTF format
+ * Handles three cases:
+ * 1. Single date with encoding/type attributes -> preserve as-is
+ * 2. Date range (pointStart AND pointEnd both present) -> create EDTF range date with encoding="edtf" and preserve type attribute
+ * 3. Empty wrapper or incomplete range (only one of pointStart/pointEnd) -> remove entirely
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function unwrapDateOther(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const wrappers = safeSelect(`${XPATH_CONTEXTS.ORIGININFO}/${WRAPPER_ELEMENTS.DATE_OTHER}`, doc)
+
+    for (let wrapper of wrappers) {
+        const parent = wrapper.parentNode
+        const select = xpath.useNamespaces({})
+
+        // Get child elements
+        const dateOther = select('dateOther', wrapper)[0]
+        const pointStart = select('pointStart', wrapper)[0]
+        const pointEnd = select('pointEnd', wrapper)[0]
+
+        // Get values
+        const dateValue = dateOther?.textContent?.trim() || ''
+        const startValue = pointStart?.textContent?.trim() || ''
+        const endValue = pointEnd?.textContent?.trim() || ''
+
+        // Case 1: Has a single date value (not a range)
+        if (dateValue && !startValue && !endValue) {
+            // Keep the dateOther element with its attributes, remove wrapper
+            parent.insertBefore(dateOther, wrapper)
+        }
+        // Case 2: Has a date range (pointStart AND pointEnd both present)
+        else if (startValue && endValue) {
+            // Create new dateOther element with EDTF range
+            const attributes = { encoding: 'edtf' }
+            // Preserve type attribute from original dateOther
+            if (dateOther?.hasAttribute('type')) {
+                attributes.type = dateOther.getAttribute('type')
+            }
+            const newDate = createElement(doc, 'dateOther', `${startValue}/${endValue}`, attributes)
             parent.insertBefore(newDate, wrapper)
         }
         // Case 3: Empty, or only has pointStart OR pointEnd (incomplete range)
@@ -521,6 +579,7 @@ export function toStrictMODS(xmlString) {
 
     // Handle date wrappers and ranges
     unwrapDateCreated(doc)
+    unwrapDateOther(doc)
 
     // Remove non-MODS elements
     removeElement(doc, CUSTOM_ELEMENTS.DATE_TYPE, XPATH_CONTEXTS.ORIGININFO)

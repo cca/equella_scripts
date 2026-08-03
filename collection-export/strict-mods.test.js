@@ -1107,6 +1107,110 @@ describe('Strict MODS Conversion', () => {
             assert.strictEqual(languageTerms.length, 1)
             assert.strictEqual(languageTerms[0].textContent, 'eng')
         })
+        
+        it('should wrap originInfo/place text with placeTerm', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <originInfo>
+                    <place>Oakland, CA</place>
+                    <publisher>Test Publisher</publisher>
+                </originInfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//originInfo/place', 'placeTerm', [])
+            
+            const select = xpath.useNamespaces({})
+            const places = select('//originInfo/place', doc)
+            const placeTerms = select('//originInfo/place/placeTerm', doc)
+            
+            assert.strictEqual(places.length, 1, 'place element should exist')
+            assert.strictEqual(placeTerms.length, 1, 'placeTerm should exist')
+            assert.strictEqual(placeTerms[0].textContent, 'Oakland, CA')
+        })
+        
+        it('should not wrap empty place elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <originInfo>
+                    <place/>
+                    <publisher>Test Publisher</publisher>
+                </originInfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//originInfo/place', 'placeTerm', [])
+            
+            const select = xpath.useNamespaces({})
+            const placeTerms = select('//originInfo/place/placeTerm', doc)
+            
+            assert.strictEqual(placeTerms.length, 0, 'Should not create placeTerm for empty place')
+        })
+        
+        it('should not double-wrap already wrapped place elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <originInfo>
+                    <place>
+                        <placeTerm>San Francisco</placeTerm>
+                    </place>
+                </originInfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//originInfo/place', 'placeTerm', [])
+            
+            const select = xpath.useNamespaces({})
+            const placeTerms = select('//originInfo/place/placeTerm', doc)
+            const doubleWrapped = select('//originInfo/place/placeTerm/placeTerm', doc)
+            
+            assert.strictEqual(placeTerms.length, 1, 'Should have one placeTerm')
+            assert.strictEqual(doubleWrapped.length, 0, 'Should not double-wrap')
+        })
+        
+        it('should wrap subject/name text with namePart', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <subject>
+                    <name authority="local" type="personal">Bruce, Tecoah P.</name>
+                </subject>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//subject/name', 'namePart', [])
+            
+            const select = xpath.useNamespaces({})
+            const names = select('//subject/name', doc)
+            const nameParts = select('//subject/name/namePart', doc)
+            
+            assert.strictEqual(names.length, 1, 'name element should exist')
+            assert.strictEqual(nameParts.length, 1, 'namePart should exist')
+            assert.strictEqual(nameParts[0].textContent, 'Bruce, Tecoah P.')
+            assert.strictEqual(names[0].getAttribute('authority'), 'local', 'authority should be preserved on name')
+            assert.strictEqual(names[0].getAttribute('type'), 'personal', 'type should be preserved on name')
+        })
+        
+        it('should not double-wrap already wrapped subject/name elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <subject>
+                    <name authority="local" type="personal">
+                        <namePart>Smith, John</namePart>
+                    </name>
+                </subject>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            wrapTextWithChild(doc, '//subject/name', 'namePart', [])
+            
+            const select = xpath.useNamespaces({})
+            const nameParts = select('//subject/name/namePart', doc)
+            const doubleWrapped = select('//subject/name/namePart/namePart', doc)
+            
+            assert.strictEqual(nameParts.length, 1, 'Should have one namePart')
+            assert.strictEqual(doubleWrapped.length, 0, 'Should not double-wrap')
+            assert.strictEqual(nameParts[0].textContent, 'Smith, John')
+        })
     })
     
     describe('convertNamePartDate', () => {
@@ -1547,6 +1651,74 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('<genre>correspondence</genre>'), 'Should have genre from formBroad')
             assert.ok(result.includes('<genre>personal</genre>'), 'Should have genre from formSpecific')
             assert.ok(result.includes('digitalOrigin'), 'Should preserve other physicalDescription content')
+        })
+        
+        it('should wrap originInfo/place text with placeTerm', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test Publication</title></titleInfo>
+                <originInfo>
+                    <place>Oakland, CA</place>
+                    <publisher>Test Publisher</publisher>
+                    <dateIssued>2024</dateIssued>
+                </originInfo>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<place>'), 'Should have place element')
+            assert.ok(result.includes('<placeTerm>Oakland, CA</placeTerm>'), 
+                'Should wrap place text with placeTerm')
+            assert.ok(!result.includes('<place>Oakland, CA</place>'), 
+                'Should not have unwrapped text in place')
+        })
+        
+        it('should handle empty place elements gracefully', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <originInfo>
+                    <place/>
+                    <publisher>Test Publisher</publisher>
+                </originInfo>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            // Empty place should be removed by removeEmptyElements
+            assert.ok(!result.includes('<place'), 'Empty place should be removed')
+        })
+        
+        it('should wrap subject/name text with namePart', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <subject>
+                    <name authority="local" type="personal">Bruce, Tecoah P.</name>
+                </subject>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<subject>'), 'Should have subject element')
+            assert.ok(result.includes('<name authority="local" type="personal">'), 
+                'Should have name with preserved attributes')
+            assert.ok(result.includes('<namePart>Bruce, Tecoah P.</namePart>'), 
+                'Should wrap name text with namePart')
+            assert.ok(!result.includes('<name authority="local" type="personal">Bruce, Tecoah P.</name>'), 
+                'Should not have unwrapped text in name')
+        })
+        
+        it('should handle multiple subject/name elements', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <subject>
+                    <name authority="local" type="personal">Smith, John</name>
+                </subject>
+                <subject>
+                    <name authority="local" type="corporate">ACME Corp</name>
+                </subject>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<namePart>Smith, John</namePart>'), 
+                'Should wrap first name')
+            assert.ok(result.includes('<namePart>ACME Corp</namePart>'), 
+                'Should wrap second name')
         })
         
         it('should convert namePartDate to namePart with type="date"', () => {

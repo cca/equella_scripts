@@ -24,10 +24,12 @@ const XPATH_CONTEXTS = {
     NAME: '//name',
     ORIGININFO_CAMEL: '//originInfo',
     ORIGININFO: '//origininfo',
+    ORIGININFO_PLACE: '//originInfo/place',
     PART: '//part',
     PHYSICAL_DESCRIPTION: '//physicalDescription',
     RELATEDITEM: '//relatedItem',
     SUBJECT: '//subject',
+    SUBJECT_NAME: '//subject/name',
 }
 
 // Custom EQUELLA wrapper elements to unwrap
@@ -63,7 +65,9 @@ const CASE_FIXES = {
 const ELEMENT_NAMES = {
     GENRE: 'genre',
     LANGUAGE_TERM: 'languageTerm',
+    NAME_PART: 'namePart',
     NOTE: 'note',
+    PLACE_TERM: 'placeTerm',
     SUBJECT: 'subject',
     TEXT: 'text',
     TITLE_INFO: 'titleInfo',
@@ -555,6 +559,12 @@ export function toStrictMODS(xmlString) {
 
     // Wrap language text content with languageTerm and move authority attribute
     wrapTextWithChild(doc, XPATH_CONTEXTS.LANGUAGE, ELEMENT_NAMES.LANGUAGE_TERM, ['authority'])
+
+    // Wrap originInfo/place text content with placeTerm
+    wrapTextWithChild(doc, XPATH_CONTEXTS.ORIGININFO_PLACE, ELEMENT_NAMES.PLACE_TERM, [])
+
+    // Wrap subject/name text content with namePart (preserves authority and type attributes on name)
+    wrapTextWithChild(doc, XPATH_CONTEXTS.SUBJECT_NAME, ELEMENT_NAMES.NAME_PART, [])
 
     // Move classification elements to subject/topic
     moveClassificationToSubject(doc, CUSTOM_ELEMENTS.PHOTO_CLASSIFICATION, 'local')

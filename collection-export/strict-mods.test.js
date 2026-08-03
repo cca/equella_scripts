@@ -1388,6 +1388,50 @@ describe('Strict MODS Conversion', () => {
         
         it('should rename part/title to part/text', () => {
             const input = `<xml><mods>
+                <part><title>filename.pdf</title></part>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(result.includes('<text>filename.pdf</text>'), 'Should rename title to text in part')
+            assert.ok(!result.includes('<part><title>'), 'Should not have title directly in part')
+        })
+        
+        it('should convert part/number to part/text with type="attachment-uuid"', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <part>
+                    <title>Document.pdf</title>
+                    <number>a3a5980a-2fcc-40af-a8bb-55ed42be0686</number>
+                </part>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('<number>'), 'Should not contain number element')
+            assert.ok(result.includes('<text type="attachment-uuid">a3a5980a-2fcc-40af-a8bb-55ed42be0686</text>'), 
+                'Should convert number to text with type="attachment-uuid"')
+        })
+        
+        it('should remove redundant numberB, numberC, numberD from part', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Journal Article</title></titleInfo>
+                <part>
+                    <number>eb0960c6-5594-41ee-a1da-df3cec309d89</number>
+                    <numberB>3403-3413</numberB>
+                    <numberC>20</numberC>
+                    <numberD>4</numberD>
+                </part>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('numberB'), 'Should not contain numberB')
+            assert.ok(!result.includes('numberC'), 'Should not contain numberC')
+            assert.ok(!result.includes('numberD'), 'Should not contain numberD')
+            assert.ok(result.includes('<text type="attachment-uuid">eb0960c6-5594-41ee-a1da-df3cec309d89</text>'), 
+                'Should still have converted attachment UUID')
+        })
+        
+        it('should rename part/title to part/text', () => {
+            const input = `<xml><mods>
                 <titleInfo><title>Test Item</title></titleInfo>
                 <part>
                     <title>filename.pdf</title>

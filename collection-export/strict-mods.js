@@ -43,6 +43,12 @@ const WRAPPER_ELEMENTS = {
 const CUSTOM_ELEMENTS = {
     ARTSTOR_CLASSIFICATION: 'artstorClassification',
     DATE_TYPE: 'dateType',
+    // numberB, numberC, numberD are used in Faculty Research collection to store
+    // redundant bibliographic information (page ranges, volume, issue) that is
+    // already present in valid MODS fields within relatedItem/part
+    NUMBER_B: 'numberB',
+    NUMBER_C: 'numberC',
+    NUMBER_D: 'numberD',
     PHOTO_CLASSIFICATION: 'photoClassification',
     SUBJECT_TYPE: 'subjectType',
 }
@@ -150,14 +156,16 @@ export function unwrapDateCreated(doc) {
 
 /**
  * Helper function to rename elements while preserving attributes and children
+ * Optionally adds a type attribute to the new element
  *
  * @param {Document} doc - XML DOM document
  * @param {string} oldName - Current element name
  * @param {string} newName - New element name
  * @param {string} [xpathContext='//mods'] - XPath context to search within (searches direct children by default)
+ * @param {string} [typeAttribute] - Optional type attribute value to add to renamed elements
  * @returns {Document} Modified document
  */
-export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEXTS.MODS) {
+export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEXTS.MODS, typeAttribute) {
     if (!doc || !oldName || !newName) {
         return doc
     }
@@ -167,6 +175,12 @@ export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEX
     for (let element of elements) {
         const newElement = doc.createElement(newName)
         copyAttributes(element, newElement)
+        
+        // Add type attribute if specified
+        if (typeAttribute) {
+            newElement.setAttribute('type', typeAttribute)
+        }
+        
         moveChildren(element, newElement)
         element.parentNode.replaceChild(newElement, element)
     }
@@ -505,6 +519,10 @@ export function toStrictMODS(xmlString) {
     removeElement(doc, CUSTOM_ELEMENTS.DATE_TYPE, XPATH_CONTEXTS.ORIGININFO)
     removeElement(doc, CUSTOM_ELEMENTS.SUBJECT_TYPE, XPATH_CONTEXTS.SUBJECT)
     removeElement(doc, CUSTOM_ELEMENTS.ARTSTOR_CLASSIFICATION)
+    // Remove redundant bibliographic fields from part (used in Faculty Research collection)
+    removeElement(doc, CUSTOM_ELEMENTS.NUMBER_B, XPATH_CONTEXTS.PART)
+    removeElement(doc, CUSTOM_ELEMENTS.NUMBER_C, XPATH_CONTEXTS.PART)
+    removeElement(doc, CUSTOM_ELEMENTS.NUMBER_D, XPATH_CONTEXTS.PART)
 
     // Convert authority-specific topic elements
     convertAuthorityElement(doc, 'topicCONA', ELEMENT_NAMES.TOPIC, 'cona')
@@ -521,7 +539,10 @@ export function toStrictMODS(xmlString) {
     renameElement(doc, CASE_FIXES.RELATEDITEM.old, CASE_FIXES.RELATEDITEM.new)
 
     // Fix element names for MODS compliance
+    // part/title -> part/text
     renameElement(doc, 'title', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
+    // part/number contains attachment UUIDs, map to part/text with type="attachment-uuid"
+    renameElement(doc, 'number', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, 'attachment-uuid')
 
     // Convert namePartDate to namePart with type="date" attribute
     convertNamePartDate(doc)

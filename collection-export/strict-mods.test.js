@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, unwrapDateCreated, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -1051,6 +1051,123 @@ describe('Strict MODS Conversion', () => {
         })
     })
     
+    describe('convertNamePartDate', () => {
+        it('should convert namePartDate to namePart with type="date"', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal">
+                    <namePart>Doe, John</namePart>
+                    <namePartDate>1920-2000</namePartDate>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertNamePartDate(doc)
+            
+            const select = xpath.useNamespaces({})
+            const namePartDates = select('//name/namePartDate', doc)
+            const nameParts = select('//name/namePart', doc)
+            const dateNameParts = select('//name/namePart[@type="date"]', doc)
+            
+            assert.strictEqual(namePartDates.length, 0, 'namePartDate should be removed')
+            assert.strictEqual(nameParts.length, 2, 'Should have 2 namePart elements')
+            assert.strictEqual(dateNameParts.length, 1, 'Should have 1 namePart with type="date"')
+            assert.strictEqual(dateNameParts[0].textContent, '1920-2000')
+            assert.strictEqual(dateNameParts[0].getAttribute('type'), 'date')
+        })
+        
+        it('should handle empty namePartDate elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal">
+                    <namePart>Smith, Jane</namePart>
+                    <namePartDate/>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertNamePartDate(doc)
+            
+            const select = xpath.useNamespaces({})
+            const namePartDates = select('//name/namePartDate', doc)
+            const dateNameParts = select('//name/namePart[@type="date"]', doc)
+            
+            assert.strictEqual(namePartDates.length, 0, 'namePartDate should be removed')
+            assert.strictEqual(dateNameParts.length, 1, 'Should have 1 empty namePart with type="date"')
+            assert.strictEqual(dateNameParts[0].textContent, '')
+        })
+        
+        it('should handle multiple name elements with namePartDate', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal">
+                    <namePart>Doe, John</namePart>
+                    <namePartDate>1920-2000</namePartDate>
+                </name>
+                <name type="personal">
+                    <namePart>Smith, Jane</namePart>
+                    <namePartDate>1930-2010</namePartDate>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertNamePartDate(doc)
+            
+            const select = xpath.useNamespaces({})
+            const namePartDates = select('//name/namePartDate', doc)
+            const dateNameParts = select('//name/namePart[@type="date"]', doc)
+            
+            assert.strictEqual(namePartDates.length, 0, 'All namePartDate should be removed')
+            assert.strictEqual(dateNameParts.length, 2, 'Should have 2 namePart with type="date"')
+            assert.strictEqual(dateNameParts[0].textContent, '1920-2000')
+            assert.strictEqual(dateNameParts[1].textContent, '1930-2010')
+        })
+        
+        it('should preserve existing attributes on namePartDate', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal">
+                    <namePart>Doe, John</namePart>
+                    <namePartDate encoding="w3cdtf">1920-01-01</namePartDate>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertNamePartDate(doc)
+            
+            const select = xpath.useNamespaces({})
+            const dateNameParts = select('//name/namePart[@type="date"]', doc)
+            
+            assert.strictEqual(dateNameParts.length, 1)
+            assert.strictEqual(dateNameParts[0].getAttribute('type'), 'date')
+            assert.strictEqual(dateNameParts[0].getAttribute('encoding'), 'w3cdtf')
+            assert.strictEqual(dateNameParts[0].textContent, '1920-01-01')
+        })
+        
+        it('should not affect name elements without namePartDate', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal">
+                    <namePart>Doe, John</namePart>
+                    <namePart type="date">1920-2000</namePart>
+                    <role><roleTerm>author</roleTerm></role>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+            
+            convertNamePartDate(doc)
+            
+            const select = xpath.useNamespaces({})
+            const nameParts = select('//name/namePart', doc)
+            const dateNameParts = select('//name/namePart[@type="date"]', doc)
+            const roles = select('//name/role', doc)
+            
+            assert.strictEqual(nameParts.length, 2, 'Should still have 2 namePart elements')
+            assert.strictEqual(dateNameParts.length, 1, 'Should still have 1 namePart with type="date"')
+            assert.strictEqual(roles.length, 1, 'Should preserve role element')
+        })
+    })
+    
     describe('toStrictMODS', () => {
         it('should extract mods element and add namespace by default', () => {
             const input = `<xml><mods>
@@ -1328,6 +1445,45 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('<genre>correspondence</genre>'), 'Should have genre from formBroad')
             assert.ok(result.includes('<genre>personal</genre>'), 'Should have genre from formSpecific')
             assert.ok(result.includes('digitalOrigin'), 'Should preserve other physicalDescription content')
+        })
+        
+        it('should convert namePartDate to namePart with type="date"', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test Item</title></titleInfo>
+                <name type="personal" usage="primary">
+                    <namePart>Doe, John</namePart>
+                    <namePartDate>1920-2000</namePartDate>
+                    <role><roleTerm>creator</roleTerm></role>
+                </name>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('namePartDate'), 'Should not contain namePartDate')
+            assert.ok(result.includes('<namePart type="date">1920-2000</namePart>'), 
+                'Should have namePart with type="date"')
+            assert.ok(result.includes('<namePart>Doe, John</namePart>'), 
+                'Should preserve other namePart elements')
+        })
+        
+        it('should handle multiple names with namePartDate', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test Item</title></titleInfo>
+                <name type="personal">
+                    <namePart>Smith, Jane</namePart>
+                    <namePartDate>1930-2010</namePartDate>
+                </name>
+                <name type="corporate">
+                    <namePart>University Press</namePart>
+                    <namePartDate>1850-</namePartDate>
+                </name>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+            
+            assert.ok(!result.includes('namePartDate'), 'Should not contain namePartDate')
+            assert.ok(result.includes('<namePart type="date">1930-2010</namePart>'), 
+                'Should convert first namePartDate')
+            assert.ok(result.includes('<namePart type="date">1850-</namePart>'), 
+                'Should convert second namePartDate')
         })
     })
     

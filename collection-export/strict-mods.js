@@ -21,6 +21,7 @@ const XPATH_CONTEXTS = {
     ACCESS_CONDITION: '//accessCondition',
     LANGUAGE: '//mods/language',
     MODS: '//mods',
+    NAME: '//name',
     ORIGININFO_CAMEL: '//originInfo',
     ORIGININFO: '//origininfo',
     PART: '//part',
@@ -429,6 +430,37 @@ export function moveAndRenameElement(doc, sourcePath, targetParentPath, newEleme
 }
 
 /**
+ * Convert namePartDate elements to namePart elements with type="date" attribute
+ * namePartDate is a custom EQUELLA element that should be namePart with type="date"
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function convertNamePartDate(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const namePartDates = safeSelect(`${XPATH_CONTEXTS.NAME}/namePartDate`, doc)
+
+    for (let element of namePartDates) {
+        const newElement = doc.createElement('namePart')
+        newElement.setAttribute('type', 'date')
+        
+        // Copy attributes from original element
+        copyAttributes(element, newElement)
+        
+        // Move children (text nodes and elements)
+        moveChildren(element, newElement)
+        
+        // Replace the old element with the new one
+        element.parentNode.replaceChild(newElement, element)
+    }
+
+    return doc
+}
+
+/**
  * Main conversion function to convert custom MODS to strict MODS
  *
  * @param {string} xmlString - XML string to convert
@@ -490,6 +522,9 @@ export function toStrictMODS(xmlString) {
 
     // Fix element names for MODS compliance
     renameElement(doc, 'title', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
+
+    // Convert namePartDate to namePart with type="date" attribute
+    convertNamePartDate(doc)
 
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, 'title', ELEMENT_NAMES.TITLE_INFO)

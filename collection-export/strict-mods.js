@@ -65,9 +65,11 @@ const CASE_FIXES = {
 
 // Element names for transformations
 const ELEMENT_NAMES = {
+    EXTENT: 'extent',
     GENRE: 'genre',
     LANGUAGE_OF_CATALOGING: 'languageOfCataloging',
     LANGUAGE_TERM: 'languageTerm',
+    LIST: 'list',
     NAME_PART: 'namePart',
     NOTE: 'note',
     PLACE_TERM: 'placeTerm',
@@ -610,7 +612,9 @@ export function toStrictMODS(xmlString) {
     // part/title -> part/text
     renameElement(doc, 'title', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
     // part/number contains attachment UUIDs, map to part/text with type="attachment-uuid"
-    renameElement(doc, 'number', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, { type: 'attachment-uuid' })
+    renameElement(doc, 'number', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, {type: 'attachment-uuid'})
+    // part/extent -> part/extent/list (our use is not quite standard but this is an improvement)
+    wrapTextWithChild(doc, `${XPATH_CONTEXTS.PART}/extent`, ELEMENT_NAMES.LIST)
 
     // Convert namePartDate to namePart with type="date" attribute
     convertNamePartDate(doc)
@@ -622,10 +626,10 @@ export function toStrictMODS(xmlString) {
     wrapTextWithChild(doc, XPATH_CONTEXTS.LANGUAGE, ELEMENT_NAMES.LANGUAGE_TERM, ['authority'])
 
     // Wrap originInfo/place text content with placeTerm
-    wrapTextWithChild(doc, XPATH_CONTEXTS.ORIGININFO_PLACE, ELEMENT_NAMES.PLACE_TERM, [])
+    wrapTextWithChild(doc, XPATH_CONTEXTS.ORIGININFO_PLACE, ELEMENT_NAMES.PLACE_TERM)
 
     // Wrap subject/name text content with namePart (preserves authority and type attributes on name)
-    wrapTextWithChild(doc, XPATH_CONTEXTS.SUBJECT_NAME, ELEMENT_NAMES.NAME_PART, [])
+    wrapTextWithChild(doc, XPATH_CONTEXTS.SUBJECT_NAME, ELEMENT_NAMES.NAME_PART)
 
     // Move classification elements to subject/topic
     moveClassificationToSubject(doc, CUSTOM_ELEMENTS.PHOTO_CLASSIFICATION, 'local')

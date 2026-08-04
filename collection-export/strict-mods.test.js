@@ -1690,6 +1690,20 @@ describe('Strict MODS Conversion', () => {
                 'Should convert number to text with type="attachment-uuid"')
         })
 
+        it('should move part/extent to part/extent/list', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <part>
+                    <extent>10 pages</extent>
+                </part>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+
+            assert.ok(!result.includes('<extent>10 pages</extent>'), 'Should not have extent directly in part')
+            assert.ok(result.includes('<extent><list>10 pages</list></extent>'),
+                'Should move extent text to list/item structure')
+        })
+
         it('should remove redundant numberB, numberC, numberD from part', () => {
             const input = `<xml><mods>
                 <titleInfo><title>Journal Article</title></titleInfo>

@@ -1876,6 +1876,20 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('<namePart type="date">1850-</namePart>'),
                 'Should convert second namePartDate')
         })
+
+        it('should wrap languageOfCataloging with languageTerm and move authority', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <recordInfo><languageOfCataloging authority="iso639-2b">eng</languageOfCataloging></recordInfo>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+
+            assert.ok(result.includes('<languageOfCataloging>'), 'Should have languageOfCataloging')
+            assert.ok(result.includes('<languageTerm authority="iso639-2b">eng</languageTerm>'),
+                'Should wrap text with languageTerm and move authority')
+            assert.ok(!result.includes('<languageOfCataloging authority'),
+                'LanguageOfCataloging should not have authority attribute')
+        })
     })
 
     describe('Edge cases and error handling', () => {

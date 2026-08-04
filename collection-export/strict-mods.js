@@ -27,6 +27,7 @@ const XPATH_CONTEXTS = {
     ORIGININFO_PLACE: '//originInfo/place',
     PART: '//part',
     PHYSICAL_DESCRIPTION: '//physicalDescription',
+    RECORD_INFO: '//recordInfo',
     RELATEDITEM: '//relatedItem',
     SUBJECT: '//subject',
     SUBJECT_NAME: '//subject/name',
@@ -65,6 +66,7 @@ const CASE_FIXES = {
 // Element names for transformations
 const ELEMENT_NAMES = {
     GENRE: 'genre',
+    LANGUAGE_OF_CATALOGING: 'languageOfCataloging',
     LANGUAGE_TERM: 'languageTerm',
     NAME_PART: 'namePart',
     NOTE: 'note',
@@ -631,6 +633,9 @@ export function toStrictMODS(xmlString) {
 
     // Remove non-standard attributes
     removeAttribute(doc, XPATH_CONTEXTS.ACCESS_CONDITION, 'href')
+
+    // Wrap recordInfo/languageOfCataloging with languageTerm and move authority attribute
+    wrapTextWithChild(doc, `${XPATH_CONTEXTS.RECORD_INFO}/languageOfCataloging`, ELEMENT_NAMES.LANGUAGE_TERM, ['authority'])
 
     // Remove all empty elements (no text, no children with text)
     removeEmptyElements(doc)

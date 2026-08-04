@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -111,6 +111,69 @@ const fixtures = {
             <genre>correspondence</genre>
             <note>Test note</note>
             <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleNoAttributes: {
+        input: `<xml><mods>
+            <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleUsagePrimary: {
+        input: `<xml><mods>
+            <titleInfo><title usage="primary">Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleUsageAbbreviated: {
+        input: `<xml><mods>
+            <titleInfo><title usage="abbreviated">Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo type="abbreviated"><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleUsageNonStandard: {
+        input: `<xml><mods>
+            <titleInfo><title usage="donkey">Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleInfoUsage: {
+        input: `<xml><mods>
+            <titleInfo usage="primary"><title>Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo usage="primary"><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleInfoUsageTitleUsage: {
+        input: `<xml><mods>
+            <titleInfo usage="primary"><title usage="primary">Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo usage="primary"><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleInfoUsageTitleAbbreviated: {
+        input: `<xml><mods>
+            <titleInfo usage="primary"><title usage="abbreviated">Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo usage="primary" type="abbreviated"><title>Test Item</title></titleInfo>
         </mods></xml>`
     },
 
@@ -322,6 +385,104 @@ describe('Strict MODS Conversion', () => {
             assert.strictEqual(wrapperElements.length, 0)
             assert.strictEqual(unwrappedElements.length, 1)
             assert.strictEqual(unwrappedElements[0].textContent, 'text')
+        })
+    })
+
+    describe('fixTitleAttributes', () => {
+        // titleNoAttributes
+        it('should preserve titles without usage attributes', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.titleNoAttributes.input, 'text/xml')
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleNoAttributes.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it("should remove usage attribute from title element", () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleUsagePrimary.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleUsagePrimary.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should convert usage="abbreviated" to type="abbreviated" on titleInfo', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleUsageAbbreviated.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleUsageAbbreviated.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle non-standard usage attribute values', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleUsageNonStandard.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleUsageNonStandard.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should remove usage attribute from titleInfo element', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoUsage.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoUsage.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle usage attributes on both titleInfo and title', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoUsageTitleUsage.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoUsageTitleUsage.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should convert usage="abbreviated" on both titleInfo and title', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoUsageTitleAbbreviated.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoUsageTitleAbbreviated.expected)
+
+            assert.strictEqual(result, expected)
         })
     })
 

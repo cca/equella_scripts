@@ -79,6 +79,8 @@ const ELEMENT_NAMES = {
     TOPIC: 'topic',
 }
 
+const TITLE_INFO_TYPES = ['uniform', 'alternative', 'translated', 'abbreviated']
+
 /**
  * Simple unwrapper for elements that just wrap a single child element
  * Replaces wrapper element with its child element(s)
@@ -102,6 +104,37 @@ export function unwrapSimpleElement(doc, wrapperName, context = XPATH_CONTEXTS.M
             parent.insertBefore(wrapper.firstChild, wrapper)
         }
         parent.removeChild(wrapper)
+    }
+
+    return doc
+}
+
+
+/**
+ * We have a nonstandard @usage attribute on the titleInfo/title element
+ * which should be titleInfo/@type instead with one of four values: uniform, alternative,
+ * translated, or abbreviated. "Primariy" is not valid & should be dropped.
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function fixTitleAttributes(doc) {
+    if (!doc) {
+        return doc
+    }
+    const title = safeSelect(`${XPATH_CONTEXTS.MODS}//titleInfo/title[@usage]`, doc)
+
+    for (let titleElement of title) {
+        const usageValue = titleElement.getAttribute('usage')
+        const titleInfoElement = titleElement.parentNode
+
+        // If usage value is one of the valid types, move it to titleInfo/@type
+        if (TITLE_INFO_TYPES.includes(usageValue)) {
+            titleInfoElement.setAttribute('type', usageValue)
+        }
+
+        // Remove the nonstandard @usage attribute from title
+        titleElement.removeAttribute('usage')
     }
 
     return doc
@@ -580,6 +613,9 @@ export function toStrictMODS(xmlString) {
     unwrapSimpleElement(doc, WRAPPER_ELEMENTS.TYPE_OF_RESOURCE)
     unwrapSimpleElement(doc, WRAPPER_ELEMENTS.GENRE)
     unwrapSimpleElement(doc, WRAPPER_ELEMENTS.NOTE)
+
+    // Fix titleInfo/title usage attribute
+    fixTitleAttributes(doc)
 
     // Handle date wrappers and ranges
     unwrapDateCreated(doc)

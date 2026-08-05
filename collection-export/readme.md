@@ -19,6 +19,7 @@ Options:
   --html               Write a brief HTML index for each item
   --item <UUID>        UUID of single item to export
   --name               Use item name for export folders instead of UUID
+  --no-mods            Do not write strict MODS XML for each item
   --verbose            Print debug info
 
 You can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".
@@ -82,7 +83,7 @@ end
 
 ## Strict MODS Module
 
-The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XML to strict MODS schema-compliant XML by unwrapping custom wrapper elements and removing non-standard elements. Our MODS implementation uses custom "wrapper" elements (like `typeOfResourceWrapper`, `genreWrapper`, `noteWrapper`) that are not part of the official MODS schema to work with EQUELLA's contribution form repeaters.
+The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XML to strict MODS schema-compliant XML by unwrapping custom wrapper elements, removing non-standard elements and attributes, and creating child elements where necessary (e.g. `mods/language` -> `mods/language/languageTerm`.). Our MODS implementation uses custom "wrapper" elements (like `typeOfResourceWrapper`, `genreWrapper`, `noteWrapper`) that are not part of the official MODS schema to work with EQUELLA's contribution form repeaters.
 
 ### Strict MODS Testing
 
@@ -94,7 +95,7 @@ npm run modstest
 node test-collection-samples.js data/mudflats.json 10
 ```
 
-The `test-collection-samples.js` script tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly. You can also download item XML to run the strict MODS conversion on your own.
+The `test-collection-samples.js` script tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly. We can also download item XML to run the strict MODS conversion on our own.
 
 ### Converting & Validating MODS Files
 

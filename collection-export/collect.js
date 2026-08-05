@@ -8,12 +8,15 @@ import rc from 'rc'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
+import { toStrictMODS } from './strict-mods.js'
+
 const defaults = {
     // obviously need attachment & metadata info
     // "basic" is a nicety, gives item.name
     // "detail" gives owner, dates, collaborators, & some other unneeded item properties
     info: 'attachment,basic,detail,metadata',
     limit: Infinity,
+    mods: true,
 }
 const options = rc('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
@@ -25,6 +28,7 @@ if (options.help || options.h || (options._.length && options._[0].match(/^help$
     console.log('  --html               Write a brief HTML index for each item')
     console.log('  --item <UUID>        UUID of single item to export')
     console.log('  --name               Use item name for export folders instead of UUID')
+    console.log('  --no-mods            Do not write strict MODS XML for each item')
     console.log('  --verbose            Print debug info')
     console.log('\nYou can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".\nSee https://vault.cca.edu/apidocs.do#operations-tag-Searching')
     process.exit(0)
@@ -184,6 +188,10 @@ function getAttachments(item, itemDir) {
 function writeXML(item, dir) {
     debug(`Writing XML metadata for item ${item.links.view}`)
     fs.writeFile(path.join(dir, 'metadata', 'metadata.xml'), item.metadata, handleErr)
+    if (options.mods) {
+        const strictMods = toStrictMODS(item.metadata)
+        fs.writeFile(path.join(dir, 'metadata', 'metadata.mods.xml'), strictMods, handleErr)
+    }
 }
 
 function writeJSON(item, dir) {

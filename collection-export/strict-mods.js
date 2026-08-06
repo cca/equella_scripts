@@ -600,6 +600,39 @@ export function convertNamePartDate(doc) {
  * @param {Document} doc - XML DOM document
  * @returns {Document} Modified document
  */
+/**
+ * Wrap copyInformation in holdingSimple element
+ * MODS standard requires: location/holdingSimple/copyInformation
+ * Currently we have: location/copyInformation (non-standard)
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function wrapCopyInformation(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    // Find all copyInformation elements that are direct children of location
+    const copyInfoElements = safeSelect('//location/copyInformation', doc)
+
+    for (let copyInfo of copyInfoElements) {
+        const location = copyInfo.parentNode
+
+        // Create holdingSimple wrapper
+        const holdingSimple = doc.createElement('holdingSimple')
+
+        // Move copyInformation into holdingSimple
+        location.removeChild(copyInfo)
+        holdingSimple.appendChild(copyInfo)
+
+        // Add holdingSimple to location
+        location.appendChild(holdingSimple)
+    }
+
+    return doc
+}
+
 export function convertSubNameWrapper(doc) {
     if (!doc) {
         return doc
@@ -734,6 +767,9 @@ export function toStrictMODS(xmlString) {
 
     // Fix nonstandard subNameWrapper elements under mods/name
     convertSubNameWrapper(doc)
+
+    // Wrap copyInformation in holdingSimple under location
+    wrapCopyInformation(doc)
 
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TITLE_INFO)

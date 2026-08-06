@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -491,6 +491,109 @@ const fixtures = {
                 <affiliation>CCA</affiliation>
                 <affiliation>Design (MFA)</affiliation>
             </name>
+        </mods></xml>`
+    },
+
+    // wrapCopyInformation fixtures
+    copyInformationSimple: {
+        input: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <copyInformation>
+                    <sublocation>Meyer Library</sublocation>
+                    <shelfLocator>Shelf A-123</shelfLocator>
+                </copyInformation>
+            </location>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <sublocation>Meyer Library</sublocation>
+                        <shelfLocator>Shelf A-123</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
+        </mods></xml>`
+    },
+
+    copyInformationWithSublocationDetail: {
+        input: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <copyInformation>
+                    <sublocation>Meyer Library</sublocation>
+                    <sublocationDetail>Archives - Founder's Files (Box) Meyer #1</sublocationDetail>
+                    <shelfLocator>(Folder) Letter to Dr. Porter</shelfLocator>
+                </copyInformation>
+            </location>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <sublocation>Meyer Library</sublocation>
+                        <sublocationDetail>Archives - Founder's Files (Box) Meyer #1</sublocationDetail>
+                        <shelfLocator>(Folder) Letter to Dr. Porter</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
+        </mods></xml>`
+    },
+
+    copyInformationMultipleLocations: {
+        input: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <copyInformation>
+                    <sublocation>Meyer Library</sublocation>
+                    <shelfLocator>A-1</shelfLocator>
+                </copyInformation>
+            </location>
+            <location>
+                <physicalLocation>San Francisco Campus</physicalLocation>
+                <copyInformation>
+                    <sublocation>Main Library</sublocation>
+                    <shelfLocator>B-2</shelfLocator>
+                </copyInformation>
+            </location>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <sublocation>Meyer Library</sublocation>
+                        <shelfLocator>A-1</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
+            <location>
+                <physicalLocation>San Francisco Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <sublocation>Main Library</sublocation>
+                        <shelfLocator>B-2</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
+        </mods></xml>`
+    },
+
+    locationWithoutCopyInformation: {
+        input: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <url>https://example.com</url>
+            </location>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <url>https://example.com</url>
+            </location>
         </mods></xml>`
     }
 }
@@ -2799,6 +2902,110 @@ describe('Strict MODS Conversion', () => {
 
             assert.strictEqual(affiliations.length, 0, 'Should not create empty affiliations')
             assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+        })
+    })
+
+    describe('wrapCopyInformation', () => {
+        it('should wrap copyInformation in holdingSimple', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.copyInformationSimple.input, 'text/xml')
+
+            wrapCopyInformation(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.copyInformationSimple.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should wrap copyInformation with sublocationDetail (non-standard child)', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.copyInformationWithSublocationDetail.input, 'text/xml')
+
+            wrapCopyInformation(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const holdingSimple = select('//location/holdingSimple', doc)
+            const copyInfo = select('//location/holdingSimple/copyInformation', doc)
+
+            assert.strictEqual(holdingSimple.length, 1, 'Should have one holdingSimple')
+            assert.strictEqual(copyInfo.length, 1, 'Should have one copyInformation inside holdingSimple')
+            assert.ok(result.includes('<sublocationDetail>'), 'sublocationDetail should be preserved (to be fixed later)')
+        })
+
+        it('should handle multiple location elements', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.copyInformationMultipleLocations.input, 'text/xml')
+
+            wrapCopyInformation(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const holdingSimples = select('//location/holdingSimple', doc)
+            const copyInfos = select('//location/holdingSimple/copyInformation', doc)
+
+            assert.strictEqual(holdingSimples.length, 2, 'Should have two holdingSimple elements')
+            assert.strictEqual(copyInfos.length, 2, 'Should have two copyInformation elements')
+        })
+
+        it('should not modify location without copyInformation', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.locationWithoutCopyInformation.input, 'text/xml')
+
+            wrapCopyInformation(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.locationWithoutCopyInformation.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle null document gracefully', () => {
+            const result = wrapCopyInformation(null)
+            assert.strictEqual(result, null, 'Should return null for null input')
+        })
+
+        it('should preserve other location children', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <location>
+                    <physicalLocation>Oakland Campus</physicalLocation>
+                    <url>https://example.com</url>
+                    <copyInformation>
+                        <sublocation>Library</sublocation>
+                    </copyInformation>
+                </location>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            wrapCopyInformation(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const physicalLocation = select('//location/physicalLocation', doc)
+            const url = select('//location/url', doc)
+            const holdingSimple = select('//location/holdingSimple', doc)
+
+            assert.strictEqual(physicalLocation.length, 1, 'Should preserve physicalLocation')
+            assert.strictEqual(url.length, 1, 'Should preserve url')
+            assert.strictEqual(holdingSimple.length, 1, 'Should create holdingSimple')
+            assert.strictEqual(physicalLocation[0].textContent, 'Oakland Campus')
+            assert.strictEqual(url[0].textContent, 'https://example.com')
+        })
+
+        it('should verify copyInformation structure after wrapping', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.copyInformationSimple.input, 'text/xml')
+
+            wrapCopyInformation(doc)
+
+            const select = xpath.useNamespaces({})
+            const directCopyInfo = select('//location/copyInformation', doc)
+            const wrappedCopyInfo = select('//location/holdingSimple/copyInformation', doc)
+
+            assert.strictEqual(directCopyInfo.length, 0, 'Should not have copyInformation as direct child of location')
+            assert.strictEqual(wrappedCopyInfo.length, 1, 'Should have copyInformation inside holdingSimple')
         })
     })
 })

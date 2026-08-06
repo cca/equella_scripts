@@ -27,6 +27,7 @@ const XPATH_CONTEXTS = {
     ORIGININFO_PLACE: '//originInfo/place',
     PART: '//part',
     PHYSICAL_DESCRIPTION: '//physicalDescription',
+    PHYSICAL_DESCRIPTION_NOTE: '//physicalDescriptionNote',
     RECORD_INFO: '//recordInfo',
     RELATEDITEM: '//relatedItem',
     SUBJECT: '//subject',
@@ -47,6 +48,8 @@ const WRAPPER_ELEMENTS = {
 const CUSTOM_ELEMENTS = {
     ARTSTOR_CLASSIFICATION: 'artstorClassification',
     DATE_TYPE: 'dateType',
+    FORM_BROAD: 'formBroad',
+    FORM_SPECIFIC: 'formSpecific',
     // numberB, numberC, numberD are used in Faculty Research collection to store
     // redundant bibliographic information (page ranges, volume, issue) that is
     // already present in valid MODS fields within relatedItem/part
@@ -72,11 +75,20 @@ const ELEMENT_NAMES = {
     LIST: 'list',
     NAME_PART: 'namePart',
     NOTE: 'note',
+    NUMBER: 'number',
     PLACE_TERM: 'placeTerm',
     SUBJECT: 'subject',
     TEXT: 'text',
     TITLE_INFO: 'titleInfo',
+    TITLE: 'title',
     TOPIC: 'topic',
+}
+
+// Attributes
+const ATTRIBUTES = {
+    AUTHORITY: 'authority',
+    HREF: 'href',
+    XMLNS: 'xmlns',
 }
 
 const TITLE_INFO_TYPES = ['uniform', 'alternative', 'translated', 'abbreviated']
@@ -634,11 +646,11 @@ export function toStrictMODS(xmlString) {
     convertAuthorityElement(doc, 'topicCONA', ELEMENT_NAMES.TOPIC, 'cona')
 
     // Move form elements from physicalDescription to genre
-    moveAndRenameElement(doc, `${XPATH_CONTEXTS.PHYSICAL_DESCRIPTION}/formBroad`, XPATH_CONTEXTS.MODS, ELEMENT_NAMES.GENRE)
-    moveAndRenameElement(doc, `${XPATH_CONTEXTS.PHYSICAL_DESCRIPTION}/formSpecific`, XPATH_CONTEXTS.MODS, ELEMENT_NAMES.GENRE)
+    moveAndRenameElement(doc, `${XPATH_CONTEXTS.PHYSICAL_DESCRIPTION}/${CUSTOM_ELEMENTS.FORM_BROAD}`, XPATH_CONTEXTS.MODS, ELEMENT_NAMES.GENRE)
+    moveAndRenameElement(doc, `${XPATH_CONTEXTS.PHYSICAL_DESCRIPTION}/${CUSTOM_ELEMENTS.FORM_SPECIFIC}`, XPATH_CONTEXTS.MODS, ELEMENT_NAMES.GENRE)
 
     // Move notes from physicalDescriptionNote wrapper to physicalDescription
-    moveAndRenameElement(doc, `//${WRAPPER_ELEMENTS.PHYSICAL_DESCRIPTION_NOTE}/${ELEMENT_NAMES.NOTE}`, XPATH_CONTEXTS.PHYSICAL_DESCRIPTION, ELEMENT_NAMES.NOTE)
+    moveAndRenameElement(doc, `${XPATH_CONTEXTS.PHYSICAL_DESCRIPTION_NOTE}/${ELEMENT_NAMES.NOTE}`, XPATH_CONTEXTS.PHYSICAL_DESCRIPTION, ELEMENT_NAMES.NOTE)
 
     // Fix case sensitivity
     renameElement(doc, CASE_FIXES.ORIGININFO.old, CASE_FIXES.ORIGININFO.new)
@@ -646,20 +658,20 @@ export function toStrictMODS(xmlString) {
 
     // Fix element names for MODS compliance
     // part/title -> part/text
-    renameElement(doc, 'title', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
+    renameElement(doc, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
     // part/number contains attachment UUIDs, map to part/text with type="attachment-uuid"
-    renameElement(doc, 'number', ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, {type: 'attachment-uuid'})
+    renameElement(doc, ELEMENT_NAMES.NUMBER, ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, {type: 'attachment-uuid'})
     // part/extent -> part/extent/list (our use is not quite standard but this is an improvement)
-    wrapTextWithChild(doc, `${XPATH_CONTEXTS.PART}/extent`, ELEMENT_NAMES.LIST)
+    wrapTextWithChild(doc, `${XPATH_CONTEXTS.PART}/${ELEMENT_NAMES.EXTENT}`, ELEMENT_NAMES.LIST)
 
     // Convert namePartDate to namePart with type="date" attribute
     convertNamePartDate(doc)
 
     // Wrap title elements that are direct children of relatedItem with titleInfo
-    wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, 'title', ELEMENT_NAMES.TITLE_INFO)
+    wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TITLE_INFO)
 
     // Wrap language text content with languageTerm and move authority attribute
-    wrapTextWithChild(doc, XPATH_CONTEXTS.LANGUAGE, ELEMENT_NAMES.LANGUAGE_TERM, ['authority'])
+    wrapTextWithChild(doc, XPATH_CONTEXTS.LANGUAGE, ELEMENT_NAMES.LANGUAGE_TERM, [ATTRIBUTES.AUTHORITY])
 
     // Wrap originInfo/place text content with placeTerm
     wrapTextWithChild(doc, XPATH_CONTEXTS.ORIGININFO_PLACE, ELEMENT_NAMES.PLACE_TERM)
@@ -672,10 +684,10 @@ export function toStrictMODS(xmlString) {
     removeElement(doc, CUSTOM_ELEMENTS.PHOTO_CLASSIFICATION)  // Remove any remaining classification elements
 
     // Remove non-standard attributes
-    removeAttribute(doc, XPATH_CONTEXTS.ACCESS_CONDITION, 'href')
+    removeAttribute(doc, XPATH_CONTEXTS.ACCESS_CONDITION, ATTRIBUTES.HREF)
 
     // Wrap recordInfo/languageOfCataloging with languageTerm and move authority attribute
-    wrapTextWithChild(doc, `${XPATH_CONTEXTS.RECORD_INFO}/languageOfCataloging`, ELEMENT_NAMES.LANGUAGE_TERM, ['authority'])
+    wrapTextWithChild(doc, `${XPATH_CONTEXTS.RECORD_INFO}/${ELEMENT_NAMES.LANGUAGE_OF_CATALOGING}`, ELEMENT_NAMES.LANGUAGE_TERM, [ATTRIBUTES.AUTHORITY])
 
     // Remove all empty elements (no text, no children with text)
     removeEmptyElements(doc)
@@ -686,8 +698,8 @@ export function toStrictMODS(xmlString) {
         const modsElement = modsElements[0]
 
         // Add MODS namespace if not present (required for schema validation)
-        if (!modsElement.getAttribute('xmlns')) {
-            modsElement.setAttribute('xmlns', 'http://www.loc.gov/mods/v3')
+        if (!modsElement.getAttribute(ATTRIBUTES.XMLNS)) {
+            modsElement.setAttribute(ATTRIBUTES.XMLNS, 'http://www.loc.gov/mods/v3')
         }
 
         return modsElement.toString()

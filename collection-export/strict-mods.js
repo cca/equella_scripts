@@ -672,6 +672,49 @@ export function wrapCopyInformation(doc) {
     return doc
 }
 
+/**
+ * Reorder children of copyInformation to match MODS schema sequence
+ * Schema order: form, subLocation, shelfLocator, electronicLocator, note, enumerationAndChronology, itemIdentifier
+ * 
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function reorderCopyInformationChildren(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const copyInfoElements = safeSelect('//copyInformation', doc)
+    const correctOrder = ['form', 'subLocation', 'shelfLocator', 'electronicLocator', 'note', 'enumerationAndChronology', 'itemIdentifier']
+
+    for (let copyInfo of copyInfoElements) {
+        // Get all children
+        const children = Array.from(copyInfo.childNodes).filter(node => node.nodeType === 1) // Element nodes only
+        
+        // Sort children by the schema order
+        children.sort((a, b) => {
+            const aIndex = correctOrder.indexOf(a.tagName)
+            const bIndex = correctOrder.indexOf(b.tagName)
+            // Elements not in the list go to the end
+            const aPos = aIndex === -1 ? 1000 : aIndex
+            const bPos = bIndex === -1 ? 1000 : bIndex
+            return aPos - bPos
+        })
+
+        // Remove all children
+        while (copyInfo.firstChild) {
+            copyInfo.removeChild(copyInfo.firstChild)
+        }
+
+        // Re-append in correct order
+        for (let child of children) {
+            copyInfo.appendChild(child)
+        }
+    }
+
+    return doc
+}
+
 export function convertSubNameWrapper(doc) {
     if (!doc) {
         return doc
@@ -813,6 +856,12 @@ export function toStrictMODS(xmlString) {
     wrapCopyInformation(doc)
     // Fix sublocation -> subLocation under location
     renameElement(doc, CASE_FIXES.SUBLOCATION.old, CASE_FIXES.SUBLOCATION.new, XPATH_CONTEXTS.COPY_INFORMATION)
+    // Convert sublocationDetail to note (non-standard element)
+    renameElement(doc, 'sublocationDetail', 'note', XPATH_CONTEXTS.COPY_INFORMATION)
+    // Reorder copyInformation children to match schema sequence
+    reorderCopyInformationChildren(doc)
+    // Rename subLocationDetail to note
+    renameElement(doc, 'subLocationDetail', 'note', XPATH_CONTEXTS.COPY_INFORMATION)
 
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TITLE_INFO)

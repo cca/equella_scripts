@@ -516,6 +516,17 @@ const fixtures = {
                     </copyInformation>
                 </holdingSimple>
             </location>
+        </mods></xml>`,
+        toStrictMODSExpected: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <subLocation>Meyer Library</subLocation>
+                        <shelfLocator>Shelf A-123</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
         </mods></xml>`
     },
 
@@ -535,8 +546,20 @@ const fixtures = {
                 <physicalLocation>Oakland Campus</physicalLocation>
                 <holdingSimple>
                     <copyInformation>
-                        <subLocation>Meyer Library</subLocation>
+                        <sublocation>Meyer Library</sublocation>
                         <sublocationDetail>Archives - Founder's Files (Box) Meyer #1</sublocationDetail>
+                        <shelfLocator>(Folder) Letter to Dr. Porter</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
+        </mods></xml>`,
+        toStrictMODSExpected: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <subLocation>Meyer Library</subLocation>
+                        <note>Archives - Founder's Files (Box) Meyer #1</note>
                         <shelfLocator>(Folder) Letter to Dr. Porter</shelfLocator>
                     </copyInformation>
                 </holdingSimple>
@@ -562,6 +585,26 @@ const fixtures = {
             </location>
         </mods></xml>`,
         expected: `<xml><mods>
+            <location>
+                <physicalLocation>Oakland Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <sublocation>Meyer Library</sublocation>
+                        <shelfLocator>A-1</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
+            <location>
+                <physicalLocation>San Francisco Campus</physicalLocation>
+                <holdingSimple>
+                    <copyInformation>
+                        <sublocation>Main Library</sublocation>
+                        <shelfLocator>B-2</shelfLocator>
+                    </copyInformation>
+                </holdingSimple>
+            </location>
+        </mods></xml>`,
+        toStrictMODSExpected: `<xml><mods>
             <location>
                 <physicalLocation>Oakland Campus</physicalLocation>
                 <holdingSimple>
@@ -3091,6 +3134,41 @@ describe('Strict MODS Conversion', () => {
 
             assert.strictEqual(directCopyInfo.length, 0, 'Should not have copyInformation as direct child of location')
             assert.strictEqual(wrappedCopyInfo.length, 1, 'Should have copyInformation inside holdingSimple')
+        })
+    })
+
+    // full copyInformation conversions with subLocation case and sublocationDetail->note
+    describe('copyInformationStrictMODS', () => {
+        // copyInformationSimple
+        it('should convert simple copyInformation to strict MODS', () => {
+            const result = normalizeXML(toStrictMODS(fixtures.copyInformationSimple.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Meyer Library</subLocation><shelfLocator>Shelf A-123</shelfLocator></copyInformation></holdingSimple></location></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        // copyInformationWithSublocationDetail
+        it('should convert copyInformation with sublocation and sublocationDetail to strict MODS', () => {
+            const result = normalizeXML(toStrictMODS(fixtures.copyInformationWithSublocationDetail.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Meyer Library</subLocation><shelfLocator>(Folder) Letter to Dr. Porter</shelfLocator><note>Archives - Founder's Files (Box) Meyer #1</note></copyInformation></holdingSimple></location></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        // copyInformationMultipleLocations
+        it('should convert multiple locations with copyInformation to strict MODS', () => {
+            const result = normalizeXML(toStrictMODS(fixtures.copyInformationMultipleLocations.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Meyer Library</subLocation><shelfLocator>A-1</shelfLocator></copyInformation></holdingSimple></location><location><physicalLocation>San Francisco Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Main Library</subLocation><shelfLocator>B-2</shelfLocator></copyInformation></holdingSimple></location></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        // locationWithoutCopyInformation
+        it('should convert location without copyInformation to strict MODS', () => {
+            const result = normalizeXML(toStrictMODS(fixtures.locationWithoutCopyInformation.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><url>https://example.com</url></location></mods>`)
+
+            assert.strictEqual(result, expected)
         })
     })
 

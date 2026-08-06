@@ -592,6 +592,29 @@ export function convertNamePartDate(doc) {
 }
 
 /**
+ * Remove usage attributes from name elements if they're not "primary".
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function removeBadNameUsageAttrs(doc) {
+    if (!doc) {
+        return doc
+    }
+    const VALID_USAGE_VALUES = ['primary']
+
+    const nameElements = safeSelect(`${XPATH_CONTEXTS.NAME}[@usage]`, doc)
+    for (let name of nameElements) {
+        const usageValue = name.getAttribute('usage')
+        if (!VALID_USAGE_VALUES.includes(usageValue)) {
+            name.removeAttribute('usage')
+        }
+    }
+
+    return doc
+}
+
+/**
  * Convert part/detail elements that indicate speaker release forms
  * Mudflats collection uses part/detail with "yes"/"no" values to indicate
  * whether a speaker release form exists for oral history attachments.
@@ -851,6 +874,9 @@ export function toStrictMODS(xmlString) {
 
     // Fix nonstandard subNameWrapper elements under mods/name
     convertSubNameWrapper(doc)
+
+    // Remove usage="secondary" attribute from name elements
+    removeBadNameUsageAttrs(doc)
 
     // Wrap copyInformation in holdingSimple under location
     wrapCopyInformation(doc)

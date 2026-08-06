@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -2024,6 +2024,66 @@ describe('Strict MODS Conversion', () => {
             assert.strictEqual(nameParts.length, 2, 'Should still have 2 namePart elements')
             assert.strictEqual(dateNameParts.length, 1, 'Should still have 1 namePart with type="date"')
             assert.strictEqual(roles.length, 1, 'Should preserve role element')
+        })
+    })
+
+    describe('removeSecondaryUsageNameAttr', () => {
+        it('should remove secondaryUsage attribute from name elements', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal" usage="secondary">
+                    <namePart>Doe, John</namePart>
+                </name>
+                <name type="corporate">
+                    <namePart>Acme Corp</namePart>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            removeBadNameUsageAttrs(doc)
+
+            const select = xpath.useNamespaces({})
+            const names = select('//mods/name', doc)
+
+            assert.strictEqual(names.length, 2)
+            assert.strictEqual(names[0].hasAttribute('usage'), false, 'usage="secondary" should be removed from first name')
+            assert.strictEqual(names[1].hasAttribute('usage'), false, 'second name should not have usage attribute')
+        })
+
+        it('should not affect name elements without usage="secondary"', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+            <name type="personal">
+                <namePart>Smith, Jane</namePart>
+            </name>
+        </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            removeBadNameUsageAttrs(doc)
+
+            const select = xpath.useNamespaces({})
+            const names = select('//mods/name', doc)
+
+            assert.strictEqual(names.length, 1)
+            assert.strictEqual(names[0].hasAttribute('usage'), false, 'name without usage attribute should remain unaffected')
+        })
+
+        it('should leave usage=primary intact', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal" usage="primary">
+                    <namePart>Doe, John</namePart>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            removeBadNameUsageAttrs(doc)
+
+            const select = xpath.useNamespaces({})
+            const names = select('//mods/name', doc)
+
+            assert.strictEqual(names.length, 1)
+            assert.strictEqual(names[0].getAttribute('usage'), 'primary', 'usage="primary" should remain intact')
         })
     })
 

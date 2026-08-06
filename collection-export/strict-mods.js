@@ -603,6 +603,43 @@ export function convertNamePartDate(doc) {
  * @returns {Document} Modified document
  */
 /**
+ * Convert part/detail elements that indicate speaker release forms
+ * Mudflats collection uses part/detail with "yes"/"no" values to indicate
+ * whether a speaker release form exists for oral history attachments.
+ * - detail with "no" -> remove the element
+ * - detail with "yes" -> replace with part/text containing "Speaker Release Form"
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function convertSpeakerReleaseDetail(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    // Find all detail elements under part
+    const detailElements = safeSelect('//part/detail', doc)
+
+    for (let detail of detailElements) {
+        const value = detail.textContent.trim().toLowerCase()
+        const part = detail.parentNode
+
+        if (value === 'no') {
+            // Remove detail elements with "no"
+            part.removeChild(detail)
+        } else if (value === 'yes') {
+            // Replace with part/text containing "Speaker Release Form"
+            const textElement = doc.createElement('text')
+            textElement.textContent = 'Speaker Release Form'
+            part.replaceChild(textElement, detail)
+        }
+        // Ignore any other values (shouldn't exist but be defensive)
+    }
+
+    return doc
+}
+
+/**
  * Wrap copyInformation in holdingSimple element
  * MODS standard requires: location/holdingSimple/copyInformation
  * Currently we have: location/copyInformation (non-standard)
@@ -761,6 +798,8 @@ export function toStrictMODS(xmlString) {
     renameElement(doc, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
     // part/number contains attachment UUIDs, map to part/text with type="attachment-uuid"
     renameElement(doc, ELEMENT_NAMES.NUMBER, ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, {type: 'attachment-uuid'})
+    // Convert part/detail yes/no values for speaker release forms (Mudflats-specific)
+    convertSpeakerReleaseDetail(doc)
     // part/extent -> part/extent/list (our use is not quite standard but this is an improvement)
     wrapTextWithChild(doc, `${XPATH_CONTEXTS.PART}/${ELEMENT_NAMES.EXTENT}`, ELEMENT_NAMES.LIST)
 

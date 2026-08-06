@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -595,6 +595,90 @@ const fixtures = {
                 <physicalLocation>Oakland Campus</physicalLocation>
                 <url>https://example.com</url>
             </location>
+        </mods></xml>`
+    },
+
+    speakerReleaseDetailYes: {
+        input: `<xml><mods>
+            <part>
+                <title>Interview_speaker_release.pdf</title>
+                <number>fd24b523-6808-4d3d-b65a-fd0fdcaed07c</number>
+                <extent>text file PDF</extent>
+                <text/>
+                <detail>yes</detail>
+            </part>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <part>
+                <title>Interview_speaker_release.pdf</title>
+                <number>fd24b523-6808-4d3d-b65a-fd0fdcaed07c</number>
+                <extent>text file PDF</extent>
+                <text/>
+                <text>Speaker Release Form</text>
+            </part>
+        </mods></xml>`
+    },
+
+    speakerReleaseDetailNo: {
+        input: `<xml><mods>
+            <part>
+                <title>Interview_log_notes.pdf</title>
+                <number>2a6cd0c0-1011-4975-a56d-1b5053ca2589</number>
+                <extent>text file PDF</extent>
+                <text/>
+                <detail>no</detail>
+            </part>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <part>
+                <title>Interview_log_notes.pdf</title>
+                <number>2a6cd0c0-1011-4975-a56d-1b5053ca2589</number>
+                <extent>text file PDF</extent>
+                <text/>
+            </part>
+        </mods></xml>`
+    },
+
+    speakerReleaseDetailMixed: {
+        input: `<xml><mods>
+            <part>
+                <title>Audio.WAV</title>
+                <extent>audio file</extent>
+            </part>
+            <part>
+                <title>Log_notes.pdf</title>
+                <extent>text file PDF</extent>
+                <detail>no</detail>
+            </part>
+            <part>
+                <title>Speaker_release.pdf</title>
+                <extent>text file PDF</extent>
+                <detail>yes</detail>
+            </part>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <part>
+                <title>Audio.WAV</title>
+                <extent>audio file</extent>
+            </part>
+            <part>
+                <title>Log_notes.pdf</title>
+                <extent>text file PDF</extent>
+            </part>
+            <part>
+                <title>Speaker_release.pdf</title>
+                <extent>text file PDF</extent>
+                <text>Speaker Release Form</text>
+            </part>
+        </mods></xml>`
+    },
+
+    speakerReleaseDetailNoParts: {
+        input: `<xml><mods>
+            <titleInfo><title>Test</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Test</title></titleInfo>
         </mods></xml>`
     }
 }
@@ -3007,6 +3091,79 @@ describe('Strict MODS Conversion', () => {
 
             assert.strictEqual(directCopyInfo.length, 0, 'Should not have copyInformation as direct child of location')
             assert.strictEqual(wrappedCopyInfo.length, 1, 'Should have copyInformation inside holdingSimple')
+        })
+    })
+
+    describe('convertSpeakerReleaseDetail', () => {
+        it('should replace detail with "yes" with text element', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.speakerReleaseDetailYes.input, 'text/xml')
+
+            convertSpeakerReleaseDetail(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.speakerReleaseDetailYes.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should remove detail with "no"', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.speakerReleaseDetailNo.input, 'text/xml')
+
+            convertSpeakerReleaseDetail(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.speakerReleaseDetailNo.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle multiple parts with mixed yes/no/none', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.speakerReleaseDetailMixed.input, 'text/xml')
+
+            convertSpeakerReleaseDetail(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.speakerReleaseDetailMixed.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should not modify document with no part elements', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.speakerReleaseDetailNoParts.input, 'text/xml')
+
+            convertSpeakerReleaseDetail(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.speakerReleaseDetailNoParts.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle null document gracefully', () => {
+            const result = convertSpeakerReleaseDetail(null)
+
+            assert.strictEqual(result, null)
+        })
+
+        it('should verify detail elements are properly converted', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.speakerReleaseDetailMixed.input, 'text/xml')
+
+            convertSpeakerReleaseDetail(doc)
+
+            const select = xpath.useNamespaces({})
+            const detailElements = select('//part/detail', doc)
+            const textElements = select('//part/text', doc)
+
+            // No detail elements should remain
+            assert.strictEqual(detailElements.length, 0)
+            // Should have one text element with "Speaker Release Form"
+            const releaseTexts = textElements.filter(el => el.textContent === 'Speaker Release Form')
+            assert.strictEqual(releaseTexts.length, 1)
         })
     })
 })

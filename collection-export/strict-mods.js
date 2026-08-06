@@ -19,6 +19,7 @@ import {
 // XPath contexts for different element types
 const XPATH_CONTEXTS = {
     ACCESS_CONDITION: '//accessCondition',
+    COPY_INFORMATION: '//copyInformation',
     LANGUAGE: '//mods/language',
     MODS: '//mods',
     NAME: '//name',
@@ -64,7 +65,8 @@ const CUSTOM_ELEMENTS = {
 // Case-sensitive element names to fix
 const CASE_FIXES = {
     ORIGININFO: { old: 'origininfo', new: 'originInfo' },
-    RELATEDITEM: { old: 'relateditem', new: 'relatedItem' },
+    RELATEDITEM: {old: 'relateditem', new: 'relatedItem'},
+    SUBLOCATION: {old: 'sublocation', new: 'subLocation'},
 }
 
 // Element names for transformations
@@ -770,6 +772,8 @@ export function toStrictMODS(xmlString) {
 
     // Wrap copyInformation in holdingSimple under location
     wrapCopyInformation(doc)
+    // Fix sublocation -> subLocation under location
+    renameElement(doc, CASE_FIXES.SUBLOCATION.old, CASE_FIXES.SUBLOCATION.new, XPATH_CONTEXTS.COPY_INFORMATION)
 
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TITLE_INFO)

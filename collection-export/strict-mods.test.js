@@ -505,6 +505,7 @@ const fixtures = {
                 </copyInformation>
             </location>
         </mods></xml>`,
+        // wrapCopyInformation() does not fix sublocation case, only toStrictMODS() does
         expected: `<xml><mods>
             <location>
                 <physicalLocation>Oakland Campus</physicalLocation>
@@ -534,7 +535,7 @@ const fixtures = {
                 <physicalLocation>Oakland Campus</physicalLocation>
                 <holdingSimple>
                     <copyInformation>
-                        <sublocation>Meyer Library</sublocation>
+                        <subLocation>Meyer Library</subLocation>
                         <sublocationDetail>Archives - Founder's Files (Box) Meyer #1</sublocationDetail>
                         <shelfLocator>(Folder) Letter to Dr. Porter</shelfLocator>
                     </copyInformation>
@@ -565,7 +566,7 @@ const fixtures = {
                 <physicalLocation>Oakland Campus</physicalLocation>
                 <holdingSimple>
                     <copyInformation>
-                        <sublocation>Meyer Library</sublocation>
+                        <subLocation>Meyer Library</subLocation>
                         <shelfLocator>A-1</shelfLocator>
                     </copyInformation>
                 </holdingSimple>
@@ -574,7 +575,7 @@ const fixtures = {
                 <physicalLocation>San Francisco Campus</physicalLocation>
                 <holdingSimple>
                     <copyInformation>
-                        <sublocation>Main Library</sublocation>
+                        <subLocation>Main Library</subLocation>
                         <shelfLocator>B-2</shelfLocator>
                     </copyInformation>
                 </holdingSimple>
@@ -2804,18 +2805,18 @@ describe('Strict MODS Conversion', () => {
 
             assert.strictEqual(names.length, 2, 'Should have two names')
             assert.strictEqual(affiliations.length, 3, 'Should have three total affiliations')
-            
+
             // First name: one affiliation
             const name1Affiliations = select('affiliation', names[0])
             assert.strictEqual(name1Affiliations.length, 1)
             assert.strictEqual(name1Affiliations[0].textContent, 'CCA Undergraduate Student')
-            
+
             // Second name: two affiliations
             const name2Affiliations = select('affiliation', names[1])
             assert.strictEqual(name2Affiliations.length, 2)
             assert.strictEqual(name2Affiliations[0].textContent, 'CCA Graduate Student')
             assert.strictEqual(name2Affiliations[1].textContent, 'Fine Arts (MFA)')
-            
+
             assert.ok(!result.includes('subNameWrapper'), 'All subNameWrappers should be removed')
         })
 

@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, toStrictMODS } from './strict-mods.js'
+import { unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -265,6 +265,232 @@ const fixtures = {
         expected: `<xml><mods>
             <relatedItem type="host"><title>Host Title</title></relatedItem>
             <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    // convertSubNameWrapper fixtures
+    subNameWrapperEmpty: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Smith, John</namePart>
+                <subNameWrapper>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Smith, John</namePart>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperAffiliationOnly: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Doe, Jane</namePart>
+                <role><roleTerm>Artist</roleTerm></role>
+                <subNameWrapper>
+                    <ccaAffiliated>Yes</ccaAffiliated>
+                    <affiliation>CCA</affiliation>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Doe, Jane</namePart>
+                <role><roleTerm>Artist</roleTerm></role>
+                <affiliation>CCA</affiliation>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperDepartmentOnly: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Johnson, Mary</namePart>
+                <subNameWrapper>
+                    <department>Libraries</department>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Johnson, Mary</namePart>
+                <affiliation>Libraries</affiliation>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperAffiliationAndConstituent: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Brown, Alice</namePart>
+                <role><roleTerm>Curator</roleTerm></role>
+                <subNameWrapper>
+                    <affiliation>CCA</affiliation>
+                    <constituent>Staff</constituent>
+                    <gradDate/>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Brown, Alice</namePart>
+                <role><roleTerm>Curator</roleTerm></role>
+                <affiliation>CCA Staff</affiliation>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperDepartmentAndGradDate: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Lee, Robert</namePart>
+                <subNameWrapper>
+                    <constituent>Alumnus</constituent>
+                    <department>Fine Arts (MFA)</department>
+                    <gradDate>2007</gradDate>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Lee, Robert</namePart>
+                <affiliation>Fine Arts (MFA) 2007</affiliation>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperFullExample: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Scarboro, Jennine</namePart>
+                <role><roleTerm>Recording engineer</roleTerm></role>
+                <subNameWrapper>
+                    <ccaAffiliated>Yes</ccaAffiliated>
+                    <affiliation>CCA</affiliation>
+                    <constituent>Staff</constituent>
+                    <department>Libraries</department>
+                    <gradDate/>
+                    <description>Capp Street Project Archive Curator</description>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Scarboro, Jennine</namePart>
+                <role><roleTerm>Recording engineer</roleTerm></role>
+                <affiliation>CCA Staff</affiliation>
+                <affiliation>Libraries</affiliation>
+                <description>Capp Street Project Archive Curator</description>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperDescriptionOnly: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Sommer, Robert</namePart>
+                <role><roleTerm>photographer</roleTerm></role>
+                <subNameWrapper>
+                    <ccaAffiliated>No</ccaAffiliated>
+                    <affiliation/>
+                    <description>Environmental Psychologist at UC Davis</description>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Sommer, Robert</namePart>
+                <role><roleTerm>photographer</roleTerm></role>
+                <description>Environmental Psychologist at UC Davis</description>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperMultipleNames: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Artist One</namePart>
+                <subNameWrapper>
+                    <affiliation>CCA</affiliation>
+                    <constituent>Undergraduate Student</constituent>
+                    <description/>
+                </subNameWrapper>
+            </name>
+            <name type="personal">
+                <namePart>Artist Two</namePart>
+                <subNameWrapper>
+                    <affiliation>CCA</affiliation>
+                    <constituent>Graduate Student</constituent>
+                    <department>Fine Arts (MFA)</department>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Artist One</namePart>
+                <affiliation>CCA Undergraduate Student</affiliation>
+            </name>
+            <name type="personal">
+                <namePart>Artist Two</namePart>
+                <affiliation>CCA Graduate Student</affiliation>
+                <affiliation>Fine Arts (MFA)</affiliation>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperConferenceType: {
+        input: `<xml><mods>
+            <name type="conference">
+                <namePart>CCAC: School of Fine Arts</namePart>
+                <subNameWrapper>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="conference">
+                <namePart>CCAC: School of Fine Arts</namePart>
+            </name>
+        </mods></xml>`
+    },
+
+    subNameWrapperExistingAffiliation: {
+        input: `<xml><mods>
+            <name type="personal">
+                <namePart>Gomez-Pena, Guillermo</namePart>
+                <affiliation>Capp Street Project artist-in-residence</affiliation>
+                <role><roleTerm>installation artist</roleTerm></role>
+            </name>
+            <name type="personal">
+                <namePart>Chen, Lisa</namePart>
+                <role><roleTerm>Designer</roleTerm></role>
+                <subNameWrapper>
+                    <affiliation>CCA</affiliation>
+                    <department>Design (MFA)</department>
+                    <description/>
+                </subNameWrapper>
+            </name>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <name type="personal">
+                <namePart>Gomez-Pena, Guillermo</namePart>
+                <affiliation>Capp Street Project artist-in-residence</affiliation>
+                <role><roleTerm>installation artist</roleTerm></role>
+            </name>
+            <name type="personal">
+                <namePart>Chen, Lisa</namePart>
+                <role><roleTerm>Designer</roleTerm></role>
+                <affiliation>CCA</affiliation>
+                <affiliation>Design (MFA)</affiliation>
+            </name>
         </mods></xml>`
     }
 }
@@ -2349,6 +2575,230 @@ describe('Strict MODS Conversion', () => {
                 const result = doc.toString()
                 assert.ok(result.includes('<title>Test</title>'), 'Original content should be preserved')
             })
+        })
+    })
+
+    describe('convertSubNameWrapper', () => {
+        it('should remove empty subNameWrapper', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperEmpty.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+            assert.ok(result.includes('<namePart>Smith, John</namePart>'), 'Name should be preserved')
+        })
+
+        it('should map affiliation to name/affiliation', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperAffiliationOnly.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const affiliations = select('//name/affiliation', doc)
+
+            assert.strictEqual(affiliations.length, 1, 'Should have one affiliation')
+            assert.strictEqual(affiliations[0].textContent, 'CCA')
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+            assert.ok(!result.includes('ccaAffiliated'), 'ccaAffiliated should be removed')
+        })
+
+        it('should map department to name/affiliation', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperDepartmentOnly.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const affiliations = select('//name/affiliation', doc)
+
+            assert.strictEqual(affiliations.length, 1, 'Should have one affiliation from department')
+            assert.strictEqual(affiliations[0].textContent, 'Libraries')
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+        })
+
+        it('should append constituent to affiliation', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperAffiliationAndConstituent.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const affiliations = select('//name/affiliation', doc)
+
+            assert.strictEqual(affiliations.length, 1, 'Should have one combined affiliation')
+            assert.strictEqual(affiliations[0].textContent, 'CCA Staff')
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+        })
+
+        it('should append gradDate to department affiliation', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperDepartmentAndGradDate.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const affiliations = select('//name/affiliation', doc)
+
+            assert.strictEqual(affiliations.length, 1, 'Should have one affiliation')
+            assert.strictEqual(affiliations[0].textContent, 'Fine Arts (MFA) 2007')
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+        })
+
+        it('should create multiple affiliations and description', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperFullExample.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const affiliations = select('//name/affiliation', doc)
+            const descriptions = select('//name/description', doc)
+
+            assert.strictEqual(affiliations.length, 2, 'Should have two affiliations')
+            assert.strictEqual(affiliations[0].textContent, 'CCA Staff')
+            assert.strictEqual(affiliations[1].textContent, 'Libraries')
+            assert.strictEqual(descriptions.length, 1, 'Should have one description')
+            assert.strictEqual(descriptions[0].textContent, 'Capp Street Project Archive Curator')
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+        })
+
+        it('should map description only when no affiliation', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperDescriptionOnly.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const descriptions = select('//name/description', doc)
+            const affiliations = select('//name/affiliation', doc)
+
+            assert.strictEqual(descriptions.length, 1, 'Should have one description')
+            assert.strictEqual(descriptions[0].textContent, 'Environmental Psychologist at UC Davis')
+            assert.strictEqual(affiliations.length, 0, 'Should have no affiliations')
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+        })
+
+        it('should handle multiple name elements with subNameWrapper', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperMultipleNames.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const names = select('//name', doc)
+            const affiliations = select('//name/affiliation', doc)
+
+            assert.strictEqual(names.length, 2, 'Should have two names')
+            assert.strictEqual(affiliations.length, 3, 'Should have three total affiliations')
+            
+            // First name: one affiliation
+            const name1Affiliations = select('affiliation', names[0])
+            assert.strictEqual(name1Affiliations.length, 1)
+            assert.strictEqual(name1Affiliations[0].textContent, 'CCA Undergraduate Student')
+            
+            // Second name: two affiliations
+            const name2Affiliations = select('affiliation', names[1])
+            assert.strictEqual(name2Affiliations.length, 2)
+            assert.strictEqual(name2Affiliations[0].textContent, 'CCA Graduate Student')
+            assert.strictEqual(name2Affiliations[1].textContent, 'Fine Arts (MFA)')
+            
+            assert.ok(!result.includes('subNameWrapper'), 'All subNameWrappers should be removed')
+        })
+
+        it('should handle conference name type', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperConferenceType.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+            assert.ok(result.includes('type="conference"'), 'Conference type should be preserved')
+            assert.ok(result.includes('<namePart>CCAC: School of Fine Arts</namePart>'), 'NamePart should be preserved')
+        })
+
+        it('should preserve existing affiliation in names without subNameWrapper', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.subNameWrapperExistingAffiliation.input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const names = select('//name', doc)
+
+            // First name should keep its existing affiliation
+            const name1Affiliations = select('affiliation', names[0])
+            assert.strictEqual(name1Affiliations.length, 1)
+            assert.strictEqual(name1Affiliations[0].textContent, 'Capp Street Project artist-in-residence')
+
+            // Second name should have affiliations from subNameWrapper
+            const name2Affiliations = select('affiliation', names[1])
+            assert.strictEqual(name2Affiliations.length, 2)
+            assert.strictEqual(name2Affiliations[0].textContent, 'CCA')
+            assert.strictEqual(name2Affiliations[1].textContent, 'Design (MFA)')
+
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
+        })
+
+        it('should handle null document gracefully', () => {
+            const result = convertSubNameWrapper(null)
+            assert.strictEqual(result, null, 'Should return null for null input')
+        })
+
+        it('should handle document with no subNameWrapper', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal">
+                    <namePart>Test Name</namePart>
+                    <role><roleTerm>Artist</roleTerm></role>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            assert.doesNotThrow(() => {
+                convertSubNameWrapper(doc)
+            })
+
+            const result = doc.toString()
+            assert.ok(result.includes('<namePart>Test Name</namePart>'), 'Original content should be preserved')
+        })
+
+        it('should handle empty affiliation and constituent gracefully', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <name type="personal">
+                    <namePart>Test</namePart>
+                    <subNameWrapper>
+                        <affiliation/>
+                        <constituent/>
+                        <department/>
+                        <description/>
+                    </subNameWrapper>
+                </name>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            convertSubNameWrapper(doc)
+
+            const result = doc.toString()
+            const select = xpath.useNamespaces({})
+            const affiliations = select('//name/affiliation', doc)
+
+            assert.strictEqual(affiliations.length, 0, 'Should not create empty affiliations')
+            assert.ok(!result.includes('subNameWrapper'), 'subNameWrapper should be removed')
         })
     })
 })

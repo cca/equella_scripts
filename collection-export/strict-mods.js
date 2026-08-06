@@ -41,6 +41,7 @@ const WRAPPER_ELEMENTS = {
     GENRE: 'genreWrapper',
     NOTE: 'noteWrapper',
     PHYSICAL_DESCRIPTION_NOTE: 'physicalDescriptionNote',
+    SUB_NAME: 'subNameWrapper',
     TYPE_OF_RESOURCE: 'typeOfResourceWrapper',
 }
 
@@ -589,6 +590,70 @@ export function convertNamePartDate(doc) {
 }
 
 /**
+ * Fix nonstandard mods/name/subNameWrapper elements, several operations:
+ * - affiliation -> name/affiliation ("CCAC")
+ * - constituent -> append to affiliation affiliation ("CCAC Faculty")
+ * - department -> name/affiliation ("MFA Design")
+ * - gradDate -> append to department affiliation ("MFA Design 2020")
+ * - description -> name/description ("Sinel was the father of modern industrial design.")
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function convertSubNameWrapper(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const subNameWrappers = safeSelect(`${XPATH_CONTEXTS.NAME}/${WRAPPER_ELEMENTS.SUB_NAME}`, doc)
+
+    for (let wrapper of subNameWrappers) {
+        const parentName = wrapper.parentNode
+        const select = xpath.useNamespaces({})
+
+        // affiliation
+        const affiliation = select('affiliation', wrapper)[0]
+        if (affiliation && affiliation.textContent.trim()) {
+            parentName.appendChild(affiliation)
+        }
+
+        // constituent -> append to affiliation
+        const constituent = select('constituent', wrapper)[0]
+        if (constituent && affiliation && constituent.textContent.trim()) {
+            affiliation.textContent += ` ${constituent.textContent.trim()}`
+        }
+
+        // department -> name/affiliation
+        const department = select('department', wrapper)[0]
+        if (department && department.textContent.trim()) {
+            const deptAffiliation = doc.createElement('affiliation')
+            deptAffiliation.textContent = department.textContent.trim()
+            parentName.appendChild(deptAffiliation)
+        }
+
+        // gradDate -> append to department affiliation
+        const gradDate = select('gradDate', wrapper)[0]
+        if (gradDate && department && gradDate.textContent.trim()) {
+            const deptAffiliation = select('affiliation', parentName).find(el => el.textContent.includes(department.textContent.trim()))
+            if (deptAffiliation) {
+                deptAffiliation.textContent += ` ${gradDate.textContent.trim()}`
+            }
+        }
+
+        // description -> name/description
+        const description = select('description', wrapper)[0]
+        if (description && description.textContent.trim()) {
+            parentName.appendChild(description)
+        }
+
+        // Remove subNameWrapper after processing
+        parentName.removeChild(wrapper)
+    }
+
+    return doc
+}
+
+/**
  * Main conversion function to convert custom MODS to strict MODS
  *
  * @param {string} xmlString - XML string to convert
@@ -666,6 +731,9 @@ export function toStrictMODS(xmlString) {
 
     // Convert namePartDate to namePart with type="date" attribute
     convertNamePartDate(doc)
+
+    // Fix nonstandard subNameWrapper elements under mods/name
+    convertSubNameWrapper(doc)
 
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TITLE_INFO)

@@ -592,17 +592,6 @@ export function convertNamePartDate(doc) {
 }
 
 /**
- * Fix nonstandard mods/name/subNameWrapper elements, several operations:
- * - affiliation -> name/affiliation ("CCAC")
- * - constituent -> append to affiliation affiliation ("CCAC Faculty")
- * - department -> name/affiliation ("MFA Design")
- * - gradDate -> append to department affiliation ("MFA Design 2020")
- * - description -> name/description ("Sinel was the father of modern industrial design.")
- *
- * @param {Document} doc - XML DOM document
- * @returns {Document} Modified document
- */
-/**
  * Convert part/detail elements that indicate speaker release forms
  * Mudflats collection uses part/detail with "yes"/"no" values to indicate
  * whether a speaker release form exists for oral history attachments.
@@ -675,7 +664,7 @@ export function wrapCopyInformation(doc) {
 /**
  * Reorder children of copyInformation to match MODS schema sequence
  * Schema order: form, subLocation, shelfLocator, electronicLocator, note, enumerationAndChronology, itemIdentifier
- * 
+ *
  * @param {Document} doc - XML DOM document
  * @returns {Document} Modified document
  */
@@ -690,7 +679,7 @@ export function reorderCopyInformationChildren(doc) {
     for (let copyInfo of copyInfoElements) {
         // Get all children
         const children = Array.from(copyInfo.childNodes).filter(node => node.nodeType === 1) // Element nodes only
-        
+
         // Sort children by the schema order
         children.sort((a, b) => {
             const aIndex = correctOrder.indexOf(a.tagName)
@@ -715,6 +704,17 @@ export function reorderCopyInformationChildren(doc) {
     return doc
 }
 
+/**
+ * Fix nonstandard mods/name/subNameWrapper elements, several operations:
+ * - affiliation -> name/affiliation ("CCAC")
+ * - constituent -> append to affiliation affiliation ("CCAC Faculty")
+ * - department -> name/affiliation ("MFA Design")
+ * - gradDate -> append to department affiliation ("MFA Design 2020")
+ * - description -> name/description ("Sinel was the father of modern industrial design.")
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
 export function convertSubNameWrapper(doc) {
     if (!doc) {
         return doc

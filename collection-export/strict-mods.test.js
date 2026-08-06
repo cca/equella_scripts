@@ -128,7 +128,7 @@ const fixtures = {
             <titleInfo><title usage="primary">Test Item</title></titleInfo>
         </mods></xml>`,
         expected: `<xml><mods>
-            <titleInfo><title>Test Item</title></titleInfo>
+            <titleInfo otherType="primary"><title>Test Item</title></titleInfo>
         </mods></xml>`
     },
 
@@ -146,25 +146,7 @@ const fixtures = {
             <titleInfo><title usage="donkey">Test Item</title></titleInfo>
         </mods></xml>`,
         expected: `<xml><mods>
-            <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
-    },
-
-    titleInfoUsage: {
-        input: `<xml><mods>
-            <titleInfo usage="primary"><title>Test Item</title></titleInfo>
-        </mods></xml>`,
-        expected: `<xml><mods>
-            <titleInfo usage="primary"><title>Test Item</title></titleInfo>
-        </mods></xml>`
-    },
-
-    titleInfoUsageTitleUsage: {
-        input: `<xml><mods>
-            <titleInfo usage="primary"><title usage="primary">Test Item</title></titleInfo>
-        </mods></xml>`,
-        expected: `<xml><mods>
-            <titleInfo usage="primary"><title>Test Item</title></titleInfo>
+            <titleInfo otherType="donkey"><title>Test Item</title></titleInfo>
         </mods></xml>`
     },
 
@@ -174,6 +156,25 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo usage="primary" type="abbreviated"><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleInfoTypeEnumerated: {
+        input: `<xml><mods>
+            <titleInfo type="enumerated"><title>Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo otherType="enumerated"><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleInfoAndTitleOtherTypes: {
+        input: `<xml><mods>
+            <titleInfo type="enumerated"><title usage="other">Test Item</title></titleInfo>
+        </mods></xml>`,
+        // we prefer the title's usage attribute over the titleInfo's type attribute
+        expected: `<xml><mods>
+            <titleInfo otherType="other"><title>Test Item</title></titleInfo>
         </mods></xml>`
     },
 
@@ -900,34 +901,6 @@ describe('Strict MODS Conversion', () => {
             assert.strictEqual(result, expected)
         })
 
-        it('should remove usage attribute from titleInfo element', () => {
-            const parser = new xmldom()
-            const doc = parser.parseFromString(
-                fixtures.titleInfoUsage.input,
-                "text/xml",
-            )
-            fixTitleAttributes(doc)
-
-            const result = normalizeXML(doc.toString())
-            const expected = normalizeXML(fixtures.titleInfoUsage.expected)
-
-            assert.strictEqual(result, expected)
-        })
-
-        it('should handle usage attributes on both titleInfo and title', () => {
-            const parser = new xmldom()
-            const doc = parser.parseFromString(
-                fixtures.titleInfoUsageTitleUsage.input,
-                "text/xml",
-            )
-            fixTitleAttributes(doc)
-
-            const result = normalizeXML(doc.toString())
-            const expected = normalizeXML(fixtures.titleInfoUsageTitleUsage.expected)
-
-            assert.strictEqual(result, expected)
-        })
-
         it('should convert usage="abbreviated" on both titleInfo and title', () => {
             const parser = new xmldom()
             const doc = parser.parseFromString(
@@ -938,6 +911,36 @@ describe('Strict MODS Conversion', () => {
 
             const result = normalizeXML(doc.toString())
             const expected = normalizeXML(fixtures.titleInfoUsageTitleAbbreviated.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        // titleInfoTypeEnumerated
+        it('should convert titleInfo type="enumerated" to otherType="enumerated"', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoTypeEnumerated.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoTypeEnumerated.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        // titleInfoAndTitleOtherTypes
+        it('should prefer title usage attribute over titleInfo type attribute', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoAndTitleOtherTypes.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoAndTitleOtherTypes.expected)
 
             assert.strictEqual(result, expected)
         })

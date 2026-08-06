@@ -128,7 +128,8 @@ export function unwrapSimpleElement(doc, wrapperName, context = XPATH_CONTEXTS.M
 /**
  * We have a nonstandard @usage attribute on the titleInfo/title element
  * which should be titleInfo/@type instead with one of four values: uniform, alternative,
- * translated, or abbreviated. "Primariy" is not valid & should be dropped.
+ * translated, or abbreviated. "Primary" is not valid & should be dropped.
+ * We also move nonstandard values to titleInfo/@otherType instead of titleInfo/@type.
  *
  * @param {Document} doc - XML DOM document
  * @returns {Document} Modified document
@@ -137,19 +138,34 @@ export function fixTitleAttributes(doc) {
     if (!doc) {
         return doc
     }
-    const title = safeSelect(`${XPATH_CONTEXTS.MODS}//titleInfo/title[@usage]`, doc)
+    const title = safeSelect(`${XPATH_CONTEXTS.MODS}//titleInfo/title`, doc)
 
     for (let titleElement of title) {
-        const usageValue = titleElement.getAttribute('usage')
+        const titleUsageValue = titleElement.getAttribute('usage')
         const titleInfoElement = titleElement.parentNode
+        const titleInfoTypeValue = titleInfoElement.getAttribute('type')
 
         // If usage value is one of the valid types, move it to titleInfo/@type
-        if (TITLE_INFO_TYPES.includes(usageValue)) {
-            titleInfoElement.setAttribute('type', usageValue)
+        // otherwise put it in the uncontrolled @otherType
+        if (titleUsageValue) {
+            if (TITLE_INFO_TYPES.includes(titleUsageValue)) {
+                titleInfoElement.setAttribute('type', titleUsageValue)
+            } else {
+                titleInfoElement.setAttribute('otherType', titleUsageValue)
+            }
+
+            // Remove the nonstandard @usage attribute from title
+            titleElement.removeAttribute('usage')
         }
 
-        // Remove the nonstandard @usage attribute from title
-        titleElement.removeAttribute('usage')
+        // If titleInfo/@type is invalid and we do not already have an @otherType, move it to @otherType
+        // This implies we prefer titleInfo/title@usage over titleInfo@type
+        if (titleInfoTypeValue && !TITLE_INFO_TYPES.includes(titleInfoTypeValue)) {
+            if (!titleInfoElement.hasAttribute('otherType')) {
+                titleInfoElement.setAttribute('otherType', titleInfoTypeValue)
+            }
+            titleInfoElement.removeAttribute('type')
+        }
     }
 
     return doc

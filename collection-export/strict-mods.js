@@ -98,6 +98,9 @@ const ATTRIBUTES = {
     XMLNS: 'xmlns',
 }
 
+// https://www.loc.gov/standards/mods/userguide/attributes.html
+const DATE_CREATED_QUALIFIER_VALUES = ['approximate', 'inferred', 'questionable']
+const DATE_CREATED_KEYDATE_VALUES = ['yes']
 const TITLE_INFO_TYPES = ['uniform', 'alternative', 'translated', 'abbreviated']
 const TITLE_INFO_USAGE_VALUES = ['primary']
 
@@ -510,6 +513,51 @@ export function wrapTextWithChild(doc, parentPath, childElement, attributesToMov
 
         // Add child to parent
         parent.appendChild(child)
+    }
+
+    return doc
+}
+
+/**
+ * dateCreated@keyDate can only be "yes" and we have "no" values,
+ * which is implied. Remove them.
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function fixDateCreatedKeyDate(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const dateCreatedElements = safeSelect(`${XPATH_CONTEXTS.ORIGININFO}/dateCreated`, doc)
+    for (let dateCreated of dateCreatedElements) {
+        const keyDateValue = dateCreated.getAttribute('keyDate')
+        if (!DATE_CREATED_KEYDATE_VALUES.includes(keyDateValue)) {
+            dateCreated.removeAttribute('keyDate')
+        }
+    }
+
+    return doc
+}
+
+
+/**
+ * Ensure dateCreated/@qualifier has a valid value, we have
+ * empty strings in our data.
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function fixDateCreatedQualifer(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const dateCreatedElements = safeSelect(`${XPATH_CONTEXTS.ORIGININFO}/dateCreated`, doc)
+    for (let dateCreated of dateCreatedElements) {
+        const qualifierValue = dateCreated.getAttribute('qualifier')
+        if (!DATE_CREATED_QUALIFIER_VALUES.includes(qualifierValue)) {
+            dateCreated.removeAttribute('qualifier')
+        }
     }
 
     return doc
@@ -966,6 +1014,9 @@ export function toStrictMODS(xmlString) {
     // Handle date wrappers and ranges
     unwrapDateCreated(doc)
     unwrapDateOther(doc)
+    // fix invalid dateCreated attributes
+    fixDateCreatedKeyDate(doc)
+    fixDateCreatedQualifer(doc)
 
     // Remove non-MODS elements
     removeElement(doc, CUSTOM_ELEMENTS.DATE_TYPE, XPATH_CONTEXTS.ORIGININFO)

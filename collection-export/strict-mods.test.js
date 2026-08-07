@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, removeEmptyClassifications, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, removeEmptyClassifications, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
 import { hasDirectTextContent } from './strict-mods-helpers.js'
 
 // Test fixtures
@@ -1222,6 +1222,248 @@ describe('Strict MODS Conversion', () => {
 
             assert.strictEqual(wrappers.length, 0, 'Wrapper should be removed')
             assert.strictEqual(dateOthers.length, 0, 'Empty dateOther should not be created')
+        })
+    })
+
+    describe('fixDateCreatedKeyDate', () => {
+        it('should preserve valid keyDate="yes" attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated keyDate="yes">1925-01-20</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedKeyDate(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].getAttribute('keyDate'), 'yes')
+        })
+
+        it('should remove invalid keyDate="no" attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated keyDate="no">1925-01-20</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedKeyDate(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].hasAttribute('keyDate'), false)
+        })
+
+        it('should remove empty keyDate attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated keyDate="">1925-01-20</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedKeyDate(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].hasAttribute('keyDate'), false)
+        })
+
+        it('should handle multiple dateCreated elements with mixed keyDate values', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated keyDate="yes">1925-01-20</dateCreated>
+                    <dateCreated keyDate="no">1930-05-15</dateCreated>
+                    <dateCreated>1935-12-01</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedKeyDate(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 3)
+            assert.strictEqual(dateElements[0].getAttribute('keyDate'), 'yes')
+            assert.strictEqual(dateElements[1].hasAttribute('keyDate'), false)
+            assert.strictEqual(dateElements[2].hasAttribute('keyDate'), false)
+        })
+
+        it('should not affect dateCreated without keyDate attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated>1925-01-20</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedKeyDate(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].hasAttribute('keyDate'), false)
+            assert.strictEqual(dateElements[0].textContent, '1925-01-20')
+        })
+
+        it('should handle null document', () => {
+            const result = fixDateCreatedKeyDate(null)
+            assert.strictEqual(result, null)
+        })
+    })
+
+    describe('fixDateCreatedQualifer', () => {
+        it('should preserve valid qualifier="approximate" attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated qualifier="approximate">1925</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedQualifer(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].getAttribute('qualifier'), 'approximate')
+        })
+
+        it('should preserve valid qualifier="inferred" attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated qualifier="inferred">1925</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedQualifer(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].getAttribute('qualifier'), 'inferred')
+        })
+
+        it('should preserve valid qualifier="questionable" attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated qualifier="questionable">1925</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedQualifer(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].getAttribute('qualifier'), 'questionable')
+        })
+
+        it('should remove empty qualifier attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated qualifier="">1925-01-20</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedQualifer(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].hasAttribute('qualifier'), false)
+        })
+
+        it('should remove invalid qualifier attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated qualifier="invalid">1925-01-20</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedQualifer(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].hasAttribute('qualifier'), false)
+        })
+
+        it('should handle multiple dateCreated elements with mixed qualifier values', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated qualifier="approximate">1925</dateCreated>
+                    <dateCreated qualifier="">1930</dateCreated>
+                    <dateCreated qualifier="inferred">1935</dateCreated>
+                    <dateCreated qualifier="bad">1940</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedQualifer(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 4)
+            assert.strictEqual(dateElements[0].getAttribute('qualifier'), 'approximate')
+            assert.strictEqual(dateElements[1].hasAttribute('qualifier'), false)
+            assert.strictEqual(dateElements[2].getAttribute('qualifier'), 'inferred')
+            assert.strictEqual(dateElements[3].hasAttribute('qualifier'), false)
+        })
+
+        it('should not affect dateCreated without qualifier attribute', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods>
+                <origininfo>
+                    <dateCreated>1925-01-20</dateCreated>
+                </origininfo>
+            </mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            fixDateCreatedQualifer(doc)
+
+            const select = xpath.useNamespaces({})
+            const dateElements = select('//origininfo/dateCreated', doc)
+
+            assert.strictEqual(dateElements.length, 1)
+            assert.strictEqual(dateElements[0].hasAttribute('qualifier'), false)
+            assert.strictEqual(dateElements[0].textContent, '1925-01-20')
+        })
+
+        it('should handle null document', () => {
+            const result = fixDateCreatedQualifer(null)
+            assert.strictEqual(result, null)
         })
     })
 

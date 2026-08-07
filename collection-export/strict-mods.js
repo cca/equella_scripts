@@ -767,7 +767,7 @@ export function wrapLocationTextContent(doc) {
         // Only process if element has direct text content (not already wrapped)
         let textContent = ''
         let hasDirectText = false
-        
+
         for (let node of location.childNodes) {
             if (node.nodeType === 3) { // TEXT_NODE
                 const text = node.nodeValue.trim()
@@ -813,6 +813,51 @@ export function wrapLocationTextContent(doc) {
         // Only add the child if it has content
         if (child.textContent.trim()) {
             location.appendChild(child)
+        }
+    }
+
+    return doc
+}
+
+/**
+ * Remove classification elements that only contain classificationType children.
+ * classificationType is a non-standard element with values "CCA/C Subject" or
+ * "ARTstor" in Libraries collection but is disconnected from the element where
+ * those _subject_ (and not classification) terms are stored.
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function removeEmptyClassifications(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const classifications = safeSelect('//classification', doc)
+
+    for (let classification of classifications) {
+        // Check if classification has direct text content (meaningful content)
+        let hasDirectText = false
+        for (let node of classification.childNodes) {
+            if (node.nodeType === 3) { // TEXT_NODE
+                if (node.nodeValue.trim()) {
+                    hasDirectText = true
+                    break
+                }
+            }
+        }
+
+        // If no direct text content, check if it only contains classificationType
+        if (!hasDirectText) {
+            const classificationTypes = Array.from(classification.childNodes).filter(
+                node => node.nodeType === 1 && node.tagName === 'classificationType'
+            )
+
+            // If classification only contains classificationType (no actual classification value),
+            // remove the entire classification element
+            if (classificationTypes.length > 0) {
+                classification.parentNode.removeChild(classification)
+            }
         }
     }
 
@@ -936,6 +981,9 @@ export function toStrictMODS(xmlString) {
     removeElement(doc, CUSTOM_ELEMENTS.NUMBER_B, XPATH_CONTEXTS.PART)
     removeElement(doc, CUSTOM_ELEMENTS.NUMBER_C, XPATH_CONTEXTS.PART)
     removeElement(doc, CUSTOM_ELEMENTS.NUMBER_D, XPATH_CONTEXTS.PART)
+
+    // Remove classification elements that only contain classificationType (non-standard subelement)
+    removeEmptyClassifications(doc)
 
     // Convert authority-specific topic elements
     convertAuthorityElement(doc, 'topicCONA', ELEMENT_NAMES.TOPIC, 'cona')

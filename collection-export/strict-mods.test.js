@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, removeEmptyClassifications, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -2215,6 +2215,126 @@ describe('Strict MODS Conversion', () => {
             const expected = normalizeXML(`<xml/>`)
 
             assert.strictEqual(result, expected)
+        })
+    })
+
+    describe('removeEmptyClassifications', () => {
+        const classificationFixtures = {
+            onlyClassificationType: {
+                input: `<xml><mods>
+                    <classification><classificationType>CCA/C Subject</classificationType></classification>
+                    <classification><classificationType>ARTstor</classificationType></classification>
+                    <classification><classificationType>Archives Series</classificationType></classification>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    
+                    
+                    
+                </mods></xml>`
+            },
+            validClassification: {
+                input: `<xml><mods>
+                    <classification authority="lcc">ND237.H64</classification>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <classification authority="lcc">ND237.H64</classification>
+                </mods></xml>`
+            },
+            mixed: {
+                input: `<xml><mods>
+                    <classification><classificationType>CCA/C Subject</classificationType></classification>
+                    <classification authority="lcc">ND237.H64</classification>
+                    <classification><classificationType>ARTstor</classificationType></classification>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    
+                    <classification authority="lcc">ND237.H64</classification>
+                    
+                </mods></xml>`
+            },
+            emptyClassification: {
+                input: `<xml><mods>
+                    <classification></classification>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <classification></classification>
+                </mods></xml>`
+            }
+        }
+
+        it('should remove classification with only classificationType child', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(classificationFixtures.onlyClassificationType.input, 'text/xml')
+
+            removeEmptyClassifications(doc)
+
+            const select = xpath.useNamespaces({})
+            const classifications = select('//classification', doc)
+
+            assert.strictEqual(classifications.length, 0, 'All classifications with only classificationType should be removed')
+        })
+
+        it('should preserve classification with text content', () => {
+            const result = normalizeXML(toStrictMODS(classificationFixtures.validClassification.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><classification authority="lcc">ND237.H64</classification></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle mixed valid and invalid classifications', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(classificationFixtures.mixed.input, 'text/xml')
+
+            removeEmptyClassifications(doc)
+
+            const select = xpath.useNamespaces({})
+            const classifications = select('//classification', doc)
+
+            assert.strictEqual(classifications.length, 1, 'Should have one valid classification')
+            assert.strictEqual(classifications[0].textContent, 'ND237.H64', 'Should preserve valid classification text')
+        })
+
+        it('should not remove empty classification without classificationType', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(classificationFixtures.emptyClassification.input, 'text/xml')
+
+            removeEmptyClassifications(doc)
+
+            const select = xpath.useNamespaces({})
+            const classifications = select('//classification', doc)
+
+            // Empty elements will be removed later by removeEmptyElements
+            assert.strictEqual(classifications.length, 1, 'Should not remove empty classification in this step')
+        })
+
+        it('should handle null document gracefully', () => {
+            const result = removeEmptyClassifications(null)
+            assert.strictEqual(result, null)
+        })
+
+        it('should handle document without classifications', () => {
+            const parser = new xmldom()
+            const input = `<xml><mods><titleInfo><title>Test</title></titleInfo></mods></xml>`
+            const doc = parser.parseFromString(input, 'text/xml')
+
+            removeEmptyClassifications(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(input)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should verify classificationType elements are removed with parent', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(classificationFixtures.onlyClassificationType.input, 'text/xml')
+
+            removeEmptyClassifications(doc)
+
+            const select = xpath.useNamespaces({})
+            const classificationTypes = select('//classificationType', doc)
+
+            assert.strictEqual(classificationTypes.length, 0, 'All classificationType elements should be removed with their parents')
         })
     })
 

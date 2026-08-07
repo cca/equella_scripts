@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -2087,6 +2087,134 @@ describe('Strict MODS Conversion', () => {
 
             assert.strictEqual(names.length, 1)
             assert.strictEqual(names[0].getAttribute('usage'), 'primary', 'usage="primary" should remain intact')
+        })
+    })
+
+    describe('wrapLocationTextContent', () => {
+        const locationTextFixtures = {
+            urlInRelatedItem: {
+                input: `<xml><mods>
+                    <relatedItem type="isReferencedBy">
+                        <titleInfo><title>Related Resource</title></titleInfo>
+                        <location>https://vault.cca.edu/items/9d019022-72ce-4774-9e2a-0c315c14f1d1/1/</location>
+                    </relatedItem>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <relatedItem type="isReferencedBy">
+                        <titleInfo><title>Related Resource</title></titleInfo>
+                        <location><url>https://vault.cca.edu/items/9d019022-72ce-4774-9e2a-0c315c14f1d1/1/</url></location>
+                    </relatedItem>
+                </mods></xml>`
+            },
+            physicalLocationInRelatedItem: {
+                input: `<xml><mods>
+                    <relatedItem type="otherVersion">
+                        <titleInfo><title>Publication</title></titleInfo>
+                        <location>CCA/C Archives / Archives Publications / Catalogs:Reference Copies / 1971-1974</location>
+                    </relatedItem>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <relatedItem type="otherVersion">
+                        <titleInfo><title>Publication</title></titleInfo>
+                        <location><physicalLocation>CCA/C Archives / Archives Publications / Catalogs:Reference Copies / 1971-1974</physicalLocation></location>
+                    </relatedItem>
+                </mods></xml>`
+            },
+            httpUrlInLocation: {
+                input: `<xml><mods>
+                    <location>http://www.example.com/resource</location>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <location><url>http://www.example.com/resource</url></location>
+                </mods></xml>`
+            },
+            wikipediaUrl: {
+                input: `<xml><mods>
+                    <location>https://en.wikipedia.org/wiki/Wikipedia:Meetup/Oakland/ArtandFeminism_2015</location>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <location><url>https://en.wikipedia.org/wiki/Wikipedia:Meetup/Oakland/ArtandFeminism_2015</url></location>
+                </mods></xml>`
+            },
+            alreadyWrapped: {
+                input: `<xml><mods>
+                    <location>
+                        <physicalLocation>Oakland Campus</physicalLocation>
+                    </location>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <location>
+                        <physicalLocation>Oakland Campus</physicalLocation>
+                    </location>
+                </mods></xml>`
+            },
+            emptyLocation: {
+                input: `<xml><mods>
+                    <location></location>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <location></location>
+                </mods></xml>`
+            },
+            whitespaceOnly: {
+                input: `<xml><mods>
+                    <location>   </location>
+                </mods></xml>`,
+                expected: `<xml><mods>
+                    <location>   </location>
+                </mods></xml>`
+            }
+        }
+
+        it('should wrap URL text content in <url> element', () => {
+            const result = normalizeXML(toStrictMODS(locationTextFixtures.urlInRelatedItem.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><relatedItem type="isReferencedBy"><titleInfo><title>Related Resource</title></titleInfo><location><url>https://vault.cca.edu/items/9d019022-72ce-4774-9e2a-0c315c14f1d1/1/</url></location></relatedItem></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should wrap physical location text content in <physicalLocation> element', () => {
+            const result = normalizeXML(toStrictMODS(locationTextFixtures.physicalLocationInRelatedItem.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><relatedItem type="otherVersion"><titleInfo><title>Publication</title></titleInfo><location><physicalLocation>CCA/C Archives / Archives Publications / Catalogs:Reference Copies / 1971-1974</physicalLocation></location></relatedItem></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should wrap HTTP URLs in <url> element', () => {
+            const result = normalizeXML(toStrictMODS(locationTextFixtures.httpUrlInLocation.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><url>http://www.example.com/resource</url></location></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should wrap Wikipedia URLs in <url> element', () => {
+            const result = normalizeXML(toStrictMODS(locationTextFixtures.wikipediaUrl.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><url>https://en.wikipedia.org/wiki/Wikipedia:Meetup/Oakland/ArtandFeminism_2015</url></location></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should not modify already wrapped location', () => {
+            const result = normalizeXML(toStrictMODS(locationTextFixtures.alreadyWrapped.input))
+            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation></location></mods>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should not modify empty location', () => {
+            const result = normalizeXML(toStrictMODS(locationTextFixtures.emptyLocation.input))
+            // Empty elements are removed by removeEmptyElements()
+            const expected = normalizeXML(`<xml/>`)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should not modify location with only whitespace', () => {
+            const result = normalizeXML(toStrictMODS(locationTextFixtures.whitespaceOnly.input))
+            // Empty elements are removed by removeEmptyElements()
+            const expected = normalizeXML(`<xml/>`)
+
+            assert.strictEqual(result, expected)
         })
     })
 

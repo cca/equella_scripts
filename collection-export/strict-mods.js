@@ -76,15 +76,18 @@ const ELEMENT_NAMES = {
     LANGUAGE_OF_CATALOGING: 'languageOfCataloging',
     LANGUAGE_TERM: 'languageTerm',
     LIST: 'list',
+    LOCATION: 'location',
     NAME_PART: 'namePart',
     NOTE: 'note',
     NUMBER: 'number',
+    PHYSICAL_LOCATION: 'physicalLocation',
     PLACE_TERM: 'placeTerm',
     SUBJECT: 'subject',
     TEXT: 'text',
     TITLE_INFO: 'titleInfo',
     TITLE: 'title',
     TOPIC: 'topic',
+    URL: 'url',
 }
 
 // Attributes
@@ -744,6 +747,79 @@ export function reorderCopyInformationChildren(doc) {
 }
 
 /**
+ * Wrap location text content with appropriate child elements
+ * - URLs go into <url> elements
+ * - Physical locations go into <physicalLocation> elements
+ * Uses Node's URL constructor to validate URLs
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function wrapLocationTextContent(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    // Find all location elements that might have direct text content
+    const locationElements = safeSelect('//location', doc)
+
+    for (let location of locationElements) {
+        // Only process if element has direct text content (not already wrapped)
+        let textContent = ''
+        let hasDirectText = false
+        
+        for (let node of location.childNodes) {
+            if (node.nodeType === 3) { // TEXT_NODE
+                const text = node.nodeValue.trim()
+                if (text) {
+                    hasDirectText = true
+                    textContent = text
+                    break
+                }
+            }
+        }
+
+        if (!hasDirectText) {
+            continue
+        }
+
+        // Determine if text is a URL or physical location
+        let isURL = false
+        try {
+            // Use Node's URL constructor to validate URL
+            // This handles various URL formats including http, https, ftp, etc.
+            new URL(textContent)
+            isURL = true
+        } catch {
+            // Not a valid URL, treat as physical location
+            isURL = false
+        }
+
+        // Create appropriate child element
+        const childElementName = isURL ? ELEMENT_NAMES.URL : ELEMENT_NAMES.PHYSICAL_LOCATION
+        const child = doc.createElement(childElementName)
+
+        // Move text content to child element
+        while (location.firstChild) {
+            if (location.firstChild.nodeType === 3) { // TEXT_NODE
+                child.appendChild(location.firstChild)
+            } else {
+                // If there's already an element child, don't process this location
+                // (it means the text is mixed with elements, which shouldn't happen)
+                break
+            }
+        }
+
+        // Only add the child if it has content
+        if (child.textContent.trim()) {
+            location.appendChild(child)
+        }
+    }
+
+    return doc
+}
+
+/**
  * Fix nonstandard mods/name/subNameWrapper elements, several operations:
  * - affiliation -> name/affiliation ("CCAC")
  * - constituent -> append to affiliation affiliation ("CCAC Faculty")
@@ -907,6 +983,9 @@ export function toStrictMODS(xmlString) {
 
     // Wrap title elements that are direct children of relatedItem with titleInfo
     wrapElement(doc, XPATH_CONTEXTS.RELATEDITEM, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TITLE_INFO)
+
+    // Wrap location text content with url or physicalLocation
+    wrapLocationTextContent(doc)
 
     // Wrap language text content with languageTerm and move authority attribute
     wrapTextWithChild(doc, XPATH_CONTEXTS.LANGUAGE, ELEMENT_NAMES.LANGUAGE_TERM, [ATTRIBUTES.AUTHORITY])

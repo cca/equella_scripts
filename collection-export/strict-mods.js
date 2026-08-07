@@ -98,6 +98,7 @@ const ATTRIBUTES = {
 }
 
 const TITLE_INFO_TYPES = ['uniform', 'alternative', 'translated', 'abbreviated']
+const TITLE_INFO_USAGE_VALUES = ['primary']
 
 /**
  * Simple unwrapper for elements that just wrap a single child element
@@ -147,11 +148,14 @@ export function fixTitleAttributes(doc) {
         const titleUsageValue = titleElement.getAttribute('usage')
         const titleInfoElement = titleElement.parentNode
         const titleInfoTypeValue = titleInfoElement.getAttribute('type')
+        const titleInfoUsageValue = titleInfoElement.getAttribute('usage')
 
-        // If usage value is one of the valid types, move it to titleInfo/@type
+        // If title usage value is one of the valid types
+        // and we do not already have a valid titleInfo/@type
+        // move it to titleInfo/@type
         // otherwise put it in the uncontrolled @otherType
         if (titleUsageValue) {
-            if (TITLE_INFO_TYPES.includes(titleUsageValue)) {
+            if (TITLE_INFO_TYPES.includes(titleUsageValue) && !titleInfoTypeValue) {
                 titleInfoElement.setAttribute('type', titleUsageValue)
             } else {
                 titleInfoElement.setAttribute('otherType', titleUsageValue)
@@ -168,6 +172,16 @@ export function fixTitleAttributes(doc) {
                 titleInfoElement.setAttribute('otherType', titleInfoTypeValue)
             }
             titleInfoElement.removeAttribute('type')
+        }
+
+        // If titleInfo/@usage is invalid
+        // and we already have an otherType, remove it
+        // else move it to @otherType
+        if (titleInfoUsageValue && !TITLE_INFO_USAGE_VALUES.includes(titleInfoUsageValue)) {
+            if (!titleInfoElement.hasAttribute('otherType')) {
+                titleInfoElement.setAttribute('otherType', titleInfoUsageValue)
+            }
+            titleInfoElement.removeAttribute('usage')
         }
     }
 

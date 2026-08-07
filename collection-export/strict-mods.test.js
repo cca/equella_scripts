@@ -178,6 +178,51 @@ const fixtures = {
         </mods></xml>`
     },
 
+    titleInfoUsageSecondary: {
+        input: `<xml><mods>
+            <titleInfo usage="secondary"><title>Alternative Title</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo otherType="secondary"><title>Alternative Title</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleInfoUsagePrimary: {
+        input: `<xml><mods>
+            <titleInfo usage="primary"><title>Main Title</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo usage="primary"><title>Main Title</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleInfoUsageInvalidWithOtherType: {
+        input: `<xml><mods>
+            <titleInfo usage="secondary" otherType="display"><title>Test Title</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo otherType="display"><title>Test Title</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleUsageWithExistingType: {
+        input: `<xml><mods>
+            <titleInfo type="alternative"><title usage="abbreviated">Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo type="alternative" otherType="abbreviated"><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    titleUsageAbbreviatedNoExistingType: {
+        input: `<xml><mods>
+            <titleInfo><title usage="abbreviated">Short Title</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo type="abbreviated"><title>Short Title</title></titleInfo>
+        </mods></xml>`
+    },
+
     dateCreatedSingle: {
         input: `<xml><mods>
             <origininfo>
@@ -941,6 +986,76 @@ describe('Strict MODS Conversion', () => {
 
             const result = normalizeXML(doc.toString())
             const expected = normalizeXML(fixtures.titleInfoAndTitleOtherTypes.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should convert titleInfo usage="secondary" to otherType="secondary"', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoUsageSecondary.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoUsageSecondary.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should preserve titleInfo usage="primary"', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoUsagePrimary.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoUsagePrimary.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should remove invalid titleInfo usage when otherType already exists', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoUsageInvalidWithOtherType.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoUsageInvalidWithOtherType.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should not overwrite existing titleInfo type when moving title usage', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleUsageWithExistingType.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleUsageWithExistingType.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should move title usage to titleInfo type when no existing type', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleUsageAbbreviatedNoExistingType.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleUsageAbbreviatedNoExistingType.expected)
 
             assert.strictEqual(result, expected)
         })

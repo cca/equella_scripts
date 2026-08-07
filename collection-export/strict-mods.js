@@ -789,7 +789,7 @@ export function wrapLocationTextContent(doc) {
         }
 
         // Determine if text is a URL or physical location
-        let isURL = false
+        let isURL
         try {
             // Use Node's URL constructor to validate URL
             // This handles various URL formats including http, https, ftp, etc.

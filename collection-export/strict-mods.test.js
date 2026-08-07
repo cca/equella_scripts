@@ -4,6 +4,7 @@ import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
 import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, removeEmptyClassifications, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
+import { hasDirectTextContent } from './strict-mods-helpers.js'
 
 // Test fixtures
 const fixtures = {
@@ -3668,6 +3669,74 @@ describe('Strict MODS Conversion', () => {
             // Should have one text element with "Speaker Release Form"
             const releaseTexts = textElements.filter(el => el.textContent === 'Speaker Release Form')
             assert.strictEqual(releaseTexts.length, 1)
+        })
+    })
+
+    describe('Helper functions', () => {
+        describe('hasDirectTextContent', () => {
+            it('should return true for element with direct text content', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<root>Some text</root>', 'text/xml')
+                const root = doc.documentElement
+
+                assert.strictEqual(hasDirectTextContent(root), true)
+            })
+
+            it('should return false for element with only child elements', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<root><child>Text</child></root>', 'text/xml')
+                const root = doc.documentElement
+
+                assert.strictEqual(hasDirectTextContent(root), false)
+            })
+
+            it('should return false for element with only whitespace', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<root>   \n\t  </root>', 'text/xml')
+                const root = doc.documentElement
+
+                assert.strictEqual(hasDirectTextContent(root), false)
+            })
+
+            it('should return false for empty element', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<root/>', 'text/xml')
+                const root = doc.documentElement
+
+                assert.strictEqual(hasDirectTextContent(root), false)
+            })
+
+            it('should return true for element with mixed content including text', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<root>Text before<child>nested</child>text after</root>', 'text/xml')
+                const root = doc.documentElement
+
+                assert.strictEqual(hasDirectTextContent(root), true)
+            })
+
+            it('should return false for null element', () => {
+                assert.strictEqual(hasDirectTextContent(null), false)
+            })
+
+            it('should return false for undefined element', () => {
+                assert.strictEqual(hasDirectTextContent(undefined), false)
+            })
+
+            it('should return true for element with only direct text nodes', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<location>California</location>', 'text/xml')
+                const location = doc.documentElement
+
+                assert.strictEqual(hasDirectTextContent(location), true)
+            })
+
+            it('should return false for element with text in child only', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<location><url>http://example.com</url></location>', 'text/xml')
+                const location = doc.documentElement
+
+                assert.strictEqual(hasDirectTextContent(location), false)
+            })
         })
     })
 })

@@ -194,3 +194,26 @@ export function isElementEmpty(element) {
 
     return true // No text, all children empty
 }
+
+/**
+ * Check if an element has direct text node children with non-whitespace content
+ * This is used to determine if an element needs text wrapping or has already been processed
+ *
+ * @param {Element} element - Element to check
+ * @returns {boolean} True if element has direct text content (not in child elements)
+ */
+export function hasDirectTextContent(element) {
+    if (!element || !element.childNodes) {
+        return false
+    }
+
+    for (let node of element.childNodes) {
+        if (node.nodeType === 3) { // TEXT_NODE
+            if (node.nodeValue.trim()) {
+                return true
+            }
+        }
+    }
+
+    return false
+}

@@ -7,7 +7,8 @@ import {
     isEmptyOrWhitespace,
     moveAndTransformElement,
     createElement,
-    isElementEmpty
+    isElementEmpty,
+    hasDirectTextContent
 } from './strict-mods-helpers.js'
 
 /**
@@ -482,15 +483,7 @@ export function wrapTextWithChild(doc, parentPath, childElement, attributesToMov
 
     for (let parent of parents) {
         // Only process if element has direct text content (not already wrapped)
-        let hasDirectText = false
-        for (let node of parent.childNodes) {
-            if (node.nodeType === 3 && node.nodeValue.trim()) { // TEXT_NODE
-                hasDirectText = true
-                break
-            }
-        }
-
-        if (!hasDirectText) {
+        if (!hasDirectTextContent(parent)) {
             continue
         }
 
@@ -779,22 +772,20 @@ export function wrapLocationTextContent(doc) {
 
     for (let location of locationElements) {
         // Only process if element has direct text content (not already wrapped)
-        let textContent = ''
-        let hasDirectText = false
+        if (!hasDirectTextContent(location)) {
+            continue
+        }
 
+        // Get the text content for URL detection
+        let textContent = ''
         for (let node of location.childNodes) {
             if (node.nodeType === 3) { // TEXT_NODE
                 const text = node.nodeValue.trim()
                 if (text) {
-                    hasDirectText = true
                     textContent = text
                     break
                 }
             }
-        }
-
-        if (!hasDirectText) {
-            continue
         }
 
         // Determine if text is a URL or physical location
@@ -851,18 +842,7 @@ export function removeEmptyClassifications(doc) {
 
     for (let classification of classifications) {
         // Check if classification has direct text content (meaningful content)
-        let hasDirectText = false
-        for (let node of classification.childNodes) {
-            if (node.nodeType === 3) { // TEXT_NODE
-                if (node.nodeValue.trim()) {
-                    hasDirectText = true
-                    break
-                }
-            }
-        }
-
-        // If no direct text content, check if it only contains classificationType
-        if (!hasDirectText) {
+        if (!hasDirectTextContent(classification)) {
             const classificationTypes = Array.from(classification.childNodes).filter(
                 node => node.nodeType === 1 && node.tagName === 'classificationType'
             )

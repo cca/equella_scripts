@@ -33,14 +33,14 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.8.0",
-    "globals": "^17.8.0",
-    "mocha": "^11.7.6"
+    "globals": "^17.9.0",
+    "mocha": "^11.8.0"
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.9.10",
     "async": "^3.2.6",
     "csv-reader": "^1.0.12",
-    "csv-stringify": "^6.8.1",
+    "csv-stringify": "^6.8.2",
     "filenamify": "~7.0.2",
     "luxon": "^3.7.2",
     "md5-file": "^5.0.0",

@@ -1861,7 +1861,7 @@ describe('Strict MODS Conversion', () => {
             assert.strictEqual(subjects.length, 1, 'subject should be created')
             assert.strictEqual(topics.length, 1, 'topic should be created')
             assert.strictEqual(topics[0].textContent, 'photographs')
-            assert.strictEqual(topics[0].getAttribute('authority'), 'local')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'ccac')
         })
 
         it('should handle multiple photoClassification elements', () => {
@@ -1882,8 +1882,8 @@ describe('Strict MODS Conversion', () => {
             assert.strictEqual(topics.length, 2, 'Two topics should be created')
             assert.strictEqual(topics[0].textContent, 'portraits')
             assert.strictEqual(topics[1].textContent, 'landscapes')
-            assert.strictEqual(topics[0].getAttribute('authority'), 'local')
-            assert.strictEqual(topics[1].getAttribute('authority'), 'local')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'ccac')
+            assert.strictEqual(topics[1].getAttribute('authority'), 'ccac')
         })
 
         it('should skip empty photoClassification elements', () => {
@@ -1915,7 +1915,7 @@ describe('Strict MODS Conversion', () => {
             const topics = select('//subject/topic', doc)
 
             assert.strictEqual(topics.length, 1)
-            assert.strictEqual(topics[0].getAttribute('authority'), 'local')
+            assert.strictEqual(topics[0].getAttribute('authority'), 'ccac')
             assert.strictEqual(topics[0].getAttribute('type'), 'genre')
         })
     })
@@ -2585,9 +2585,9 @@ describe('Strict MODS Conversion', () => {
                     <classification><classificationType>Archives Series</classificationType></classification>
                 </mods></xml>`,
                 expected: `<xml><mods>
-                    
-                    
-                    
+
+
+
                 </mods></xml>`
             },
             validClassification: {
@@ -2605,9 +2605,9 @@ describe('Strict MODS Conversion', () => {
                     <classification><classificationType>ARTstor</classificationType></classification>
                 </mods></xml>`,
                 expected: `<xml><mods>
-                    
+
                     <classification authority="lcc">ND237.H64</classification>
-                    
+
                 </mods></xml>`
             },
             emptyClassification: {
@@ -3034,10 +3034,7 @@ describe('Strict MODS Conversion', () => {
 
             assert.ok(!result.includes('photoClassification'), 'Should not have photoClassification')
             assert.ok(result.includes('<subject>'), 'Should have subject wrapper')
-            assert.ok(result.includes('<topic authority="local">architectural photography</topic>'), 'Should have topic with authority')
-        })
-
-        it('should wrap relatedItem/title with titleInfo', () => {
+            assert.ok(result.includes('<topic authority="ccac">architectural photography</topic>'), 'Should have topic with authority')
         })
 
         it('should wrap relatedItem/title with titleInfo', () => {

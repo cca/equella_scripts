@@ -610,7 +610,7 @@ export function moveClassificationToSubject(doc, classificationElement, authorit
         ELEMENT_NAMES.TOPIC,
         {
             wrapperElement: ELEMENT_NAMES.SUBJECT,
-            addAttributes: { authority },
+            addAttributes: { authority: "ccac" },
             skipEmpty: true
         }
     )

@@ -18,6 +18,81 @@ The **metadata.xml** file is only the item metadata (`.metadata` within the JSON
 
 The **metadata.mods.xml** file is the item metadata in MODS format (using the [strict-mods.js](https://github.com/cca/equella_scripts/blob/main/collection-export/strict-mods.js) conversion of Collection Export). This file should validate against [MODS schema version 3.8](https://www.loc.gov/standards/mods/mods-3-8.xsd) (2022).
 
+## REST API Item JSON Structure
+
+See the included "VAULT Item JSON Data Dictionary" spreadsheet for information on these fields.
+
+Example:
+
+```json
+{
+  "uuid": "5ba9b49e-6ba6-4854-a72e-d2e4a2b67380",
+  "version": 2,
+  "name": "Artists books / Brooklyn Museum of Art",
+  "metadata": "<xml><mods>...</mods></xml>",
+  "status": "live",
+  "createdDate": "2025-10-27T11:31:16.257-07:00",
+  "modifiedDate": "2025-10-27T11:31:16.257-07:00",
+  "owner": {
+    "id": "pnavarrete"
+  },
+  "collaborators": [],
+  "collection": {
+    "uuid": "db4e60c6-e001-9ef3-5ce5-479f384026a3"
+  },
+  "rating": -1,
+  "attachments": [
+    {
+      "type": "file",
+      "uuid": "6e8a5f5d-a3ea-402a-a564-ad3097c2e452",
+      "description": "N7433.35.N7_B23_2000_01.TIF",
+      "preview": false,
+      "erroredIndexing": false,
+      "restricted": false,
+      "thumbnail": "_THUMBS/N7433.35.N7_B23_2000_01.TIF.jpeg",
+      "filename": "N7433.35.N7_B23_2000_01.TIF",
+      "size": 6928522,
+      "md5": "c75c13696acd3a905588bc5a589a406e",
+      "conversion": false,
+      "thumbFilename": "_THUMBS/N7433.35.N7_B23_2000_01.TIF.jpeg",
+      "externalId": {
+        "present": false
+      },
+      "links": {
+        "view": "https://vault.cca.edu/items/5ba9b49e-6ba6-4854-a72e-d2e4a2b67380/2/?attachment.uuid=6e8a5f5d-a3ea-402a-a564-ad3097c2e452",
+        "thumbnail": "https://vault.cca.edu/thumbs/5ba9b49e-6ba6-4854-a72e-d2e4a2b67380/2/6e8a5f5d-a3ea-402a-a564-ad3097c2e452"
+      }
+    }
+  ],
+  "navigation": {
+    "hideUnreferencedAttachments": false,
+    "showSplitOption": false,
+    "nodes": []
+  },
+  "drm": {},
+  "thumbnail": "default",
+  "displayFields": [
+    {
+      "type": "node",
+      "name": "Form",
+      "html": "artists' books (books)"
+    }
+  ],
+  "displayOptions": {
+    "attachmentType": "STRUCTURED",
+    "disableThumbnail": false,
+    "standardOpen": false,
+    "integrationOpen": false
+  },
+  "links": {
+    "view": "https://vault.cca.edu/items/5ba9b49e-6ba6-4854-a72e-d2e4a2b67380/2/",
+    "self": "https://vault.cca.edu/api/item/5ba9b49e-6ba6-4854-a72e-d2e4a2b67380/2/"
+  }
+}
+```
+
+Many fields are administrative metadata which are unimportant in other systems, such as rating, displayFields, displayOptions, and navigation. The important information, sometimes not represented in the XML metadata, is the `uuid`, `version`, `status`, `createdDate`, `modifiedDate`, and some `attachments` subfields (such as `type`, `filename`, `size`, and `md5`).
+
 ## Controlled Vocabularies
 
 We use several controlled vocabularies. Our metadata references these by acronyms in `@authority` attributes, but we do not have `authorityURI` or `valueURI` attributes for them. See the CCA Controlled Vocabularies spreadsheet for details.

@@ -20,7 +20,7 @@ The **metadata.mods.xml** file is the item metadata in MODS format (using the [s
 
 ## REST API Item JSON Structure
 
-See the included "VAULT Item JSON Data Dictionary" spreadsheet for information on these fields.
+See the included "VAULT Item JSON Data Dictionary" spreadsheet for information on these fields. In the data dictionary, the "Nullable" column indicates whether a field can be nonexistent (e.g., the `filename` on a `type = url` attachment) for particular items or attachments. Most nullable fields are properties of attachments due to the different types, which are enumerated in the data dictionary.
 
 Example:
 
@@ -91,7 +91,7 @@ Example:
 }
 ```
 
-Many fields are administrative metadata which are unimportant in other systems, such as rating, displayFields, displayOptions, and navigation. The important information, sometimes not represented in the XML metadata, is the `uuid`, `version`, `status`, `createdDate`, `modifiedDate`, and some `attachments` subfields (such as `type`, `filename`, `size`, and `md5`).
+Many fields are administrative metadata and will be unimportant in other systems, such as `rating`, `displayOptions`, and `navigation`. The most important information, sometimes not represented in the XML metadata, is the `uuid`, `version`, `status`, `createdDate`, `modifiedDate`, and some `attachments` subfields (such as `type`, `filename`, `size`, and `md5`).
 
 ## Controlled Vocabularies
 

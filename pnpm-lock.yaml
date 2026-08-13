@@ -18,8 +18,8 @@ importers:
         specifier: ^1.0.12
         version: 1.0.12
       csv-stringify:
-        specifier: ^6.8.2
-        version: 6.8.2
+        specifier: ^6.8.3
+        version: 6.8.3
       filenamify:
         specifier: ~7.0.2
         version: 7.0.2
@@ -30,8 +30,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       nodemailer:
-        specifier: ^9.0.3
-        version: 9.0.3
+        specifier: ^9.0.4
+        version: 9.0.4
       rc:
         specifier: ^1.2.8
         version: 1.2.8
@@ -224,8 +224,8 @@ packages:
     resolution: {integrity: sha512-0AAgazKJUywtjvZbclNuovIiQY/WyvojWw15Y2k3kPixE+pDiOFnfg5FcH3CfDqqnrB2f3p5oPAc446EXD01Tw==}
     engines: {node: '>=8.0.0'}
 
-  csv-stringify@6.8.2:
-    resolution: {integrity: sha512-V0md5rBGlZb5WOfUmBWM8tr1+vvbe00EC2+ZhIYPKypA1GLvGuh0NzWEK0L+yRplocH7r37YGoT9uK0r1TtqBQ==}
+  csv-stringify@6.8.3:
+    resolution: {integrity: sha512-gIeSCvq5F4VtXV3naV3VAewLhBkiZBz+PPhTOA8H3Y8h/ELa+R1ml0GZck/4/Nzo9ep2lvOluilJ6MJlbZsKMA==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -482,8 +482,8 @@ packages:
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
-  nodemailer@9.0.3:
-    resolution: {integrity: sha512-n+YP+NKwR5zRWa60k3GiQ6Q3B4KXCoAw40dAKeCtYn020iNN74aWK2liXIC3ZEATeGql7we3tE3t8QwhY0eskw==}
+  nodemailer@9.0.4:
+    resolution: {integrity: sha512-LmJNRVRtfSCULxcZpy0Cpg4WWenlUZ9+zbmTO+S7v9wD6XreYLjXRFtDjtV/4F0HT5p1GyZfA0Ux/myxHb18CQ==}
     engines: {node: '>=6.0.0'}
 
   optionator@0.9.4:
@@ -794,7 +794,7 @@ snapshots:
 
   csv-reader@1.0.12: {}
 
-  csv-stringify@6.8.2: {}
+  csv-stringify@6.8.3: {}
 
   debug@4.4.3(supports-color@8.1.1):
     dependencies:
@@ -1042,7 +1042,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  nodemailer@9.0.3: {}
+  nodemailer@9.0.4: {}
 
   optionator@0.9.4:
     dependencies:

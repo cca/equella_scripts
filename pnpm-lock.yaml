@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@xmldom/xmldom':
-        specifier: ^0.9.10
-        version: 0.9.10
+        specifier: ^0.9.11
+        version: 0.9.11
       async:
         specifier: ^3.2.6
         version: 3.2.6
@@ -30,8 +30,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       nodemailer:
-        specifier: ^9.0.4
-        version: 9.0.4
+        specifier: ^9.0.5
+        version: 9.0.5
       rc:
         specifier: ^1.2.8
         version: 1.2.8
@@ -47,10 +47,10 @@ importers:
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
-        version: 10.0.1(eslint@10.8.0(supports-color@8.1.1))
+        version: 10.0.1(eslint@10.8.1(supports-color@8.1.1))
       eslint:
-        specifier: ^10.8.0
-        version: 10.8.0(supports-color@8.1.1)
+        specifier: ^10.8.1
+        version: 10.8.1(supports-color@8.1.1)
       globals:
         specifier: ^17.9.0
         version: 17.9.0
@@ -136,10 +136,9 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@xmldom/xmldom@0.9.10':
-    resolution: {integrity: sha512-A9gOqLdi6cV4ibazAjcQufGj0B1y/vDqYrcuP6d/6x8P27gRS8643Dj9o1dEKtB6O7fwxb2FgBmJS2mX7gpvdw==}
+  '@xmldom/xmldom@0.9.11':
+    resolution: {integrity: sha512-tW8bcK3hsG0/uqSnNz6TK4BkcuZSezoU7DlnYssILmZDktPnSHHuDJJFM0AJv+13gz2r0iGdrj6qqKeUnxXEDg==}
     engines: {node: '>=14.6'}
-    deprecated: this version has critical issues, please update to the latest version
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -280,8 +279,8 @@ packages:
     resolution: {integrity: sha512-tD40eHxA35h0PEIZNeIjkHoDR4YjjJp34biM0mDvplBe//mB+IHCqHDGV7pxF+7MklTvighcCPPZC7ynWyjdTA==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  eslint@10.8.0:
-    resolution: {integrity: sha512-nuKKvN+oIBO0koN7Tm7dlkmnkc21mtt0QJLwAKzjLq14y6lRTdVG36MZHJ8eQHwdJMwZbQNMlPOYedMq/oVJvQ==}
+  eslint@10.8.1:
+    resolution: {integrity: sha512-wqA7W2jbsC/BnV9Iv1UZpKVFkO1AdNoSmYW8NWG4HNOBbkAMvIqDZ27pI2f07dqn583NcIC44ckjAcOXDL1QbQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
     hasBin: true
     peerDependencies:
@@ -482,8 +481,8 @@ packages:
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
-  nodemailer@9.0.4:
-    resolution: {integrity: sha512-LmJNRVRtfSCULxcZpy0Cpg4WWenlUZ9+zbmTO+S7v9wD6XreYLjXRFtDjtV/4F0HT5p1GyZfA0Ux/myxHb18CQ==}
+  nodemailer@9.0.5:
+    resolution: {integrity: sha512-wvjiKvjczmsN7U/8006JOdXubgBk2XFAbioDMbT+sM7cPs0QrhJTa6KBRX7P5REGGkDcLUz/EarWidb8G8C1jQ==}
     engines: {node: '>=6.0.0'}
 
   optionator@0.9.4:
@@ -652,9 +651,9 @@ packages:
 
 snapshots:
 
-  '@eslint-community/eslint-utils@4.10.1(eslint@10.8.0(supports-color@8.1.1))':
+  '@eslint-community/eslint-utils@4.10.1(eslint@10.8.1(supports-color@8.1.1))':
     dependencies:
-      eslint: 10.8.0(supports-color@8.1.1)
+      eslint: 10.8.1(supports-color@8.1.1)
       eslint-visitor-keys: 3.4.3
 
   '@eslint-community/regexpp@4.12.2': {}
@@ -675,9 +674,9 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/js@10.0.1(eslint@10.8.0(supports-color@8.1.1))':
+  '@eslint/js@10.0.1(eslint@10.8.1(supports-color@8.1.1))':
     optionalDependencies:
-      eslint: 10.8.0(supports-color@8.1.1)
+      eslint: 10.8.1(supports-color@8.1.1)
 
   '@eslint/object-schema@3.0.5': {}
 
@@ -720,7 +719,7 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@xmldom/xmldom@0.9.10': {}
+  '@xmldom/xmldom@0.9.11': {}
 
   acorn-jsx@5.3.2(acorn@8.18.0):
     dependencies:
@@ -831,9 +830,9 @@ snapshots:
 
   eslint-visitor-keys@5.0.1: {}
 
-  eslint@10.8.0(supports-color@8.1.1):
+  eslint@10.8.1(supports-color@8.1.1):
     dependencies:
-      '@eslint-community/eslint-utils': 4.10.1(eslint@10.8.0(supports-color@8.1.1))
+      '@eslint-community/eslint-utils': 4.10.1(eslint@10.8.1(supports-color@8.1.1))
       '@eslint-community/regexpp': 4.12.2
       '@eslint/config-array': 0.23.5(supports-color@8.1.1)
       '@eslint/config-helpers': 0.7.0
@@ -1042,7 +1041,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  nodemailer@9.0.4: {}
+  nodemailer@9.0.5: {}
 
   optionator@0.9.4:
     dependencies:

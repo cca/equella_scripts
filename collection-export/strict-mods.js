@@ -154,6 +154,11 @@ export function fixTitleAttributes(doc) {
         const titleInfoTypeValue = titleInfoElement.getAttribute('type')
         const titleInfoUsageValue = titleInfoElement.getAttribute('usage')
 
+        // If title info type is empty string, remove it
+        if (titleInfoTypeValue === '') {
+            titleInfoElement.removeAttribute('type')
+        }
+
         // If title usage value is one of the valid types
         // and we do not already have a valid titleInfo/@type
         // move it to titleInfo/@type

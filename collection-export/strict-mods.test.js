@@ -151,6 +151,15 @@ const fixtures = {
         </mods></xml>`
     },
 
+    titleInfoTypeEmptyString: {
+        input: `<xml><mods>
+            <titleInfo type=""><title>Test Item</title></titleInfo>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
     titleInfoUsageTitleAbbreviated: {
         input: `<xml><mods>
             <titleInfo usage="primary"><title usage="abbreviated">Test Item</title></titleInfo>
@@ -943,6 +952,20 @@ describe('Strict MODS Conversion', () => {
 
             const result = normalizeXML(doc.toString())
             const expected = normalizeXML(fixtures.titleUsageNonStandard.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should remove empty titleInfo type attribute', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(
+                fixtures.titleInfoTypeEmptyString.input,
+                "text/xml",
+            )
+            fixTitleAttributes(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.titleInfoTypeEmptyString.expected)
 
             assert.strictEqual(result, expected)
         })

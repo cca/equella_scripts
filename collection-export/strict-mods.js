@@ -912,6 +912,103 @@ export function removeEmptyClassifications(doc) {
 }
 
 /**
+ * Convert local/archivesWrapper (series/subseries) to nested relatedItem elements
+ * Maps archives metadata to MODS relatedItem structure:
+ * - subseries -> relatedItem type="series" displayLabel="subseries" containing
+ * - series -> nested relatedItem type="series" displayLabel="series"
+ * If only series exists, creates single relatedItem with displayLabel="series"
+ * 
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function convertArchivesWrapper(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const archivesWrappers = safeSelect('//local/archivesWrapper', doc)
+    const select = xpath.useNamespaces({})
+
+    for (let wrapper of archivesWrappers) {
+        const local = wrapper.parentNode // archivesWrapper's parent is local
+        
+        // Find the mods element - local is a sibling of mods, not a child
+        // Navigate to parent (xml) then find mods child
+        const modsElements = safeSelect('//mods', doc)
+        if (modsElements.length === 0) {
+            continue
+        }
+        const mods = modsElements[0]
+        
+        // Get series and subseries BEFORE removing wrapper
+        const seriesEl = select('series', wrapper)[0]
+        const subseriesEl = select('subseries', wrapper)[0]
+        
+        const seriesText = seriesEl?.textContent?.trim() || ''
+        const subseriesText = subseriesEl?.textContent?.trim() || ''
+        
+        // Remove the archivesWrapper from local
+        local.removeChild(wrapper)
+        
+        // Skip if both are empty
+        if (!seriesText && !subseriesText) {
+            continue
+        }
+        
+        if (subseriesText && seriesText) {
+            // Both exist: create nested structure
+            // Outer relatedItem is subseries
+            const outerRelatedItem = doc.createElement('relatedItem')
+            outerRelatedItem.setAttribute('type', 'series')
+            outerRelatedItem.setAttribute('displayLabel', 'subseries')
+            
+            const outerTitleInfo = doc.createElement('titleInfo')
+            const outerTitle = doc.createElement('title')
+            outerTitle.textContent = subseriesText
+            outerTitleInfo.appendChild(outerTitle)
+            outerRelatedItem.appendChild(outerTitleInfo)
+            
+            // Inner relatedItem is series
+            const innerRelatedItem = doc.createElement('relatedItem')
+            innerRelatedItem.setAttribute('type', 'series')
+            innerRelatedItem.setAttribute('displayLabel', 'series')
+            
+            const innerTitleInfo = doc.createElement('titleInfo')
+            const innerTitle = doc.createElement('title')
+            innerTitle.textContent = seriesText
+            innerTitleInfo.appendChild(innerTitle)
+            innerRelatedItem.appendChild(innerTitleInfo)
+            
+            outerRelatedItem.appendChild(innerRelatedItem)
+            mods.appendChild(outerRelatedItem)
+            
+        } else if (seriesText) {
+            // Only series: create single relatedItem
+            const relatedItem = doc.createElement('relatedItem')
+            relatedItem.setAttribute('type', 'series')
+            relatedItem.setAttribute('displayLabel', 'series')
+            
+            const titleInfo = doc.createElement('titleInfo')
+            const title = doc.createElement('title')
+            title.textContent = seriesText
+            titleInfo.appendChild(title)
+            relatedItem.appendChild(titleInfo)
+            
+            mods.appendChild(relatedItem)
+        }
+        // Note: subseries without series shouldn't happen based on data analysis
+    }
+
+    // Remove empty local elements (if all archivesWrappers were removed)
+    const localElements = safeSelect('//local[not(*)]', doc)
+    for (let local of localElements) {
+        local.parentNode.removeChild(local)
+    }
+
+    return doc
+}
+
+/**
  * Fix nonstandard mods/name/subNameWrapper elements, several operations:
  * - affiliation -> name/affiliation ("CCAC")
  * - constituent -> append to affiliation affiliation ("CCAC Faculty")
@@ -1064,6 +1161,9 @@ export function toStrictMODS(xmlString) {
 
     // Fix nonstandard subNameWrapper elements under mods/name
     convertSubNameWrapper(doc)
+
+    // Convert local/archivesWrapper (series/subseries) to nested relatedItem structure
+    convertArchivesWrapper(doc)
 
     // Remove usage="secondary" attribute from name elements
     removeBadNameUsageAttrs(doc)

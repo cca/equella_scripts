@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, removeEmptyClassifications, convertSpeakerReleaseDetail, toStrictMODS } from './strict-mods.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
 import { hasDirectTextContent } from './strict-mods-helpers.js'
 
 // Test fixtures
@@ -778,6 +778,100 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo><title>Test</title></titleInfo>
+        </mods></xml>`
+    },
+
+    archivesWrapperBoth: {
+        input: `<xml><mods>
+            <titleInfo><title>Provost's Office Emails</title></titleInfo>
+            <local>
+                <archivesWrapper>
+                    <series>I. Administrative Materials</series>
+                    <subseries>7. General Admin Files</subseries>
+                    <seriesStaging>I. Administrative Materials\\7. General Admin Files</seriesStaging>
+                </archivesWrapper>
+            </local>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Provost's Office Emails</title></titleInfo>
+            <relatedItem type="series" displayLabel="subseries">
+                <titleInfo>
+                    <title>7. General Admin Files</title>
+                </titleInfo>
+                <relatedItem type="series" displayLabel="series">
+                    <titleInfo>
+                        <title>I. Administrative Materials</title>
+                    </titleInfo>
+                </relatedItem>
+            </relatedItem>
+        </mods></xml>`
+    },
+
+    archivesWrapperSeriesOnly: {
+        input: `<xml><mods>
+            <titleInfo><title>College Newsletter</title></titleInfo>
+            <local>
+                <archivesWrapper>
+                    <series>II. Publications</series>
+                    <seriesStaging>II. Publications</seriesStaging>
+                </archivesWrapper>
+            </local>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>College Newsletter</title></titleInfo>
+            <relatedItem type="series" displayLabel="series">
+                <titleInfo>
+                    <title>II. Publications</title>
+                </titleInfo>
+            </relatedItem>
+        </mods></xml>`
+    },
+
+    archivesWrapperEmpty: {
+        input: `<xml><mods>
+            <titleInfo><title>Test Item</title></titleInfo>
+            <local>
+                <archivesWrapper>
+                    <series></series>
+                    <seriesStaging></seriesStaging>
+                </archivesWrapper>
+            </local>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Test Item</title></titleInfo>
+        </mods></xml>`
+    },
+
+    archivesWrapperMultiple: {
+        input: `<xml><mods>
+            <titleInfo><title>Multiple Archives</title></titleInfo>
+            <local>
+                <archivesWrapper>
+                    <series>I. First Series</series>
+                    <subseries>A. First Subseries</subseries>
+                </archivesWrapper>
+                <archivesWrapper>
+                    <series>II. Second Series</series>
+                </archivesWrapper>
+            </local>
+        </mods></xml>`,
+        expected: `<xml><mods>
+            <titleInfo><title>Multiple Archives</title></titleInfo>
+            <relatedItem type="series" displayLabel="subseries">
+                <titleInfo>
+                    <title>A. First Subseries</title>
+                </titleInfo>
+                <relatedItem type="series" displayLabel="series">
+                    <titleInfo>
+                        <title>I. First Series</title>
+                    </titleInfo>
+                </relatedItem>
+            </relatedItem>
+            <relatedItem type="series" displayLabel="series">
+                <titleInfo>
+                    <title>II. Second Series</title>
+                </titleInfo>
+            </relatedItem>
         </mods></xml>`
     }
 }
@@ -3931,6 +4025,84 @@ describe('Strict MODS Conversion', () => {
             // Should have one text element with "Speaker Release Form"
             const releaseTexts = textElements.filter(el => el.textContent === 'Speaker Release Form')
             assert.strictEqual(releaseTexts.length, 1)
+        })
+    })
+
+    describe('convertArchivesWrapper', () => {
+        it('should convert both series and subseries to nested relatedItem', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.archivesWrapperBoth.input, 'text/xml')
+
+            convertArchivesWrapper(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.archivesWrapperBoth.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should convert series only to single relatedItem', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.archivesWrapperSeriesOnly.input, 'text/xml')
+
+            convertArchivesWrapper(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.archivesWrapperSeriesOnly.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should remove empty archivesWrapper', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.archivesWrapperEmpty.input, 'text/xml')
+
+            convertArchivesWrapper(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.archivesWrapperEmpty.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle multiple archivesWrapper elements', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.archivesWrapperMultiple.input, 'text/xml')
+
+            convertArchivesWrapper(doc)
+
+            const result = normalizeXML(doc.toString())
+            const expected = normalizeXML(fixtures.archivesWrapperMultiple.expected)
+
+            assert.strictEqual(result, expected)
+        })
+
+        it('should handle null document gracefully', () => {
+            const result = convertArchivesWrapper(null)
+
+            assert.strictEqual(result, null)
+        })
+
+        it('should verify nested structure is created correctly', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString(fixtures.archivesWrapperBoth.input, 'text/xml')
+
+            convertArchivesWrapper(doc)
+
+            const select = xpath.useNamespaces({})
+            const outerRelated = select('//relatedItem[@displayLabel="subseries"]', doc)
+            const innerRelated = select('//relatedItem[@displayLabel="series"]', doc)
+            
+            assert.strictEqual(outerRelated.length, 1, 'Should have one subseries relatedItem')
+            assert.strictEqual(innerRelated.length, 1, 'Should have one series relatedItem')
+            assert.strictEqual(outerRelated[0].getAttribute('type'), 'series')
+            assert.strictEqual(innerRelated[0].getAttribute('type'), 'series')
+            
+            // Verify titles
+            const subseriesTitle = select('titleInfo/title', outerRelated[0])[0]
+            const seriesTitle = select('titleInfo/title', innerRelated[0])[0]
+            assert.strictEqual(subseriesTitle.textContent, '7. General Admin Files')
+            assert.strictEqual(seriesTitle.textContent, 'I. Administrative Materials')
         })
     })
 

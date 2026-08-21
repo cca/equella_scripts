@@ -3218,6 +3218,62 @@ describe('Strict MODS Conversion', () => {
                 'Should not have direct title under relatedItem')
         })
 
+        it('should deduplicate internetMediaType in physicalDescription', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <physicalDescription>
+                    <internetMediaType>image/tiff</internetMediaType>
+                    <internetMediaType>image/jpeg</internetMediaType>
+                    <internetMediaType>image/tiff</internetMediaType>
+                    <internetMediaType>image/jpeg</internetMediaType>
+                    <digitalOrigin>reformatted digital</digitalOrigin>
+                </physicalDescription>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+
+            // Should only have one of each type
+            const tiffMatches = result.match(/<internetMediaType>image\/tiff<\/internetMediaType>/g) || []
+            const jpegMatches = result.match(/<internetMediaType>image\/jpeg<\/internetMediaType>/g) || []
+            
+            assert.strictEqual(tiffMatches.length, 1, 'Should have exactly one image/tiff')
+            assert.strictEqual(jpegMatches.length, 1, 'Should have exactly one image/jpeg')
+        })
+
+        it('should deduplicate internetMediaType while preserving order', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <physicalDescription>
+                    <internetMediaType>image/tiff</internetMediaType>
+                    <internetMediaType>image/jpeg</internetMediaType>
+                    <internetMediaType>application/pdf</internetMediaType>
+                    <internetMediaType>image/tiff</internetMediaType>
+                    <internetMediaType>image/jpeg</internetMediaType>
+                </physicalDescription>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+
+            // Should have each type once, in order of first appearance
+            const types = [...result.matchAll(/<internetMediaType>(.*?)<\/internetMediaType>/g)].map(m => m[1])
+            
+            assert.deepStrictEqual(types, ['image/tiff', 'image/jpeg', 'application/pdf'],
+                'Should preserve order of first appearance')
+        })
+
+        it('should handle physicalDescription with no internetMediaType', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <physicalDescription>
+                    <digitalOrigin>born digital</digitalOrigin>
+                    <extent>10 pages</extent>
+                </physicalDescription>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+
+            assert.ok(result.includes('<digitalOrigin>born digital</digitalOrigin>'), 'Should preserve digitalOrigin')
+            assert.ok(result.includes('<extent>10 pages</extent>'), 'Should preserve extent')
+        })
+
+
         it('should move formBroad and formSpecific to genre', () => {
             const input = `<xml><mods>
                 <titleInfo><title>Test Item</title></titleInfo>

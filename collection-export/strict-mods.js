@@ -796,6 +796,53 @@ export function convertSpeakerReleaseDetail(doc) {
 }
 
 /**
+ * Deduplicate internetMediaType elements within physicalDescription
+ * Items with multiple attachments often have duplicate MIME types listed.
+ * Keep only the first occurrence of each unique value, preserving order.
+ *
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function deduplicateInternetMediaType(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const physicalDescriptions = safeSelect(XPATH_CONTEXTS.PHYSICAL_DESCRIPTION, doc)
+    const select = xpath.useNamespaces({})
+
+    for (let physDesc of physicalDescriptions) {
+        const mediaTypes = select('internetMediaType', physDesc)
+        
+        if (mediaTypes.length <= 1) {
+            continue
+        }
+
+        const seen = new Set()
+        const toRemove = []
+
+        for (let mediaType of mediaTypes) {
+            const value = mediaType.textContent.trim()
+            
+            if (seen.has(value)) {
+                // Duplicate, mark for removal
+                toRemove.push(mediaType)
+            } else {
+                // First occurrence, keep it
+                seen.add(value)
+            }
+        }
+
+        // Remove duplicates
+        for (let element of toRemove) {
+            physDesc.removeChild(element)
+        }
+    }
+
+    return doc
+}
+
+/**
  * Wrap copyInformation in holdingSimple element
  * MODS standard requires: location/holdingSimple/copyInformation
  * Currently we have: location/copyInformation (non-standard)
@@ -1269,6 +1316,9 @@ export function toStrictMODS(xmlString) {
 
     // Wrap recordInfo/languageOfCataloging with languageTerm and move authority attribute
     wrapTextWithChild(doc, `${XPATH_CONTEXTS.RECORD_INFO}/${ELEMENT_NAMES.LANGUAGE_OF_CATALOGING}`, ELEMENT_NAMES.LANGUAGE_TERM, [ATTRIBUTES.AUTHORITY])
+
+    // Deduplicate internetMediaType in physicalDescription
+    deduplicateInternetMediaType(doc)
 
     // Remove all empty elements (no text, no children with text)
     removeEmptyElements(doc)

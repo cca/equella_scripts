@@ -696,8 +696,15 @@ export function removeBadNameUsageAttrs(doc) {
 /**
  * Convert part/detail elements that indicate speaker release forms
  * Convert part/number elements to part/text with type="attachment-uuid"
- * When a part has a title (filename) and multiple numbers (UUIDs), we keep the first
- * UUID with the filename in the same part, and create separate parts for additional UUIDs.
+ * 
+ * When a part has multiple numbers (UUIDs), we cannot safely associate them with
+ * the part/title filename without access to the full item attachments JSON.
+ * 
+ * Strategy:
+ * - If part has 1 number: convert to text@type="attachment-uuid" in same part with title
+ * - If part has >1 number: keep title in original part, create ONE separate part with all UUIDs
+ * 
+ * This preserves all data without making unsafe assumptions about UUID-to-filename mapping.
  * 
  * @param {Document} doc - XML DOM document
  * @returns {Document} Modified document
@@ -717,46 +724,34 @@ export function convertPartNumbers(doc) {
             continue
         }
 
-        // Get the title element (will be renamed to text later)
-        const titleElement = select('title', part)[0]
-        const hasTitle = titleElement && titleElement.textContent.trim()
-
         if (numbers.length === 1) {
-            // Simple case: just rename the single number to text with type attribute
+            // Safe case: single UUID, convert in place
             const number = numbers[0]
             const text = doc.createElement('text')
             text.setAttribute('type', 'attachment-uuid')
             text.textContent = number.textContent
             part.replaceChild(text, number)
         } else {
-            // Multiple numbers: keep first with title, create new parts for the rest
+            // Multiple UUIDs: cannot safely associate with filename
+            // Keep title in original part, create separate part for UUIDs
             const modsElement = part.parentNode
+            const uuidPart = doc.createElement('part')
             
-            // Convert first number to text in current part
-            const firstNumber = numbers[0]
-            const firstText = doc.createElement('text')
-            firstText.setAttribute('type', 'attachment-uuid')
-            firstText.textContent = firstNumber.textContent
-            part.replaceChild(firstText, firstNumber)
-
-            // Create separate parts for additional numbers
-            for (let i = 1; i < numbers.length; i++) {
-                const number = numbers[i]
-                const newPart = doc.createElement('part')
+            // Move all numbers to the new UUID part
+            const numberList = [...numbers] // Copy array since we're modifying DOM
+            for (let number of numberList) {
                 const text = doc.createElement('text')
                 text.setAttribute('type', 'attachment-uuid')
                 text.textContent = number.textContent
-                newPart.appendChild(text)
-                
-                // Insert new part after current part
-                if (part.nextSibling) {
-                    modsElement.insertBefore(newPart, part.nextSibling)
-                } else {
-                    modsElement.appendChild(newPart)
-                }
-                
-                // Remove the number from original part
+                uuidPart.appendChild(text)
                 part.removeChild(number)
+            }
+            
+            // Insert UUID part after current part
+            if (part.nextSibling) {
+                modsElement.insertBefore(uuidPart, part.nextSibling)
+            } else {
+                modsElement.appendChild(uuidPart)
             }
         }
     }

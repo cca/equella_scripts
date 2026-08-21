@@ -3098,7 +3098,7 @@ describe('Strict MODS Conversion', () => {
             assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'Should have UUID as text with type')
         })
 
-        it('should handle part with title and multiple numbers by creating separate parts', () => {
+        it('should handle part with title and multiple numbers by keeping UUIDs separate', () => {
             const input = `<xml><mods>
                 <titleInfo><title>Test</title></titleInfo>
                 <part>
@@ -3115,23 +3115,20 @@ describe('Strict MODS Conversion', () => {
 
             const partMatches = result.match(/<part>.*?<\/part>/gs) || []
             
-            // Should have one part with filename and first UUID
+            // Should have two parts: one with filename, one with all UUIDs
+            assert.strictEqual(partMatches.length, 2, 'Should have exactly two parts')
+            
+            // First part should have only the filename (no UUID)
             assert.ok(result.includes('<text>180426001.tif</text>'), 'First part should have filename')
-            assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'First part should have first UUID')
             
-            // Additional UUIDs should be in separate part(s)
-            assert.ok(result.includes('<text type="attachment-uuid">uuid-2</text>'), 'Should include uuid-2')
-            assert.ok(result.includes('<text type="attachment-uuid">uuid-3</text>'), 'Should include uuid-3')
-            
-            // Each part should have at most one filename text and one UUID text
-            partMatches.forEach((part, idx) => {
-                const textInPart = part.match(/<text[^>]*>.*?<\/text>/g) || []
-                const nonEmptyText = textInPart.filter(t => !t.match(/<text[^>]*>\s*<\/text>/))
-                assert.ok(nonEmptyText.length <= 2, `Part ${idx} should have at most 2 non-empty text elements, got ${nonEmptyText.length}`)
-            })
+            // Second part should have all UUIDs
+            const secondPart = partMatches[1]
+            assert.ok(secondPart.includes('<text type="attachment-uuid">uuid-1</text>'), 'UUID part should include uuid-1')
+            assert.ok(secondPart.includes('<text type="attachment-uuid">uuid-2</text>'), 'UUID part should include uuid-2')
+            assert.ok(secondPart.includes('<text type="attachment-uuid">uuid-3</text>'), 'UUID part should include uuid-3')
         })
 
-        it('should handle part with no title but multiple numbers', () => {
+        it('should handle part with no title but multiple numbers by creating UUID part', () => {
             const input = `<xml><mods>
                 <titleInfo><title>Test</title></titleInfo>
                 <part>
@@ -3142,7 +3139,8 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            // Should include all UUIDs in separate parts
+            // Should create UUID part with all UUIDs
+            // Original part may be removed as empty after UUID extraction
             assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'Should include uuid-1')
             assert.ok(result.includes('<text type="attachment-uuid">uuid-2</text>'), 'Should include uuid-2')
         })

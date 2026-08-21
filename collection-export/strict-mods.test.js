@@ -3079,19 +3079,72 @@ describe('Strict MODS Conversion', () => {
             assert.ok(!result.includes('<part><title>'), 'Should not have title directly in part')
         })
 
-        it('should convert part/number to part/text with type="attachment-uuid"', () => {
+        it('should handle part with title and single number correctly', () => {
             const input = `<xml><mods>
                 <titleInfo><title>Test</title></titleInfo>
                 <part>
                     <title>Document.pdf</title>
-                    <number>a3a5980a-2fcc-40af-a8bb-55ed42be0686</number>
+                    <number>uuid-1</number>
                 </part>
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('<number>'), 'Should not contain number element')
-            assert.ok(result.includes('<text type="attachment-uuid">a3a5980a-2fcc-40af-a8bb-55ed42be0686</text>'),
-                'Should convert number to text with type="attachment-uuid"')
+            // Should have one text for filename and one for UUID
+            const textMatches = result.match(/<text[^>]*>.*?<\/text>/g) || []
+            const partMatches = result.match(/<part>.*?<\/part>/gs) || []
+            
+            assert.strictEqual(partMatches.length, 1, 'Should have exactly one part')
+            assert.ok(result.includes('<text>Document.pdf</text>'), 'Should have filename as text')
+            assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'Should have UUID as text with type')
+        })
+
+        it('should handle part with title and multiple numbers by creating separate parts', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <part>
+                    <title>180426001.tif</title>
+                    <number>uuid-1</number>
+                    <number>uuid-2</number>
+                    <number>uuid-3</number>
+                    <date/>
+                    <extent/>
+                    <text/>
+                </part>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+
+            const partMatches = result.match(/<part>.*?<\/part>/gs) || []
+            
+            // Should have one part with filename and first UUID
+            assert.ok(result.includes('<text>180426001.tif</text>'), 'First part should have filename')
+            assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'First part should have first UUID')
+            
+            // Additional UUIDs should be in separate part(s)
+            assert.ok(result.includes('<text type="attachment-uuid">uuid-2</text>'), 'Should include uuid-2')
+            assert.ok(result.includes('<text type="attachment-uuid">uuid-3</text>'), 'Should include uuid-3')
+            
+            // Each part should have at most one filename text and one UUID text
+            partMatches.forEach((part, idx) => {
+                const textInPart = part.match(/<text[^>]*>.*?<\/text>/g) || []
+                const nonEmptyText = textInPart.filter(t => !t.match(/<text[^>]*>\s*<\/text>/))
+                assert.ok(nonEmptyText.length <= 2, `Part ${idx} should have at most 2 non-empty text elements, got ${nonEmptyText.length}`)
+            })
+        })
+
+        it('should handle part with no title but multiple numbers', () => {
+            const input = `<xml><mods>
+                <titleInfo><title>Test</title></titleInfo>
+                <part>
+                    <number>uuid-1</number>
+                    <number>uuid-2</number>
+                    <date/>
+                </part>
+            </mods></xml>`
+            const result = toStrictMODS(input)
+
+            // Should include all UUIDs in separate parts
+            assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'Should include uuid-1')
+            assert.ok(result.includes('<text type="attachment-uuid">uuid-2</text>'), 'Should include uuid-2')
         })
 
         it('should move part/extent to part/extent/list', () => {

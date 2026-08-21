@@ -695,6 +695,76 @@ export function removeBadNameUsageAttrs(doc) {
 
 /**
  * Convert part/detail elements that indicate speaker release forms
+ * Convert part/number elements to part/text with type="attachment-uuid"
+ * When a part has a title (filename) and multiple numbers (UUIDs), we keep the first
+ * UUID with the filename in the same part, and create separate parts for additional UUIDs.
+ * 
+ * @param {Document} doc - XML DOM document
+ * @returns {Document} Modified document
+ */
+export function convertPartNumbers(doc) {
+    if (!doc) {
+        return doc
+    }
+
+    const parts = safeSelect(XPATH_CONTEXTS.PART, doc)
+    const select = xpath.useNamespaces({})
+
+    for (let part of parts) {
+        const numbers = select('number', part)
+        
+        if (numbers.length === 0) {
+            continue
+        }
+
+        // Get the title element (will be renamed to text later)
+        const titleElement = select('title', part)[0]
+        const hasTitle = titleElement && titleElement.textContent.trim()
+
+        if (numbers.length === 1) {
+            // Simple case: just rename the single number to text with type attribute
+            const number = numbers[0]
+            const text = doc.createElement('text')
+            text.setAttribute('type', 'attachment-uuid')
+            text.textContent = number.textContent
+            part.replaceChild(text, number)
+        } else {
+            // Multiple numbers: keep first with title, create new parts for the rest
+            const modsElement = part.parentNode
+            
+            // Convert first number to text in current part
+            const firstNumber = numbers[0]
+            const firstText = doc.createElement('text')
+            firstText.setAttribute('type', 'attachment-uuid')
+            firstText.textContent = firstNumber.textContent
+            part.replaceChild(firstText, firstNumber)
+
+            // Create separate parts for additional numbers
+            for (let i = 1; i < numbers.length; i++) {
+                const number = numbers[i]
+                const newPart = doc.createElement('part')
+                const text = doc.createElement('text')
+                text.setAttribute('type', 'attachment-uuid')
+                text.textContent = number.textContent
+                newPart.appendChild(text)
+                
+                // Insert new part after current part
+                if (part.nextSibling) {
+                    modsElement.insertBefore(newPart, part.nextSibling)
+                } else {
+                    modsElement.appendChild(newPart)
+                }
+                
+                // Remove the number from original part
+                part.removeChild(number)
+            }
+        }
+    }
+
+    return doc
+}
+
+/**
  * Mudflats collection uses part/detail with "yes"/"no" values to indicate
  * whether a speaker release form exists for oral history attachments.
  * - detail with "no" -> remove the element
@@ -1149,8 +1219,9 @@ export function toStrictMODS(xmlString) {
     // Fix element names for MODS compliance
     // part/title -> part/text
     renameElement(doc, ELEMENT_NAMES.TITLE, ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART)
-    // part/number contains attachment UUIDs, map to part/text with type="attachment-uuid"
-    renameElement(doc, ELEMENT_NAMES.NUMBER, ELEMENT_NAMES.TEXT, XPATH_CONTEXTS.PART, {type: 'attachment-uuid'})
+    // part/number contains attachment UUIDs, convert to part/text with type="attachment-uuid"
+    // When multiple numbers exist, create separate parts for additional UUIDs
+    convertPartNumbers(doc)
     // Convert part/detail yes/no values for speaker release forms (Mudflats-specific)
     convertSpeakerReleaseDetail(doc)
     // part/extent -> part/extent/list (our use is not quite standard but this is an improvement)

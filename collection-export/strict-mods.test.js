@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, wrapLocationTextContent, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
 import { hasDirectTextContent } from './strict-mods-helpers.js'
 
 // Test fixtures
@@ -3092,7 +3092,7 @@ describe('Strict MODS Conversion', () => {
             // Should have one text for filename and one for UUID
             const textMatches = result.match(/<text[^>]*>.*?<\/text>/g) || []
             const partMatches = result.match(/<part>.*?<\/part>/gs) || []
-            
+
             assert.strictEqual(partMatches.length, 1, 'Should have exactly one part')
             assert.ok(result.includes('<text>Document.pdf</text>'), 'Should have filename as text')
             assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'Should have UUID as text with type')
@@ -3114,13 +3114,13 @@ describe('Strict MODS Conversion', () => {
             const result = toStrictMODS(input)
 
             const partMatches = result.match(/<part>.*?<\/part>/gs) || []
-            
+
             // Should have two parts: one with filename, one with all UUIDs
             assert.strictEqual(partMatches.length, 2, 'Should have exactly two parts')
-            
+
             // First part should have only the filename (no UUID)
             assert.ok(result.includes('<text>180426001.tif</text>'), 'First part should have filename')
-            
+
             // Second part should have all UUIDs
             const secondPart = partMatches[1]
             assert.ok(secondPart.includes('<text type="attachment-uuid">uuid-1</text>'), 'UUID part should include uuid-1')
@@ -3234,7 +3234,7 @@ describe('Strict MODS Conversion', () => {
             // Should only have one of each type
             const tiffMatches = result.match(/<internetMediaType>image\/tiff<\/internetMediaType>/g) || []
             const jpegMatches = result.match(/<internetMediaType>image\/jpeg<\/internetMediaType>/g) || []
-            
+
             assert.strictEqual(tiffMatches.length, 1, 'Should have exactly one image/tiff')
             assert.strictEqual(jpegMatches.length, 1, 'Should have exactly one image/jpeg')
         })
@@ -3254,7 +3254,7 @@ describe('Strict MODS Conversion', () => {
 
             // Should have each type once, in order of first appearance
             const types = [...result.matchAll(/<internetMediaType>(.*?)<\/internetMediaType>/g)].map(m => m[1])
-            
+
             assert.deepStrictEqual(types, ['image/tiff', 'image/jpeg', 'application/pdf'],
                 'Should preserve order of first appearance')
         })
@@ -4199,12 +4199,12 @@ describe('Strict MODS Conversion', () => {
             const select = xpath.useNamespaces({})
             const outerRelated = select('//relatedItem[@displayLabel="subseries"]', doc)
             const innerRelated = select('//relatedItem[@displayLabel="series"]', doc)
-            
+
             assert.strictEqual(outerRelated.length, 1, 'Should have one subseries relatedItem')
             assert.strictEqual(innerRelated.length, 1, 'Should have one series relatedItem')
             assert.strictEqual(outerRelated[0].getAttribute('type'), 'series')
             assert.strictEqual(innerRelated[0].getAttribute('type'), 'series')
-            
+
             // Verify titles
             const subseriesTitle = select('titleInfo/title', outerRelated[0])[0]
             const seriesTitle = select('titleInfo/title', innerRelated[0])[0]

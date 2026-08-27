@@ -8,7 +8,7 @@ import {
     createElement,
     isElementEmpty,
     hasDirectTextContent
-} from './strict-mods-helpers.js'
+} from './xml-helpers.js'
 
 /**
  * Convert VAULT's custom MODS XML to strict MODS schema-compliant XML

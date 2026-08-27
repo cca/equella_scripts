@@ -4,7 +4,7 @@ import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
 import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
-import { hasDirectTextContent } from './strict-mods-helpers.js'
+import { hasDirectTextContent } from './xml-helpers.js'
 
 // Test fixtures
 const fixtures = {

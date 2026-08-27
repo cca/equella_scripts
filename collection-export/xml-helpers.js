@@ -15,10 +15,28 @@ import xpath from 'xpath'
  * @returns {Element[]} Array of elements with valid parents
  */
 export function safeSelect(xpathExpression, context, namespaces = {}) {
+    if (!context) return []
     const select = xpath.useNamespaces(namespaces)
     const elements = select(xpathExpression, context)
     // Filter out elements without parents upfront to avoid null checks in loops
     return Array.from(elements).filter(el => el && el.parentNode)
+}
+
+/**
+ * Like safeSelect but returns only the first element with a valid parent
+ *
+ * @param {string} xpathExpression - XPath expression to select elements
+ * @param {Document|Element} context - DOM context to search within
+ * @param {Object} [namespaces={}] - Optional namespace mapping
+ * @returns {Element|null} First element with a valid parent, or null if none found
+ */
+export function safeSelectFirst(xpathExpression, context, namespaces = {}) {
+    if (!context) return null
+    const select = xpath.useNamespaces(namespaces)
+    const elements = select(xpathExpression, context)
+    // Filter out elements without parents upfront to avoid null checks in loops
+    const filtered = Array.from(elements).filter(el => el && el.parentNode)
+    return filtered.length > 0 ? filtered[0] : null
 }
 
 /**

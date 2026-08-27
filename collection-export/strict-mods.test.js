@@ -4,7 +4,7 @@ import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
 import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
-import { hasDirectTextContent } from './xml-helpers.js'
+import { hasDirectTextContent, safeSelect, safeSelectFirst } from './xml-helpers.js'
 
 // Test fixtures
 const fixtures = {
@@ -4277,6 +4277,65 @@ describe('Strict MODS Conversion', () => {
                 const location = doc.documentElement
 
                 assert.strictEqual(hasDirectTextContent(location), false)
+            })
+        })
+
+        describe('safeSelect', () => {
+            it('should return empty array for null document', () => {
+                const result = safeSelect('//mods', null)
+                assert.deepStrictEqual(result, [])
+            })
+
+            it('should return empty array for undefined document', () => {
+                const result = safeSelect('//mods', undefined)
+                assert.deepStrictEqual(result, [])
+            })
+
+            it('should return empty array for XPath with no matches', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+                const result = safeSelect('//invalid_xpath', doc)
+                assert.deepStrictEqual(result, [])
+            })
+
+            it('should return matching elements for valid XPath', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<xml><mods/><mods/></xml>', 'text/xml')
+                const result = safeSelect('//mods', doc)
+                assert.strictEqual(result.length, 2)
+            })
+
+            it('should not return elements without parents', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<mods><child/></mods>', 'text/xml')
+                const child = xpath.select1("//child", doc)
+                // Manually remove the parent to simulate an orphaned element
+                child.parentNode.parentNode.removeChild(child.parentNode)
+                assert.deepStrictEqual(safeSelect('//child', doc), [])
+            })
+        })
+
+        describe('safeSelectFirst', () => {
+            it('should return null for null document', () => {
+                const result = safeSelectFirst('//mods', null)
+                assert.strictEqual(result, null)
+            })
+
+            it('should return null for XPath with no matches', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+                const result = safeSelectFirst('//invalid_xpath', doc)
+                assert.strictEqual(result, null)
+            })
+
+            it('should return the first matching element for valid XPath', () => {
+                const parser = new xmldom()
+                const doc = parser.parseFromString('<xml><mods/><mods/></xml>', 'text/xml')
+                const modsElements = xpath.select('//mods', doc)
+                const firstMods = safeSelectFirst('//mods', doc)
+                assert.ok(firstMods)
+                assert.strictEqual(firstMods.nodeName, 'mods')
+                assert.deepEqual(firstMods, modsElements[0])
             })
         })
     })

@@ -6,6 +6,16 @@ import {convertSyllabusXMLtoMODS} from './syllabus.js'
 // helper function to wrap XML in a root </xml> element
 const x = (xml) => `<xml>${xml}</xml>`
 
+describe('addGenre', () => {
+    it('should add genre element with type=syllabus', async () => {
+        const inputXML = x(`<mods></mods>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const genre = xpath.select1('//mods/genre[@type="aat"]', result)
+        assert.ok(genre)
+        assert.strictEqual(genre.textContent, 'syllabi')
+    })
+})
+
 describe('fixSyllabusTitle', () => {
     it('should not retain the original title', async () => {
         const title = 'Fall 2026 | FASHN-360 | Media History'

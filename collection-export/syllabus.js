@@ -13,6 +13,16 @@ import {
 } from './xml-helpers.js'
 import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
 
+export function addGenre(doc) {
+    const genre = createElement(doc, 'genre')
+    genre.setAttribute('type', 'aat')
+    genre.textContent = 'syllabi'
+    const mods = safeSelectFirst("//mods", doc)
+    mods.appendChild(genre)
+
+    return doc
+}
+
 /**
  * local/courseInfo/courseNumer & course -> mods/titleInfo/title
  * local/courseInfo/semester -> mods/part/partNumber
@@ -99,6 +109,9 @@ export function convertSyllabusXMLtoMODS(xmlString) {
 
     // mods/part/number to part/text @type=attachment-uuid
     convertPartNumbers(doc)
+
+    // Add syllabi genre
+    addGenre(doc)
 
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)

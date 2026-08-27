@@ -1,26 +1,65 @@
 import assert from 'node:assert'
 import {describe, it} from 'mocha'
 import xpath from 'xpath'
-import { DOMParser as xmldom } from '@xmldom/xmldom'
-import { convertSyllabusXMLtoMODS } from './syllabus.js'
+import {convertSyllabusXMLtoMODS} from './syllabus.js'
+
+// helper function to wrap XML in a root </xml> element
+const x = (xml) => `<xml>${xml}</xml>`
+
+describe('fixSyllabusTitle', () => {
+    it('should not retain the original title', async () => {
+        const title = 'Fall 2026 | FASHN-360 | Media History'
+        const inputXML = x(`<local><courseInfo><course>Test</course></courseInfo></local><mods><titleInfo><title>${title}</title></titleInfo></mods>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const newTitle = xpath.select("string(//mods/titleInfo/title)", result)
+        assert.notEqual(newTitle, title)
+    })
+
+    it('should have a titleInfo/title with the course title', async () => {
+        const title = 'Media History'
+        const inputXML = x(`<local><courseInfo><course>${title}</course></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        assert.strictEqual(xpath.select("string(//titleInfo/title)", result), title)
+    })
+
+    it('or a titleInfo/title with the course code', async () => {
+        const courseCode = 'ARTED-101'
+        const inputXML = x(`<local><courseInfo><courseName>${courseCode}</courseName></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        assert.strictEqual(xpath.select("string(//titleInfo/title)", result), courseCode)
+    })
+
+    it('should combine courseInfo/course and courseInfo/courseName in the title', async () => {
+        const courseName = 'FASHN-360'
+        const courseTitle = 'Media History'
+        const inputXML = x(`<local><courseInfo><courseName>${courseName}</courseName><course>${courseTitle}</course></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        assert.strictEqual(xpath.select("string(//titleInfo/title)", result), `${courseName} ${courseTitle}`)
+    })
+
+    it('should have a titleInfo/partNumber with the semester', async () => {
+        const semester = 'Fall 2026'
+        const inputXML = x(`<local><courseInfo><course>Title</course><semester>${semester}</semester></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        assert.strictEqual(xpath.select("string(//titleInfo/partNumber)", result), semester)
+    })
+})
 
 describe('convertSyllabusXMLtoMODS', () => {
     it('should include the MODS namespaces & attributes', async () => {
-        const result = convertSyllabusXMLtoMODS('<xml></xml>')
-        const doc = new xmldom().parseFromString(result.toString(), 'text/xml')
-        const mods = doc.documentElement
+        // <mods> must be non-empty or it is dropped
+        const result = convertSyllabusXMLtoMODS(x('<mods><titleInfo><title>Testing</title></titleInfo></mods>'))
+        const mods = xpath.select1('//mods', result)
+        assert.ok(mods)
         assert.strictEqual(mods.getAttribute('xmlns'), 'http://www.loc.gov/mods/v3')
         assert.strictEqual(mods.getAttribute('version'), '3.8')
     })
 
     it('should drop empty elements', async () => {
-        // local courseInfo
-        const inputXML = `<local><courseInfo><faculty></faculty></courseInfo></local>`
+        // Empty elements inside mods should be removed
+        const inputXML = x(`<mods><name></name></mods>`)
         const result = convertSyllabusXMLtoMODS(inputXML)
-        assert.ok(!result.includes("faculty"))
-        // MODS
-        const inputXML2 = `<mods><name></name></mods>`
-        const result2 = convertSyllabusXMLtoMODS(inputXML2)
-        assert.ok(!result2.includes("name"))
+        const nameElements = result.getElementsByTagName('name')
+        assert.strictEqual(nameElements.length, 0)
     })
 })

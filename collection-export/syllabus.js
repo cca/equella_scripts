@@ -3,6 +3,7 @@ import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
     safeSelect,
+    safeSelectFirst,
     copyAttributes,
     moveChildren,
     moveAndTransformElement,
@@ -10,13 +11,51 @@ import {
     isElementEmpty,
     hasDirectTextContent
 } from './xml-helpers.js'
-import {convertPartNumbers, removeEmptyElements} from './strict-mods.js'
+import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
+
+/**
+ * local/courseInfo/courseNumer & course -> mods/titleInfo/title
+ * local/courseInfo/semester -> mods/part/partNumber
+ *
+ * @param   {Document}  doc  XML document
+ * @returns  {Document}       transformed document
+ */
+export function fixSyllabusTitle(doc) {
+    const courseNumber = safeSelectFirst("//local/courseInfo/courseName", doc)
+    const courseTitle = safeSelectFirst("//local/courseInfo/course", doc)
+    const semester = safeSelectFirst("//local/courseInfo/semester", doc)
+
+    if (hasDirectTextContent(courseNumber) || hasDirectTextContent(courseTitle)) {
+        // wipe out existing titleInfo element
+        const existingTitleInfo = safeSelectFirst("//mods/titleInfo", doc)
+        if (existingTitleInfo) {
+            existingTitleInfo.parentNode.removeChild(existingTitleInfo)
+        }
+
+        // Add new titleInfo parent to mods
+        const titleInfo = createElement(doc, 'titleInfo')
+        const mods = safeSelectFirst("//mods", doc)
+        mods.appendChild(titleInfo)
+
+        // Create title
+        const title = createElement(doc, 'title')
+        title.textContent = (courseNumber ? courseNumber.textContent : '') + (courseNumber && courseTitle ? ' ' : '') + (courseTitle ? courseTitle.textContent : '')
+        titleInfo.appendChild(title)
+
+        // Add partNumber for semester
+        if (hasDirectTextContent(semester)) {
+            moveAndRenameElement(doc, "//local/courseInfo/semester", '//mods/titleInfo', 'partNumber')
+        }
+    }
+
+    return doc
+}
 
 /**
  * Main conversion function to convert Syllabus 'courseInfo' XML to MODS
  *
  * @param {string} xmlString - XML string to convert
- * @returns {string} Converted MODS XML string with namespace, ready for validation
+ * @returns {Document} Converted MODS XML string with namespace, ready for validation
  * @throws {Error} If XML is malformed, cannot be parsed, or input is invalid
  */
 export function convertSyllabusXMLtoMODS(xmlString) {
@@ -39,27 +78,29 @@ export function convertSyllabusXMLtoMODS(xmlString) {
         throw new Error(`Failed to parse XML: ${error.message}`, { cause: error })
     }
 
-    // Check for parse errors in the document
-    const parseError = doc.getElementsByTagName('parsererror')[0]
-    if (parseError) {
-        throw new Error(`XML parsing error: ${parseError.textContent}`)
-    }
-
-    // Ensure we have a root mods element
+    // Ensure we have one and only one <mods> element, creating one if necessary
     const modsElements = safeSelect("//mods", doc)
     let mods
     if (modsElements.length > 0) {
         mods = modsElements[0] // default to first mods element if multiple exist
+        // If there are multiple <mods> elements, remove the extras
+        for (let i = 1; i < modsElements.length; i++) {
+            modsElements[i].parentNode.removeChild(modsElements[i])
+        }
     } else {
         mods = createElement(doc, 'mods')
+        doc.documentElement.appendChild(mods)
     }
     mods.setAttribute("xmlns", 'http://www.loc.gov/mods/v3')
     mods.setAttribute("version", '3.8')
 
-    // We do this last in strict mods but it might simplify the tree to do it first here
+    // Fix titleInfo elements
+    fixSyllabusTitle(doc)
+
+    // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)
 
-    return mods.toString()
+    return doc
 }
 
 // CLI functionality - run when executed directly
@@ -93,7 +134,9 @@ Convert EQUELLA custom Syllabus "courseInfo" XML to schema-compliant MODS.
     try {
         const xmlString = fs.readFileSync(inputFile, 'utf-8')
         const result = convertSyllabusXMLtoMODS(xmlString)
-        console.log(result.toString())
+        // Return only <mods> part of XML tree
+        const mods = safeSelectFirst("//mods", result)
+        console.log(mods.toString())
     } catch (error) {
         console.error(`Error: ${error.message}`)
         process.exit(1)

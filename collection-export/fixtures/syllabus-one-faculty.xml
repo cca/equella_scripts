@@ -1,0 +1,24 @@
+<xml>
+    <local>
+        <courseInfo>
+            <semester>Fall 2026</semester>
+            <department>FASHN</department>
+            <course>Media History</course>
+            <faculty>Eric Phetteplace</faculty>
+            <section>FASHN-3600-1</section>
+            <courseName>FASHN-360</courseName>
+            <facultyID>ephetteplace</facultyID>
+            <courseinfo>Fall 2026\FASHN\Media History\Melissa Leventon\FASHN-3600-1</courseinfo>
+        </courseInfo>
+        <department>Fashion Design (BFA)</department>
+        <division>Design Division</division>
+    </local>
+    <mods>
+        <part>
+            <number>87e7c816-35cd-4ae5-b443-b55eaa7f9527</number>
+        </part>
+        <titleInfo>
+            <title>Fall 2026 | FASHN-360 | Media History</title>
+        </titleInfo>
+    </mods>
+</xml>

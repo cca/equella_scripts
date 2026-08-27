@@ -6,7 +6,10 @@ Download all (or a subset) of items from a VAULT collection. Each item becomes i
 
 1. `pnpm install` or `npm install` dependencies
 2. create an .apprc file with an OAuth token and the root URL of the openEQUELLA instance
-3. optionally edit collection and filtering options into the .apprc
+3. (optional) edit collection and filtering options into the .apprc
+4. (optional) validate MODS XML, download [mods.xsd](https://www.loc.gov/standards/mods/v3/mods.xsd) and install `xmllint` (e.g. `brew install xmllint`)
+
+`xmlstarlet` is also useful, specifically its `xmlstarlet fo` format subcommand to pretty-print XML files.
 
 ## Usage
 
@@ -97,14 +100,21 @@ node test-collection-samples.js data/mudflats.json 10
 
 The `test-collection-samples.js` script tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly. We can also download item XML to run the strict MODS conversion on our own.
 
+## Syllabus Conversion
+
+The syllabus.js file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. It can be used as a library or passed a single XML file on the command line; it will print the converted MODS to stdout.
+
+TODO: add `--syllabus` flag to collect.js to convert syllabus XML to MODS.
+
 ### Converting & Validating MODS Files
 
 The strict-mods module can be run as a command-line tool to convert and validate MODS metadata. It automatically extracts the `<mods>` element and adds the required MODS namespace.
 
 ```sh
-# Convert an item's metadata to strict MODS (outputs <mods> element with namespace)
+# Convert an item's metadata to strict MODS
 node strict-mods.js data/item-uuid/metadata/metadata.xml
-
+# Syllabus conversion
+node syllabus.js fixtures/syllabus-one-faculty.xml
 # Validate against the MODS 3.8 schema (requires xmllint)
 # First download the MODS schema: https://www.loc.gov/standards/mods/mods-schemas.html
 wget https://www.loc.gov/standards/mods/v3/mods-3-8.xsd -O data/mods.xsd

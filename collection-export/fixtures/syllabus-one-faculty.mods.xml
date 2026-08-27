@@ -1,0 +1,45 @@
+<mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="3.8"
+    xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd">
+
+    <titleInfo>
+        <title>Media History</title>
+        <partNumber>FASHN-360</partNumber>
+    </titleInfo>
+
+    <genre authority="aat">syllabi</genre>
+
+    <name type="personal">
+        <namePart>Eric Phetteplace</namePart>
+        <role>
+            <roleTerm type="text" authority="marcrelator">instructor</roleTerm>
+        </role>
+    </name>
+
+    <name type="corporate">
+        <namePart>Design Division</namePart>
+        <namePart>Fasion Design (BFA)</namePart>
+        <role>
+            <roleTerm type="text" authority="marcrelator">sponsor</roleTerm>
+        </role>
+    </name>
+
+    <originInfo>
+        <dateIssued encoding="edtf">2026-09</dateIssued><!-- map term to first month -->
+    </originInfo>
+
+    <part>
+        <text type="attachment-uuid">87e7c816-35cd-4ae5-b443-b55eaa7f9527</text>
+    </part>
+
+    <subject>
+        <temporal>Fall 2026</temporal>
+        <topic>Fashion</topic>
+    </subject>
+
+    <identifier type="course number">FASHN-360</identifier>
+    <identifier type="section">FASHN-3600-1</identifier>
+
+    <note type="course information">Fall 2026 | Design Division | FASHN | FASHN-360 | Media History | FASHN-3600-1
+    </note>
+</mods>

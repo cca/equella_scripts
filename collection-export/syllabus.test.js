@@ -55,6 +55,36 @@ describe('convertSyllabusXMLtoMODS', () => {
         assert.strictEqual(mods.getAttribute('version'), '3.8')
     })
 
+    it('should map mods/part/number to part/text @type=attachment-uuid', async () => {
+        const partNumber = '12345'
+        const inputXML = x(`<mods><part><number>${partNumber}</number></part></mods>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const partText = xpath.select1('//mods/part/text[@type="attachment-uuid"]', result)
+        assert.ok(partText)
+        assert.strictEqual(partText.textContent, partNumber)
+    })
+
+    it('should map multiple mods/part/number to their own mods/part section', async () => {
+        const partNumber = '12345'
+        const partNumber2 = '67890'
+        const inputXML = x(`<mods><part><number>${partNumber}</number><number>${partNumber2}</number></part></mods>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const parts = xpath.select('//mods/part', result)
+        assert.strictEqual(parts.length, 1)
+        const partText = xpath.select1('//mods/part/text[@type="attachment-uuid"][1]', result)
+        assert.ok(partText)
+        const partText2 = xpath.select1('//mods/part/text[@type="attachment-uuid"][2]', result)
+        assert.ok(partText2)
+        assert.strictEqual(partText.textContent, partNumber)
+        assert.strictEqual(partText2.textContent, partNumber2)
+    })
+
+    it('should throw an error for non-string input', async () => {
+        assert.throws(() => convertSyllabusXMLtoMODS(null), /XML input must be a string/)
+        assert.throws(() => convertSyllabusXMLtoMODS(123), /XML input must be a string/)
+        assert.throws(() => convertSyllabusXMLtoMODS({}), /XML input must be a string/)
+    })
+
     it('should drop empty elements', async () => {
         // Empty elements inside mods should be removed
         const inputXML = x(`<mods><name></name></mods>`)

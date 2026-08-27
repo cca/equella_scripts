@@ -97,6 +97,9 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     // Fix titleInfo elements
     fixSyllabusTitle(doc)
 
+    // mods/part/number to part/text @type=attachment-uuid
+    convertPartNumbers(doc)
+
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)
 

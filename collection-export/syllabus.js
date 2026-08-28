@@ -14,7 +14,6 @@ import {
 import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
 
 // TODO handle username as nameIdentifier
-// TODO originInfo/dateIssued with month mapping for semester
 // TODO note with the full course info hierarchy written out
 
 /**
@@ -235,6 +234,54 @@ export function fixSyllabusTitle(doc) {
 }
 
 /**
+ * Add originInfo/dateIssued based on local/courseInfo/semseter
+ * @param   {Document}  doc  XML document
+ * @returns  {Document}       transformed document
+ */
+export function addOriginInfo(doc) {
+    const semester = safeSelectFirst("//local/courseInfo/semester", doc)
+
+    if (hasDirectTextContent(semester)) {
+        const yearMatch = semester.textContent.match(/(\d{4})$/)
+        const year = yearMatch ? yearMatch[1] : null
+        // we have to have at least a year, season on its own is meaningless
+        if (!year) return doc
+
+        const seasonMatch = semester.textContent.match(/^(Spring|Summer|Fall)/i)
+        const season = seasonMatch ? seasonMatch[1].toLowerCase() : null
+        let date
+
+        // map semester seasonal term to the first month so we can make an EDTF date
+        // Spring = Jan, Summer = May, Fall = Sept
+        switch (season) {
+        case 'spring':
+            date = `${year}-01`
+            break
+        case 'summer':
+            date = `${year}-05`
+            break
+        case 'fall':
+            date = `${year}-09`
+            break
+        default:
+            date = year
+        }
+
+        if (date) {
+            const originInfo = createElement(doc, 'originInfo')
+            const dateIssued = createElement(doc, 'dateIssued')
+            dateIssued.textContent = date
+            dateIssued.setAttribute('encoding', 'edtf')
+            originInfo.appendChild(dateIssued)
+            const mods = safeSelectFirst("//mods", doc)
+            mods.appendChild(originInfo)
+        }
+    }
+
+    return doc
+}
+
+/**
  * Main conversion function to convert Syllabus 'courseInfo' XML to MODS
  * @param {string} xmlString - XML string to convert
  * @returns {Document} Converted MODS XML string with namespace, ready for validation
@@ -289,6 +336,8 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     // mods/name
     personalNames(doc)
     corporateName(doc)
+
+    addOriginInfo(doc)
 
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)

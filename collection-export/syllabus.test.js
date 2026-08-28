@@ -221,6 +221,66 @@ describe('fixSyllabusTitle', () => {
     })
 })
 
+describe('addOriginInfo', () => {
+    it('should add an originInfo/dateIssued with the semester', async () => {
+        const semester = 'Fall 2026'
+        const inputXML = x(`<local><courseInfo><semester>${semester}</semester></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const dateIssued = xpath.select1('//mods/originInfo/dateIssued', result)
+        assert.ok(dateIssued)
+        assert.strictEqual(dateIssued.getAttribute('encoding'), 'edtf')
+        assert.strictEqual(dateIssued.textContent, "2026-09")
+    })
+
+    it('should add dateIssued for Spring, Summer, & Fall semesters', async () => {
+        let semester = 'Fall 2026'
+        let inputXML = x(`<local><courseInfo><semester>${semester}</semester></courseInfo></local>`)
+        let result = convertSyllabusXMLtoMODS(inputXML)
+        let dateIssued = xpath.select1('//mods/originInfo/dateIssued', result)
+        assert.ok(dateIssued)
+        assert.strictEqual(dateIssued.getAttribute('encoding'), 'edtf')
+        assert.strictEqual(dateIssued.textContent, "2026-09")
+        semester = 'Spring 2026'
+        inputXML = x(`<local><courseInfo><semester>${semester}</semester></courseInfo></local>`)
+        result = convertSyllabusXMLtoMODS(inputXML)
+        dateIssued = xpath.select1('//mods/originInfo/dateIssued', result)
+        assert.ok(dateIssued)
+        assert.strictEqual(dateIssued.getAttribute('encoding'), 'edtf')
+        assert.strictEqual(dateIssued.textContent, "2026-01")
+        semester = 'Summer 2026'
+        inputXML = x(`<local><courseInfo><semester>${semester}</semester></courseInfo></local>`)
+        result = convertSyllabusXMLtoMODS(inputXML)
+        dateIssued = xpath.select1('//mods/originInfo/dateIssued', result)
+        assert.ok(dateIssued)
+        assert.strictEqual(dateIssued.getAttribute('encoding'), 'edtf')
+        assert.strictEqual(dateIssued.textContent, "2026-05")
+    })
+
+    it('should add a year dateIssued if semester is missing', async () => {
+        const year = '2026'
+        const inputXML = x(`<local><courseInfo><semester>${year}</semester></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const dateIssued = xpath.select1('//mods/originInfo/dateIssued', result)
+        assert.ok(dateIssued)
+        assert.strictEqual(dateIssued.getAttribute('encoding'), 'edtf')
+        assert.strictEqual(dateIssued.textContent, year)
+    })
+
+    it('should not add originInfo if both semester and year are missing', async () => {
+        const inputXML = x(`<local><courseInfo><semester>Nonsense</semester></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const originInfo = xpath.select1('//mods/originInfo', result)
+        assert.ok(!originInfo)
+    })
+
+    it('should not add originInfo if we have semester & no year', async () => {
+        const inputXML = x(`<local><courseInfo><semester>Spring</semester></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const originInfo = xpath.select1('//mods/originInfo', result)
+        assert.ok(!originInfo)
+    })
+})
+
 describe('convertSyllabusXMLtoMODS', () => {
     it('should include the MODS namespaces & attributes', async () => {
         // <mods> must be non-empty or it is dropped

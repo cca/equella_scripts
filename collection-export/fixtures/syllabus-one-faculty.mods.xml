@@ -7,12 +7,12 @@
         <partNumber>Fall 2026</partNumber>
     </titleInfo>
 
-    <genre authority="aat">syllabi</genre>
+    <genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300028026">syllabi</genre>
 
     <name type="personal">
         <namePart>Eric Phetteplace</namePart>
         <role>
-            <roleTerm type="text" authority="marcrelator">instructor</roleTerm>
+            <roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/tch">teacher</roleTerm>
         </role>
     </name>
 

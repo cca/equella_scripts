@@ -20,6 +20,57 @@ import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './s
 // TODO note with the full course info hierarchy written out
 
 /**
+ * Add a role/roleTerm child to a parent element assuming marcrelator authority.
+ * Used by personalNames and corporateName functions.
+ * @param   {Element}  parent    Parent (name) element to which the roleTerm is added
+ * @param   {string}   roleTerm  Text content of the roleTerm element
+ * @param   {string}   valueURI  URI for the roleTerm (optional)
+ * @return  {Element|null}       The created roleTerm element, or null if parent or roleTerm is not provided
+ */
+export function addRoleTerm(parent, roleTerm, valueURI = 'marcrelator') {
+    if (!parent || !roleTerm) return null
+
+    const roleElement = createElement(parent.ownerDocument, 'role')
+    parent.appendChild(roleElement)
+    const roleTermElement = createElement(parent.ownerDocument, 'roleTerm')
+    roleTermElement.textContent = roleTerm
+
+    // Set attributes
+    roleTermElement.setAttribute('authority', 'marcrelator')
+    roleTermElement.setAttribute('authorityURI', 'http://id.loc.gov/vocabulary/relators')
+    if (valueURI) roleTermElement.setAttribute('valueURI', valueURI)
+
+    roleElement.appendChild(roleTermElement)
+
+    return roleTermElement
+}
+
+/**
+ * Adds personal name elements for all faculty
+ * @param {Document} doc  XML document
+ * @returns {Document}       transformed document
+ */
+export function personalNames(doc) {
+    const facultyElement = safeSelectFirst("//local/courseInfo/faculty", doc)
+    const mods = safeSelectFirst("//mods", doc)
+
+    if (hasDirectTextContent(facultyElement)) {
+        const names = facultyElement.textContent.split(', ').map(name => name.trim()).filter(name => name.length > 0)
+        names.forEach(name => {
+            let nameElement = createElement(doc, 'name')
+            nameElement.setAttribute('type', 'personal')
+            let namePart = createElement(doc, 'namePart')
+            namePart.textContent = name
+            nameElement.appendChild(namePart)
+            mods.appendChild(nameElement)
+            addRoleTerm(nameElement, 'teacher', 'http://id.loc.gov/vocabulary/relators/tch')
+        })
+    }
+
+    return doc
+}
+
+/**
  * Adds a static mods/genre = 'syllabi' element
  *
  * @param   {Document}  doc  XML document
@@ -199,6 +250,8 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     addGenre(doc)
     addSubjects(doc)
     addIdentifiers(doc)
+
+    personalNames(doc)
 
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)

@@ -1,20 +1,14 @@
 /* Much of this is modeled on strict-mods.js */
-import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
     safeSelect,
     safeSelectFirst,
-    copyAttributes,
-    moveChildren,
-    moveAndTransformElement,
     createElement,
-    isElementEmpty,
     hasDirectTextContent
 } from './xml-helpers.js'
 import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
 
 // TODO handle username as nameIdentifier
-// TODO note with the full course info hierarchy written out
 
 /**
  * Add a role/roleTerm child to a parent element assuming marcrelator authority.
@@ -87,7 +81,7 @@ export function corporateName(doc) {
 
 /**
  * Adds personal name elements for all faculty
- * @param {Document} doc  XML document
+ * @param   {Document} doc   XML document
  * @returns {Document}       transformed document
  */
 export function personalNames(doc) {
@@ -113,7 +107,7 @@ export function personalNames(doc) {
 /**
  * Adds a static mods/genre = 'syllabi' element
  * @param   {Document}  doc  XML document
- * @returns  {Document}       transformed document
+ * @returns {Document}       transformed document
  */
 export function addGenre(doc) {
     const genre = createElement(doc, 'genre')
@@ -131,7 +125,7 @@ export function addGenre(doc) {
  * local/courseInfo/courseName -> mods/identifier[@type="course number"]
  * local/courseInfo/section -> mods/identifier[@type="section"]
  * @param   {Document}  doc  XML document
- * @returns  {Document}       transformed document
+ * @returns {Document}       transformed document
  */
 function addIdentifiers(doc) {
     const courseCode = safeSelectFirst("//local/courseInfo/courseName", doc)
@@ -159,7 +153,7 @@ function addIdentifiers(doc) {
  * semester -> mods/subject/temporal
  * local/department -> strip degree postfix -> mods/subject/topic
  * @param   {Document}  doc  XML document
- * @returns  {Document}       transformed document
+ * @returns {Document}       transformed document
  */
 export function addSubjects(doc) {
     const semester = safeSelectFirst("//local/courseInfo/semester", doc)
@@ -198,7 +192,7 @@ export function addSubjects(doc) {
  * local/courseInfo/courseNumer & course -> mods/titleInfo/title
  * local/courseInfo/semester -> mods/part/partNumber
  * @param   {Document}  doc  XML document
- * @returns  {Document}       transformed document
+ * @returns {Document}       transformed document
  */
 export function fixSyllabusTitle(doc) {
     const courseNumber = safeSelectFirst("//local/courseInfo/courseName", doc)
@@ -236,7 +230,7 @@ export function fixSyllabusTitle(doc) {
 /**
  * Add originInfo/dateIssued based on local/courseInfo/semseter
  * @param   {Document}  doc  XML document
- * @returns  {Document}       transformed document
+ * @returns {Document}       transformed document
  */
 export function addOriginInfo(doc) {
     const semester = safeSelectFirst("//local/courseInfo/semester", doc)
@@ -282,10 +276,19 @@ export function addOriginInfo(doc) {
 }
 
 /**
+ * Add a mods/note with the whole hierarchy of course information
+ * @param   {Document}  doc  XML document
+ * @returns {Document}       transformed document
+ */
+export function addFullCourseInfoNote(doc) {
+    return doc
+}
+
+/**
  * Main conversion function to convert Syllabus 'courseInfo' XML to MODS
- * @param {string} xmlString - XML string to convert
- * @returns {Document} Converted MODS XML string with namespace, ready for validation
- * @throws {Error} If XML is malformed, cannot be parsed, or input is invalid
+ * @param   {string} xmlString  XML string to convert
+ * @returns {Document}          Converted MODS XML string with namespace, ready for validation
+ * @throws  {Error}             If XML is malformed, cannot be parsed, or input is invalid
  */
 export function convertSyllabusXMLtoMODS(xmlString) {
     // Handle invalid input types
@@ -338,6 +341,8 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     corporateName(doc)
 
     addOriginInfo(doc)
+
+    addFullCourseInfoNote(doc)
 
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)

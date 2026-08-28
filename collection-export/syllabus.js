@@ -13,6 +13,12 @@ import {
 } from './xml-helpers.js'
 import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
 
+// TODO name@type=personal for each faculty member
+// TODO handle username as nameIdentifier
+// TODO name@type=corporate for the department
+// TODO originInfo/dateIssued with month mapping for semester
+// TODO note with the full course info hierarchy written out
+
 /**
  * Adds a static mods/genre = 'syllabi' element
  *

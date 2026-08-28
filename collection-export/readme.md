@@ -23,6 +23,7 @@ Options:
   --item <UUID>        UUID of single item to export
   --name               Use item name for export folders instead of UUID
   --no-mods            Do not write strict MODS XML for each item
+  --syllabus           Convert courseInfo syllabus metadata to MODS
   --verbose            Print debug info
 
 You can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".
@@ -36,6 +37,8 @@ node collect --collection $UUID --status DRAFT,ARCHIVE --modifiedBefore 2020-01-
 node collect  --collection $UUID --name
 # sub-collection of Libraries, note --where needs fully-specified /xml/... path
 node collect --collection 6b755832-4070-73d2-77b3-3febcc1f5fad --where "/xml/mods/relatedItem/title = 'Robert Sommer Mudflats Collection'"
+# download syllabi & convert their metadata to MODS
+node collect --collection (eq coll --name "Syllabus Collection" | jq -r .uuid) --syllabus
 ```
 
 By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is append to the folder name if it would collide with an existing folder.
@@ -100,11 +103,11 @@ node test-collection-samples.js data/mudflats.json 10
 
 The `test-collection-samples.js` script tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly. We can also download item XML to run the strict MODS conversion on our own.
 
-## Syllabus Conversion
+## Syllabus Metadata Conversion
 
-The syllabus.js file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. It can be used as a library or passed a single XML file on the command line; it will print the converted MODS to stdout.
+The syllabus.js file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. It can be used as a library or passed a single XML file on the command line; it will print the converted MODS to stdout. `npm run sylxmltest` runs the test suite.
 
-TODO: add `--syllabus` flag to collect.js to convert syllabus XML to MODS.
+Running `node collect` with the `--syllabus` flag will automatically convert syllabus XML to MODS for any items in the collection that have a syllabus attachment.
 
 ### Converting & Validating MODS Files
 

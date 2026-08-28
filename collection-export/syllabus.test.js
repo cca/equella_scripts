@@ -334,6 +334,19 @@ describe('convertSyllabusXMLtoMODS', () => {
         assert.throws(() => convertSyllabusXMLtoMODS({}), /XML input must be a string/)
     })
 
+    it('should drop the /local XML tree', async () => {
+        const inputXML = x(`<local><courseInfo><course>Test</course></courseInfo></local><mods><titleInfo><title>Testing</title></titleInfo></mods>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const local = xpath.select1('//local', result)
+        assert.ok(!local)
+    })
+
+    it('should make <mods> the new root element', async () => {
+        const inputXML = x(`<local><courseInfo><course>Test</course></courseInfo></local><mods><titleInfo><title>Testing</title></titleInfo></mods>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        assert.strictEqual(result.documentElement.nodeName, 'mods')
+    })
+
     it('should drop empty elements', async () => {
         // Empty elements inside mods should be removed
         const inputXML = x(`<mods><name></name></mods>`)

@@ -365,8 +365,13 @@ export function convertSyllabusXMLtoMODS(xmlString) {
 
     addFullCourseInfoNote(doc)
 
-    // Remove empty elements last, after all transformations are complete
-    removeEmptyElements(doc)
+    // Strip the /local XML tree entirely & make <mods> the new root element
+    const local = safeSelectFirst("//local", doc)
+    if (local) doc.documentElement.removeChild(local)
+    doc.replaceChild(mods, doc.documentElement)
+
+    doc.normalize() // remove empty text nodes and merge adjacent text nodes
+    removeEmptyElements(doc) // Remove empty elements, probably unnecessary
 
     return doc
 }
@@ -402,9 +407,7 @@ Convert EQUELLA custom Syllabus "courseInfo" XML to schema-compliant MODS.
     try {
         const xmlString = fs.readFileSync(inputFile, 'utf-8')
         const result = convertSyllabusXMLtoMODS(xmlString)
-        // Return only <mods> part of XML tree
-        const mods = safeSelectFirst("//mods", result)
-        console.log(mods.toString())
+        console.log(result.toString())
     } catch (error) {
         console.error(`Error: ${error.message}`)
         process.exit(1)

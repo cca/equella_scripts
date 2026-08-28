@@ -1319,6 +1319,7 @@ export function toStrictMODS(xmlString) {
     // Deduplicate internetMediaType in physicalDescription
     deduplicateInternetMediaType(doc)
 
+    doc.normalize() // remove empty text nodes and merge adjacent text nodes
     // Remove all empty elements (no text, no children with text)
     removeEmptyElements(doc)
 

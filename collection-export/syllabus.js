@@ -32,6 +32,36 @@ export function addGenre(doc) {
 }
 
 /**
+ * local/courseInfo/courseName -> mods/identifier[@type="course number"]
+ * local/courseInfo/section -> mods/identifier[@type="section"]
+ *
+ * @param   {Document}  doc  XML document
+ *
+ * @returns  {Document}       transformed document
+ */
+function addIdentifiers(doc) {
+    const courseCode = safeSelectFirst("//local/courseInfo/courseName", doc)
+    const sectionCode = safeSelectFirst("//local/courseInfo/section", doc)
+    const mods = safeSelectFirst("//mods", doc)
+
+    if (hasDirectTextContent(courseCode)) {
+        const identifier = createElement(doc, 'identifier')
+        identifier.setAttribute('type', 'course number')
+        identifier.textContent = courseCode.textContent
+        mods.appendChild(identifier)
+    }
+
+    if (hasDirectTextContent(sectionCode)) {
+        const identifier = createElement(doc, 'identifier')
+        identifier.setAttribute('type', 'section')
+        identifier.textContent = sectionCode.textContent
+        mods.appendChild(identifier)
+    }
+
+    return doc
+}
+
+/**
  * semester -> mods/subject/temporal
  * local/department -> strip degree postfix -> mods/subject/topic
  *
@@ -43,7 +73,7 @@ export function addSubjects(doc) {
     const department = safeSelectFirst("//local/department", doc)
     const mods = safeSelectFirst("//mods", doc)
 
-    if (semester) {
+    if (hasDirectTextContent(semester)) {
         const temporal = createElement(doc, 'temporal')
         temporal.textContent = semester.textContent
         let subjectParent = safeSelectFirst("//mods/subject", doc)
@@ -54,7 +84,7 @@ export function addSubjects(doc) {
         subjectParent.appendChild(temporal)
     }
 
-    if (department) {
+    if (hasDirectTextContent(department)) {
         // TODO we could have a better map of department names to subject terms with URIs
         // TODO terms like "Individualized" are not informative
         const topic = createElement(doc, 'topic')
@@ -160,11 +190,9 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     // mods/part/number to part/text @type=attachment-uuid
     convertPartNumbers(doc)
 
-    // Add syllabi genre
     addGenre(doc)
-
-    // Add subjects
     addSubjects(doc)
+    addIdentifiers(doc)
 
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)

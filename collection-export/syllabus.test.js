@@ -6,6 +6,21 @@ import {convertSyllabusXMLtoMODS} from './syllabus.js'
 // helper function to wrap XML in a root </xml> element
 const x = (xml) => `<xml>${xml}</xml>`
 
+describe('addIdentifiers', () => {
+    it('should add course number and section identifiers', async () => {
+        const courseNumber = 'ARTED-101'
+        const section = 'ARTED-101-1'
+        const inputXML = x(`<local><courseInfo><courseName>${courseNumber}</courseName><section>${section}</section></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const courseIdentifier = xpath.select1('//mods/identifier[@type="course number"]', result)
+        assert.ok(courseIdentifier)
+        assert.strictEqual(courseIdentifier.textContent, courseNumber)
+        const sectionIdentifier = xpath.select1('//mods/identifier[@type="section"]', result)
+        assert.ok(sectionIdentifier)
+        assert.strictEqual(sectionIdentifier.textContent, section)
+    })
+})
+
 describe('addSubjects', () => {
     it('should add a temporal subject for semester', async () => {
         const semester = 'Fall 2026'

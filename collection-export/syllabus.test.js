@@ -87,6 +87,39 @@ describe('personalNames', () => {
         assert.ok(namePart2)
         assert.strictEqual(namePart2.textContent, 'Jane Smith')
     })
+
+    it('should add an email nameIdentifier for each personal name if local/facultyID is present', async () => {
+        const inputXML = x(`<local><courseInfo><faculty>John Doe, Jane Smith</faculty><facultyID>jdoe, jsmith</facultyID></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const nameElements = xpath.select('//mods/name[@type="personal"]', result)
+        assert.strictEqual(nameElements.length, 2)
+        const nameIdentifiers = xpath.select('//mods/name[@type="personal"]/nameIdentifier', result)
+        assert.strictEqual(nameIdentifiers.length, 2)
+        assert.ok(nameIdentifiers[0])
+        assert.strictEqual(nameIdentifiers[0].textContent, 'jdoe@cca.edu')
+        assert.ok(nameIdentifiers[1])
+        assert.strictEqual(nameIdentifiers[1].textContent, 'jsmith@cca.edu')
+    })
+
+    it('should not add email nameIdentifiers if local/facultyID is missing', async () => {
+        const inputXML = x(`<local><courseInfo><faculty>John Doe, Jane Smith</faculty></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const nameElements = xpath.select('//mods/name[@type="personal"]', result)
+        assert.strictEqual(nameElements.length, 2)
+        const nameIdentifier1 = xpath.select1('nameIdentifier', nameElements[0])
+        assert.ok(!nameIdentifier1)
+        const nameIdentifier2 = xpath.select1('nameIdentifier', nameElements[1])
+        assert.ok(!nameIdentifier2)
+    })
+
+    it('should not add emails if they do not correspond with names', async () => {
+        const inputXML = x(`<local><courseInfo><faculty>John Doe</faculty><facultyID>jdoe, jsmith</facultyID></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const nameElements = xpath.select('//mods/name[@type="personal"]', result)
+        assert.strictEqual(nameElements.length, 1)
+        const nameIdentifier1 = xpath.select1('nameIdentifier', nameElements[0])
+        assert.ok(!nameIdentifier1)
+    })
 })
 
 describe('corporateName', () => {

@@ -1,7 +1,7 @@
 <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     version="3.8"
     xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd">
-
+    <!-- this is just an example of what output should look like and not used in any tests -->
     <titleInfo>
         <title>FASHN-360 Media History</title>
         <partNumber>Fall 2026</partNumber>
@@ -14,13 +14,14 @@
         <role>
             <roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/tch">teacher</roleTerm>
         </role>
+        <nameIdentifier type="email" typeURI="https://datatracker.ietf.org/doc/html/rfc5322" displayLabel="Email">ephetteplace@cca.edu</nameIdentifier>
     </name>
 
     <name type="corporate">
         <namePart>Design Division</namePart>
         <namePart>Fasion Design (BFA)</namePart>
         <role>
-            <roleTerm type="text" authority="marcrelator">sponsor</roleTerm>
+            <roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/spn">sponsor</roleTerm>
         </role>
     </name>
 

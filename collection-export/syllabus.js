@@ -8,8 +8,6 @@ import {
 } from './xml-helpers.js'
 import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
 
-// TODO handle username as nameIdentifier
-
 /**
  * Add a role/roleTerm child to a parent element assuming marcrelator authority.
  * Used by personalNames and corporateName functions.
@@ -99,6 +97,27 @@ export function personalNames(doc) {
             mods.appendChild(nameElement)
             addRoleTerm(nameElement, 'teacher', 'http://id.loc.gov/vocabulary/relators/tch')
         })
+    }
+
+    // usernames list -> nameIdentifier elements
+    const facultyID = safeSelectFirst("//local/courseInfo/facultyID", doc)
+    const usernames = facultyID ? facultyID.textContent.split(', ')
+        .map(id => id.trim())
+        .filter(id => id.length > 0) : []
+    const nameElements = safeSelect("//mods/name[@type='personal']", doc)
+
+    // sanity check: only add nameIdentifier if we have the same number of usernames as names
+    if (usernames.length !== nameElements.length) {
+        return doc
+    }
+
+    for (let i = 0; i < usernames.length; i++) {
+        const nameIdentifier = createElement(doc, 'nameIdentifier')
+        nameIdentifier.setAttribute('type', 'email')
+        nameIdentifier.setAttribute('typeURI', 'https://datatracker.ietf.org/doc/html/rfc5322')
+        nameIdentifier.setAttribute('displayLabel', 'Email')
+        nameIdentifier.textContent = `${usernames[i]}@cca.edu`
+        nameElements[i].appendChild(nameIdentifier)
     }
 
     return doc

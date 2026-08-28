@@ -13,12 +13,60 @@ import {
 } from './xml-helpers.js'
 import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
 
+/**
+ * Adds a static mods/genre = 'syllabi' element
+ *
+ * @param   {Document}  doc  XML document
+ * @returns  {Document}       transformed document
+ */
 export function addGenre(doc) {
     const genre = createElement(doc, 'genre')
-    genre.setAttribute('type', 'aat')
+    genre.setAttribute('authority', 'aat')
+    genre.setAttribute('authorityURI', 'http://vocab.getty.edu/aat/')
+    genre.setAttribute('valueURI', 'http://vocab.getty.edu/aat/300028026')
     genre.textContent = 'syllabi'
     const mods = safeSelectFirst("//mods", doc)
     mods.appendChild(genre)
+
+    return doc
+}
+
+/**
+ * semester -> mods/subject/temporal
+ * local/department -> strip degree postfix -> mods/subject/topic
+ *
+ * @param   {Document}  doc  XML document
+ * @returns  {Document}       transformed document
+ */
+export function addSubjects(doc) {
+    const semester = safeSelectFirst("//local/courseInfo/semester", doc)
+    const department = safeSelectFirst("//local/department", doc)
+    const mods = safeSelectFirst("//mods", doc)
+
+    if (semester) {
+        const temporal = createElement(doc, 'temporal')
+        temporal.textContent = semester.textContent
+        let subjectParent = safeSelectFirst("//mods/subject", doc)
+        if (!subjectParent) {
+            subjectParent = createElement(doc, 'subject')
+            mods.appendChild(subjectParent)
+        }
+        subjectParent.appendChild(temporal)
+    }
+
+    if (department) {
+        // TODO we could have a better map of department names to subject terms with URIs
+        // TODO terms like "Individualized" are not informative
+        const topic = createElement(doc, 'topic')
+        // Strip degree postfixes like " (BFA)" or " (MFA)"
+        topic.textContent = department.textContent.trim().replace(/\s+\([A-Z]+\)$/, '')
+        let subjectParent = safeSelectFirst("//mods/subject", doc)
+        if (!subjectParent) {
+            subjectParent = createElement(doc, 'subject')
+            mods.appendChild(subjectParent)
+        }
+        subjectParent.appendChild(topic)
+    }
 
     return doc
 }
@@ -53,8 +101,10 @@ export function fixSyllabusTitle(doc) {
         titleInfo.appendChild(title)
 
         // Add partNumber for semester
-        if (hasDirectTextContent(semester)) {
-            moveAndRenameElement(doc, "//local/courseInfo/semester", '//mods/titleInfo', 'partNumber')
+        if (semester) {
+            const partNumber = createElement(doc, 'partNumber')
+            partNumber.textContent = semester.textContent
+            titleInfo.appendChild(partNumber)
         }
     }
 
@@ -112,6 +162,9 @@ export function convertSyllabusXMLtoMODS(xmlString) {
 
     // Add syllabi genre
     addGenre(doc)
+
+    // Add subjects
+    addSubjects(doc)
 
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)

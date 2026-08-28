@@ -6,11 +6,31 @@ import {convertSyllabusXMLtoMODS} from './syllabus.js'
 // helper function to wrap XML in a root </xml> element
 const x = (xml) => `<xml>${xml}</xml>`
 
+describe('addSubjects', () => {
+    it('should add a temporal subject for semester', async () => {
+        const semester = 'Fall 2026'
+        const inputXML = x(`<local><courseInfo><semester>${semester}</semester></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const temporal = xpath.select1('//mods/subject/temporal', result)
+        assert.ok(temporal)
+        assert.strictEqual(temporal.textContent, semester)
+    })
+
+    it('should add a topic subject for department', async () => {
+        const department = 'Art Education (BFA)'
+        const inputXML = x(`<local><department>${department}</department></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const topic = xpath.select1('//mods/subject/topic', result)
+        assert.ok(topic)
+        assert.strictEqual(topic.textContent, 'Art Education')
+    })
+})
+
 describe('addGenre', () => {
-    it('should add genre element with type=syllabus', async () => {
+    it('should add syllabi genre element with authority=aat', async () => {
         const inputXML = x(`<mods></mods>`)
         const result = convertSyllabusXMLtoMODS(inputXML)
-        const genre = xpath.select1('//mods/genre[@type="aat"]', result)
+        const genre = xpath.select1('//mods/genre[@authority="aat"]', result)
         assert.ok(genre)
         assert.strictEqual(genre.textContent, 'syllabi')
     })

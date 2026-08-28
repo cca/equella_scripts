@@ -281,6 +281,19 @@ describe('addOriginInfo', () => {
     })
 })
 
+describe('addFullCourseInfoNote', () => {
+    it('should add a note with the full course info', async () => {
+        const courseName = 'FASHN-360'
+        const courseTitle = 'Media History'
+        const semester = 'Fall 2026'
+        const inputXML = x(`<local><courseInfo><courseName>${courseName}</courseName><course>${courseTitle}</course><semester>${semester}</semester></courseInfo></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const note = xpath.select1('//mods/note[@type="full course info"]', result)
+        assert.ok(note)
+        assert.strictEqual(note.textContent, `${semester} | ${courseName} | ${courseTitle}`)
+    })
+})
+
 describe('convertSyllabusXMLtoMODS', () => {
     it('should include the MODS namespaces & attributes', async () => {
         // <mods> must be non-empty or it is dropped

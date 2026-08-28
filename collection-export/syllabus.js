@@ -281,6 +281,25 @@ export function addOriginInfo(doc) {
  * @returns {Document}       transformed document
  */
 export function addFullCourseInfoNote(doc) {
+    const semester = safeSelectFirst("//local/courseInfo/semester", doc)
+    const division = safeSelectFirst("//local/division", doc)
+    const department = safeSelectFirst("//local/department", doc)
+    const courseNumber = safeSelectFirst("//local/courseInfo/courseName", doc)
+    const courseTitle = safeSelectFirst("//local/courseInfo/course", doc)
+    const section = safeSelectFirst("//local/courseInfo/section", doc)
+    const faculty = safeSelectFirst("//local/courseInfo/faculty", doc)
+
+    const infoParts = [semester, division, department, courseNumber, courseTitle, section, faculty]
+        .filter(el => hasDirectTextContent(el))
+        .map(el => el.textContent.trim())
+
+    if (infoParts.length > 0) {
+        const mods = safeSelectFirst("//mods", doc)
+        const note = createElement(doc, 'note')
+        note.textContent = infoParts.join(' | ')
+        mods.appendChild(note)
+    }
+
     return doc
 }
 

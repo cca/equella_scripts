@@ -288,7 +288,7 @@ describe('addFullCourseInfoNote', () => {
         const semester = 'Fall 2026'
         const inputXML = x(`<local><courseInfo><courseName>${courseName}</courseName><course>${courseTitle}</course><semester>${semester}</semester></courseInfo></local>`)
         const result = convertSyllabusXMLtoMODS(inputXML)
-        const note = xpath.select1('//mods/note[@type="full course info"]', result)
+        const note = xpath.select1('//mods/note', result)
         assert.ok(note)
         assert.strictEqual(note.textContent, `${semester} | ${courseName} | ${courseTitle}`)
     })

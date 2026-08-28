@@ -325,6 +325,8 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     }
     mods.setAttribute("xmlns", 'http://www.loc.gov/mods/v3')
     mods.setAttribute("version", '3.8')
+    mods.setAttribute("xmlns:xsi", 'http://www.w3.org/2001/XMLSchema-instance')
+    mods.setAttribute("xsi:schemaLocation", 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd')
 
     // Fix titleInfo elements
     fixSyllabusTitle(doc)

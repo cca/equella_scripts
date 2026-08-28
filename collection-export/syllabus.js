@@ -13,9 +13,7 @@ import {
 } from './xml-helpers.js'
 import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
 
-// TODO name@type=personal for each faculty member
 // TODO handle username as nameIdentifier
-// TODO name@type=corporate for the department
 // TODO originInfo/dateIssued with month mapping for semester
 // TODO note with the full course info hierarchy written out
 
@@ -46,6 +44,49 @@ export function addRoleTerm(parent, roleTerm, valueURI = 'marcrelator') {
 }
 
 /**
+ * Remove " (B|MFA)" from end of string
+ * @param   {string}  string  Department name possibly with degree postfix
+ * @return  {string}          Department name without degree postfix
+ */
+export function trimDegreePostfix(string) {
+    if (typeof string !== 'string') return string
+    return string.trim().replace(/\s+\([A-Z]+\)$/, '')
+}
+
+/**
+ * Add a mods/name@type=corporate for the division & program
+ * @param   {Document}  doc  XML document
+ * @return  {Document}       transformed document
+ */
+export function corporateName(doc) {
+    const department = safeSelectFirst("//local/department", doc)
+    const division = safeSelectFirst("//local/division", doc)
+    const mods = safeSelectFirst("//mods", doc)
+
+    if (hasDirectTextContent(department) || hasDirectTextContent(division)) {
+        const nameElement = createElement(doc, 'name')
+        nameElement.setAttribute('type', 'corporate')
+        mods.appendChild(nameElement)
+
+        if (hasDirectTextContent(department)) {
+            const namePart = createElement(doc, 'namePart')
+            namePart.textContent = trimDegreePostfix(department.textContent)
+            nameElement.appendChild(namePart)
+        }
+
+        if (hasDirectTextContent(division)) {
+            const namePart = createElement(doc, 'namePart')
+            namePart.textContent = division.textContent
+            nameElement.appendChild(namePart)
+        }
+
+        addRoleTerm(nameElement, 'sponsor', 'http://id.loc.gov/vocabulary/relators/spn')
+    }
+
+    return doc
+}
+
+/**
  * Adds personal name elements for all faculty
  * @param {Document} doc  XML document
  * @returns {Document}       transformed document
@@ -72,7 +113,6 @@ export function personalNames(doc) {
 
 /**
  * Adds a static mods/genre = 'syllabi' element
- *
  * @param   {Document}  doc  XML document
  * @returns  {Document}       transformed document
  */
@@ -91,9 +131,7 @@ export function addGenre(doc) {
 /**
  * local/courseInfo/courseName -> mods/identifier[@type="course number"]
  * local/courseInfo/section -> mods/identifier[@type="section"]
- *
  * @param   {Document}  doc  XML document
- *
  * @returns  {Document}       transformed document
  */
 function addIdentifiers(doc) {
@@ -121,7 +159,6 @@ function addIdentifiers(doc) {
 /**
  * semester -> mods/subject/temporal
  * local/department -> strip degree postfix -> mods/subject/topic
- *
  * @param   {Document}  doc  XML document
  * @returns  {Document}       transformed document
  */
@@ -146,7 +183,7 @@ export function addSubjects(doc) {
         // TODO terms like "Individualized" are not informative
         const topic = createElement(doc, 'topic')
         // Strip degree postfixes like " (BFA)" or " (MFA)"
-        topic.textContent = department.textContent.trim().replace(/\s+\([A-Z]+\)$/, '')
+        topic.textContent = trimDegreePostfix(department.textContent)
         let subjectParent = safeSelectFirst("//mods/subject", doc)
         if (!subjectParent) {
             subjectParent = createElement(doc, 'subject')
@@ -161,7 +198,6 @@ export function addSubjects(doc) {
 /**
  * local/courseInfo/courseNumer & course -> mods/titleInfo/title
  * local/courseInfo/semester -> mods/part/partNumber
- *
  * @param   {Document}  doc  XML document
  * @returns  {Document}       transformed document
  */
@@ -200,7 +236,6 @@ export function fixSyllabusTitle(doc) {
 
 /**
  * Main conversion function to convert Syllabus 'courseInfo' XML to MODS
- *
  * @param {string} xmlString - XML string to convert
  * @returns {Document} Converted MODS XML string with namespace, ready for validation
  * @throws {Error} If XML is malformed, cannot be parsed, or input is invalid
@@ -251,7 +286,9 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     addSubjects(doc)
     addIdentifiers(doc)
 
+    // mods/name
     personalNames(doc)
+    corporateName(doc)
 
     // Remove empty elements last, after all transformations are complete
     removeEmptyElements(doc)

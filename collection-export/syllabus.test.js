@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import {describe, it} from 'mocha'
 import xpath from 'xpath'
-import {addRoleTerm, convertSyllabusXMLtoMODS} from './syllabus.js'
+import {addRoleTerm, convertSyllabusXMLtoMODS, trimDegreePostfix} from './syllabus.js'
 import {DOMParser} from '@xmldom/xmldom'
 
 // helper function to wrap XML in a root </xml> element
@@ -34,6 +34,36 @@ describe('addRoleTerm', () => {
     })
 })
 
+describe('trimDegreePostfix', () => {
+    it('should remove degree postfixes like " (BFA)" or " (MFA)"', async () => {
+        const input = 'Art Education (BFA)'
+        const expected = 'Art Education'
+        const result = trimDegreePostfix(input)
+        assert.strictEqual(result, expected)
+    })
+
+    it('should not modify strings without degree postfixes', async () => {
+        const input = 'Art History'
+        const expected = 'Art History'
+        const result = trimDegreePostfix(input)
+        assert.strictEqual(result, expected)
+    })
+
+    it('should return non-string inputs unchanged', async () => {
+        const input = 12345
+        const expected = 12345
+        const result = trimDegreePostfix(input)
+        assert.strictEqual(result, expected)
+    })
+
+    it('should only remove the last parenthetical group if it matches a degree postfix', async () => {
+        const input = 'Art Education (Other) (MFA)'
+        const expected = 'Art Education (Other)'
+        const result = trimDegreePostfix(input)
+        assert.strictEqual(result, expected)
+    })
+})
+
 describe('personalNames', () => {
     it('should add a single personal name from local/faculty elements', async () => {
         const inputXML = x(`<local><courseInfo><faculty>John Doe</faculty></courseInfo></local>`)
@@ -56,6 +86,54 @@ describe('personalNames', () => {
         const namePart2 = xpath.select1('namePart', nameElements[1])
         assert.ok(namePart2)
         assert.strictEqual(namePart2.textContent, 'Jane Smith')
+    })
+})
+
+describe('corporateName', () => {
+    it('should add type=corporate name w/ both local/department & local/division nameParts', async () => {
+        const department = 'Art Education (BFA)'
+        const division = 'School of Art'
+        const inputXML = x(`<local><department>${department}</department><division>${division}</division></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const corpName = xpath.select1('//mods/name[@type="corporate"]', result)
+        assert.ok(corpName)
+        assert.strictEqual(corpName.getAttribute('type'), 'corporate')
+        const nameParts = xpath.select('namePart', corpName)
+        assert.strictEqual(nameParts.length, 2)
+        const departmentNamePart = nameParts[0]
+        assert.ok(departmentNamePart)
+        assert.strictEqual(departmentNamePart.textContent, trimDegreePostfix(department))
+        const divisionNamePart = nameParts[1]
+        assert.ok(divisionNamePart)
+        assert.strictEqual(divisionNamePart.textContent, division)
+    })
+
+    it('should add type=corporate name w/ only local/department namePart if local/division is missing', async () => {
+        const department = 'Art Education (BFA)'
+        const inputXML = x(`<local><department>${department}</department></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const corpName = xpath.select1('//mods/name[@type="corporate"]', result)
+        assert.ok(corpName)
+        assert.strictEqual(corpName.getAttribute('type'), 'corporate')
+        const nameParts = xpath.select('namePart', corpName)
+        assert.strictEqual(nameParts.length, 1)
+        const departmentNamePart = nameParts[0]
+        assert.ok(departmentNamePart)
+        assert.strictEqual(departmentNamePart.textContent, trimDegreePostfix(department))
+    })
+
+    it('should add type=corporate name w/ only local/division namePart if local/department is missing', async () => {
+        const division = 'School of Art'
+        const inputXML = x(`<local><division>${division}</division></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const corpName = xpath.select1('//mods/name[@type="corporate"]', result)
+        assert.ok(corpName)
+        assert.strictEqual(corpName.getAttribute('type'), 'corporate')
+        const nameParts = xpath.select('namePart', corpName)
+        assert.strictEqual(nameParts.length, 1)
+        const divisionNamePart = nameParts[0]
+        assert.ok(divisionNamePart)
+        assert.strictEqual(divisionNamePart.textContent, division)
     })
 })
 

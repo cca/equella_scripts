@@ -1,46 +1,38 @@
+<?xml version="1.0"?>
 <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     version="3.8"
     xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd">
     <!-- this is just an example of what output should look like and not used in any tests -->
-    <titleInfo>
-        <title>FASHN-360 Media History</title>
-        <partNumber>Fall 2026</partNumber>
-    </titleInfo>
-
-    <genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300028026">syllabi</genre>
-
-    <name type="personal">
-        <namePart>Eric Phetteplace</namePart>
-        <role>
-            <roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/tch">teacher</roleTerm>
-        </role>
-        <nameIdentifier type="email" typeURI="https://datatracker.ietf.org/doc/html/rfc5322" displayLabel="Email">ephetteplace@cca.edu</nameIdentifier>
-    </name>
-
-    <name type="corporate">
-        <namePart>Design Division</namePart>
-        <namePart>Fasion Design (BFA)</namePart>
-        <role>
-            <roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/spn">sponsor</roleTerm>
-        </role>
-    </name>
-
-    <originInfo>
-        <dateIssued encoding="edtf">2026-09</dateIssued><!-- map term to first month -->
-    </originInfo>
-
-    <part>
-        <text type="attachment-uuid">87e7c816-35cd-4ae5-b443-b55eaa7f9527</text>
-    </part>
-
-    <subject>
-        <temporal>Fall 2026</temporal>
-        <topic>Fashion</topic>
-    </subject>
-
-    <identifier type="course number">FASHN-360</identifier>
-    <identifier type="section">FASHN-3600-1</identifier>
-
-    <note type="course information">Fall 2026 | Design Division | FASHN | FASHN-360 | Media History | FASHN-3600-1
-    </note>
+  <part>
+    <text type="attachment-uuid">87e7c816-35cd-4ae5-b443-b55eaa7f9527</text>
+  </part>
+  <titleInfo>
+    <title>FASHN-360 Media History</title>
+    <partNumber>Fall 2026</partNumber>
+  </titleInfo>
+  <genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300028026">syllabi</genre>
+  <subject>
+    <temporal>Fall 2026</temporal>
+    <topic valueURI="https://vocab.getty.edu/aat/300138708" authority="aat" authorityURI="http://vocab.getty.edu/aat/">fashion design</topic>
+  </subject>
+  <identifier type="course number">FASHN-360</identifier>
+  <identifier type="section">FASHN-3600-1</identifier>
+  <name type="personal">
+    <namePart>Eric Phetteplace</namePart>
+    <role>
+      <roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/tch">teacher</roleTerm>
+    </role>
+    <nameIdentifier type="email" typeURI="https://datatracker.ietf.org/doc/html/rfc5322" displayLabel="Email">ephetteplace@cca.edu</nameIdentifier>
+  </name>
+  <name type="corporate">
+    <namePart>Fashion Design</namePart>
+    <namePart>Design Division</namePart>
+    <role>
+      <roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/spn">sponsor</roleTerm>
+    </role>
+  </name>
+  <originInfo>
+    <dateIssued encoding="edtf">2026-09</dateIssued>
+  </originInfo>
+  <note>Fall 2026 | Design Division | Fashion Design (BFA) | FASHN-360 | Media History | FASHN-3600-1 | Eric Phetteplace</note>
 </mods>

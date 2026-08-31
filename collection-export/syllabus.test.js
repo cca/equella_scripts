@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import {describe, it} from 'mocha'
 import xpath from 'xpath'
-import {addRoleTerm, convertSyllabusXMLtoMODS, trimDegreePostfix} from './syllabus.js'
+import {addRoleTerm, convertSyllabusXMLtoMODS, PROGRAM_SUBJECT_MAP, trimDegreePostfix} from './syllabus.js'
 import {DOMParser} from '@xmldom/xmldom'
 
 // helper function to wrap XML in a root </xml> element
@@ -195,13 +195,26 @@ describe('addSubjects', () => {
         assert.strictEqual(temporal.textContent, semester)
     })
 
-    it('should add a topic subject for department', async () => {
+    it('should add a topic subject for department if no match in map', async () => {
         const department = 'Art Education (BFA)'
         const inputXML = x(`<local><department>${department}</department></local>`)
         const result = convertSyllabusXMLtoMODS(inputXML)
         const topic = xpath.select1('//mods/subject/topic', result)
         assert.ok(topic)
         assert.strictEqual(topic.textContent, 'Art Education')
+    })
+
+    it('should add a topic subject using AAT vocab if match in map', async () => {
+        const department = "Animation Program"
+        const term = PROGRAM_SUBJECT_MAP.animation
+        const inputXML = x(`<local><department>${department}</department></local>`)
+        const result = convertSyllabusXMLtoMODS(inputXML)
+        const topic = xpath.select1('//mods/subject/topic', result)
+        assert.ok(topic)
+        assert.strictEqual(topic.textContent, term.value)
+        assert.strictEqual(topic.getAttribute("valueURI"), term.valueURI)
+        assert.strictEqual(topic.getAttribute("authority"), term.authority)
+        assert.strictEqual(topic.getAttribute("authorityURI"), term.authorityURI)
     })
 })
 

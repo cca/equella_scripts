@@ -8,8 +8,8 @@ import rc from 'rc'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import {toStrictMODS} from './strict-mods.js'
-import {convertSyllabusXMLtoMODS} from './syllabus.js'
+import {toStrictMODS} from './mdmaps/strict-mods.js'
+import {convertSyllabusXMLtoMODS} from './mdmaps/syllabus.js'
 
 const defaults = {
     // obviously need attachment & metadata info

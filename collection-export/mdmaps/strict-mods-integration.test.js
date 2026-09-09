@@ -2,12 +2,12 @@ import assert from 'node:assert'
 import { describe, it } from 'mocha'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import { toStrictMODS } from './strict-mods.js'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+// parent dirname of current file, e.g. equeLla_scripts/collection-export
+const __dirname = dirname(import.meta.dirname)
 
 // Helper to normalize XML for comparison (remove whitespace differences)
 function normalizeXML(xmlString) {
@@ -17,6 +17,7 @@ function normalizeXML(xmlString) {
         .trim()
 }
 
+// ! THESE TESTS WILL FAIL WITHOUT THE EXPORTED ITEMS
 describe('Integration Tests - Real-World Data', () => {
     describe('Sample file processing', () => {
         it('should successfully process item-1 (complex record with dates and subjects)', () => {

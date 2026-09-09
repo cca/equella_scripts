@@ -6,7 +6,7 @@ import {
     createElement,
     hasDirectTextContent
 } from './xml-helpers.js'
-import {convertPartNumbers, moveAndRenameElement, removeEmptyElements} from './strict-mods.js'
+import {convertPartNumbers, removeEmptyElements} from './strict-mods.js'
 
 /**
  * Add a role/roleTerm child to a parent element assuming marcrelator authority.

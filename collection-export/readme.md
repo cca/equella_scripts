@@ -7,7 +7,7 @@ Download all (or a subset) of items from a VAULT collection. Each item becomes i
 1. `pnpm install` or `npm install` dependencies
 2. create an .apprc file with an OAuth token and the root URL of the openEQUELLA instance
 3. (optional) edit collection and filtering options into the .apprc
-4. (optional) validate MODS XML, download [mods.xsd](https://www.loc.gov/standards/mods/v3/mods.xsd) and install `xmllint` (e.g. `brew install xmllint`)
+4. (optional) to validate MODS XML, download [mods.xsd](https://www.loc.gov/standards/mods/v3/mods.xsd) and install `xmllint` (e.g. `brew install xmllint`)
 
 `xmlstarlet` is also useful, specifically its `xmlstarlet fo` format subcommand to pretty-print XML files.
 
@@ -35,13 +35,13 @@ node collect --item $UUID --version 1
 node collect --collection $UUID --status DRAFT,ARCHIVE --modifiedBefore 2020-01-01
 # download items into folders that use the items' titles
 node collect  --collection $UUID --name
-# sub-collection of Libraries, note --where needs fully-specified /xml/... path
+# sub-collection of Libraries, note --where needs fully-specified /xml/... xpath
 node collect --collection 6b755832-4070-73d2-77b3-3febcc1f5fad --where "/xml/mods/relatedItem/title = 'Robert Sommer Mudflats Collection'"
 # download syllabi & convert their metadata to MODS
-node collect --collection (eq coll --name "Syllabus Collection" | jq -r .uuid) --syllabus
+node collect --collection (eq coll --name "Syllabus Collection" | jq -r .uuid) --syllabus --limit 10
 ```
 
-By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is append to the folder name if it would collide with an existing folder.
+By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is appended to the folder name if it would collide with an existing folder.
 
 ## Metadata Evaluation
 
@@ -66,15 +66,13 @@ Attachments that reference URLs or other EQUELLA items are not downloaded but pr
 ```sh
 # single item test
 node collect --item 2e9ee5f7-9308-4d33-8b85-ba034e7015ae
-# clean data dir
-rm --rf data/*
 # last couple items of PHOTO collection
 node collect --collection dd83789b-f726-47e1-8a5f-626450d226a0 --modifiedAfter 2022-01-01 --limit 2
 ```
 
 ## Export N Random Items
 
-The fish shell code below exports N random items from a given collection. The trick is to search for only one item (`--length` 1) and set the `start` parameter to a random number between 0 and the size of the collection. Repeats are possible, especially in smaller collections. Exporting a small set of random items is useful when smoketesting importing a collection into Invenio.
+The fish shell code below exports N random items from a given collection. The trick is to search for only one item (`--length` 1) and set the `start` parameter to a random number between 0 and the size of the collection. Repeats are possible, especially in smaller collections.
 
 ```fish
 set collection 6b755832-4070-73d2-77b3-3febcc1f5fad # Libraries
@@ -98,16 +96,16 @@ The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XM
 npm run modstest
 
 # Test random samples from exported JSON files
-node test-collection-samples.js data/mudflats.json 10
+node mdmaps/test-collection-samples.js data/mudflats.json 10
 ```
 
-The `test-collection-samples.js` script tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly. We can also download item XML to run the strict MODS conversion on our own.
+The `test-collection-samples.js` tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly.
 
 ## Syllabus Metadata Conversion
 
-The syllabus.js file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. It can be used as a library or passed a single XML file on the command line; it will print the converted MODS to stdout. `npm run sylxmltest` runs the test suite.
+The `syllabus.js` file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. For testing, we can pass a single XML file on the command line; it prints the converted MODS to stdout. `npm run sylxmltest` runs the test suite.
 
-Running `node collect` with the `--syllabus` flag will automatically convert syllabus XML to MODS for any items in the collection that have a syllabus attachment.
+Running `node collect` with the `--syllabus` flag will automatically convert syllabus XML to MODS for any items in the collection that have a syllabus attachment. **TO DO**: make the syllabus conversion automatic and opt-out for items in the collection.
 
 ### Converting & Validating MODS Files
 
@@ -115,12 +113,12 @@ The strict-mods module can be run as a command-line tool to convert and validate
 
 ```sh
 # Convert an item's metadata to strict MODS
-node strict-mods.js data/item-uuid/metadata/metadata.xml
+node mdmaps/strict-mods.js data/item-uuid/metadata/metadata.xml
 # Syllabus conversion
-node syllabus.js fixtures/syllabus-one-faculty.xml
+node mdmaps/syllabus.js fixtures/syllabus-one-faculty.xml
 # Validate against the MODS 3.8 schema (requires xmllint)
 # First download the MODS schema: https://www.loc.gov/standards/mods/mods-schemas.html
 wget https://www.loc.gov/standards/mods/v3/mods-3-8.xsd -O data/mods.xsd
-node strict-mods.js data/item-uuid/metadata/metadata.xml | \
+node mdmaps/strict-mods.js data/item-uuid/metadata/metadata.xml | \
     xmllint --noout --schema data/mods.xsd -
 ```

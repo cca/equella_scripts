@@ -99,13 +99,11 @@ npm run modstest
 node mdmaps/test-collection-samples.js data/mudflats.json 10
 ```
 
-The `test-collection-samples.js` tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly.
+The [`test-collection-samples.js`](./mdmaps/test-collection-samples.js) tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly.
 
 ## Syllabus Metadata Conversion
 
-The `syllabus.js` file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. For testing, we can pass a single XML file on the command line; it prints the converted MODS to stdout. `npm run sylxmltest` runs the test suite.
-
-Running `node collect` with the `--syllabus` flag will automatically convert syllabus XML to MODS for any items in the collection that have a syllabus attachment. **TO DO**: make the syllabus conversion automatic and opt-out for items in the collection.
+The [`syllabus.js`](./mdmaps/syllabus.js) file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. For testing, we can pass a single XML file on the command line; it prints the converted MODS to stdout. `npm run sylxmltest` runs the test suite. `node collect` automatically convert syllabus XML to MODS for any items in the Syllabus Collection. Pass `--no-map` to opt out of this behavior.
 
 ### Converting & Validating MODS Files
 

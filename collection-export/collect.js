@@ -8,8 +8,7 @@ import rc from 'rc'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import {toStrictMODS} from './mdmaps/strict-mods.js'
-import {convertSyllabusXMLtoMODS} from './mdmaps/syllabus.js'
+import {convertSyllabusXMLtoMODS, toStrictMODS} from './mdmaps/index.js'
 
 const defaults = {
     // obviously need attachment & metadata info
@@ -17,21 +16,30 @@ const defaults = {
     // "detail" gives owner, dates, collaborators, & some other unneeded item properties
     info: 'attachment,basic,detail,metadata',
     limit: Infinity,
+    map: true,
     mods: true,
-    syllabus: false,
 }
 const options = rc('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+/**
+ * Map collection UUIDs to MODS XML conversion functions
+ *
+ * @key {str}                   UUID for EQUELLA collection
+ * @val {Callable<Document>}    Function that returns an XML document (NOT string)
+ */
+const modsMap = {
+    "9ec74523-e018-4e01-ab4e-be4dd06cdd68": convertSyllabusXMLtoMODS
+}
 
 if (options.help || options.h || (options._.length && options._[0].match(/^help$/i))) {
     console.log('Usage: node collect.js [options]\n')
     console.log('Options:')
     console.log('  --collection <UUID>  UUID of collection to export')
-    console.log('  --html               Write a brief HTML index for each item')
+    console.log('  --html               Write a brief HTML index')
     console.log('  --item <UUID>        UUID of single item to export')
     console.log('  --name               Use item name for export folders instead of UUID')
-    console.log('  --no-mods            Do not write strict MODS XML for each item')
-    console.log('  --syllabus           Convert courseInfo syllabus metadata to MODS')
+    console.log('  --no-map             Do not apply collection-specific MODS maps')
+    console.log('  --no-mods            Do not write strict MODS XML')
     console.log('  --verbose            Print debug info')
     console.log('\nYou can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".\nSee https://vault.cca.edu/apidocs.do#operations-tag-Searching')
     process.exit(0)
@@ -191,13 +199,12 @@ function getAttachments(item, itemDir) {
 function writeXML(item, dir) {
     debug(`Writing XML metadata for item ${item.links.view}`)
     fs.writeFile(path.join(dir, 'metadata', 'metadata.xml'), item.metadata, handleErr)
-    if (options.syllabus) {
-        const syllabusMods = convertSyllabusXMLtoMODS(item.metadata) // returns Document not string
-        if (!syllabusMods) {
-            return console.error(`Error: unable to convert courseInfo syllabus metadata to MODS for item ${item.links.view}`)
-        }
-        // do not write other MODS if --syllabus is specified, since it's a strict MODS document
-        return fs.writeFile(path.join(dir, 'metadata', 'metadata.mods.xml'), syllabusMods.toString(), handleErr)
+    const mapFn = modsMap[item?.collection?.uuid]
+    if (options.map && mapFn) {
+        const modsDoc = mapFn(item.metadata) // returns Document not string
+        if (!modsDoc) return console.error(`Error: unable to map metadata to MODS for ${item?.links?.view}`)
+        // do not write other MODS if we found a mapping
+        return fs.writeFile(path.join(dir, 'metadata', 'metadata.mods.xml'), modsDoc.toString(), handleErr)
     }
     if (options.mods) {
         const strictMods = toStrictMODS(item.metadata)

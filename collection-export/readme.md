@@ -94,16 +94,17 @@ The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XM
 ```sh
 # Run strict MODS tests
 npm run modstest
-
 # Test random samples from exported JSON files
 node mdmaps/test-collection-samples.js data/mudflats.json 10
 ```
 
 The [`test-collection-samples.js`](./mdmaps/test-collection-samples.js) tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly.
 
-## Syllabus Metadata Conversion
+## Collection-specific Metadata Conversion
 
-The [`syllabus.js`](./mdmaps/syllabus.js) file converts XML metadata from CCA's "courseInfo" schema to standards-compliant MODS. For testing, we can pass a single XML file on the command line; it prints the converted MODS to stdout. `npm run sylxmltest` runs the test suite. `node collect` automatically convert syllabus XML to MODS for any items in the Syllabus Collection. Pass `--no-map` to opt out of this behavior.
+Various collections have specific mappings to MODS beyond the strict MODS conversions, doing things like handling special `/local` fields or adding contextual information that is unique to each collection (e.g. a `mods/genre` of "syllabi" for all items in the Syllabus Collection). Each collection-specific mapping has its own script in the [`mdmaps`](./mdmaps/) directory and these scripts can be used a la carte to test conversions on individual XML files. They also have their own test routines as package.json scripts available to `npm run`.
+
+`node collect` automatically performs collection-specific XML to MODS conversions for any items in the Syllabus Collection. Pass `--no-map` to opt out of this behavior.
 
 ### Converting & Validating MODS Files
 
@@ -112,7 +113,7 @@ The strict-mods module can be run as a command-line tool to convert and validate
 ```sh
 # Convert an item's metadata to strict MODS
 node mdmaps/strict-mods.js data/item-uuid/metadata/metadata.xml
-# Syllabus conversion
+# Example of collection-specific conversion (Syllabus)
 node mdmaps/syllabus.js fixtures/syllabus-one-faculty.xml
 # Validate against the MODS 3.8 schema (requires xmllint)
 # First download the MODS schema: https://www.loc.gov/standards/mods/mods-schemas.html

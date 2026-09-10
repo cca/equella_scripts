@@ -142,15 +142,13 @@ describe('convertPressClipsXMLtoMODS', () => {
 
     describe('subject/name', () => {
         it('should convert depictedPerson to subject name@type=personal', () => {
-            const input = x(`<mods>
-                <local>
+            const input = x(`<local>
                     <communicationsWrapper>
                         <depictedWrapper>
                             <depictedPerson>John Doe</depictedPerson>
                         </depictedWrapper>
                     </communicationsWrapper>
-                </local>
-            </mods>`)
+                </local>`)
             const result = convertPressClipsXMLtoMODS(input)
             const subject = xpath.select1('subject', result)
             assert.ok(subject)
@@ -161,8 +159,7 @@ describe('convertPressClipsXMLtoMODS', () => {
         })
 
         it('should handle multiple depictedPerson elements', () => {
-            const input = x(`<mods>
-                <local>
+            const input = x(`<local>
                     <communicationsWrapper>
                         <depictedWrapper>
                             <depictedPerson>John Doe</depictedPerson>
@@ -171,8 +168,7 @@ describe('convertPressClipsXMLtoMODS', () => {
                             <depictedPerson>Jane Smith</depictedPerson>
                         </depictedWrapper>
                     </communicationsWrapper>
-                </local>
-            </mods>`)
+                </local>`)
             const result = convertPressClipsXMLtoMODS(input)
             const subjects = xpath.select('subject', result)
             assert.strictEqual(subjects.length, 2)
@@ -182,18 +178,57 @@ describe('convertPressClipsXMLtoMODS', () => {
         })
 
         it('should skip empty depictedPerson elements', () => {
-            const input = x(`<mods>
-                <local>
+            const input = x(`<local>
                     <communicationsWrapper>
                         <depictedWrapper>
                             <depictedPerson/>
                         </depictedWrapper>
                     </communicationsWrapper>
-                </local>
-            </mods>`)
+                </local>`)
             const result = convertPressClipsXMLtoMODS(input)
             const nameSubjects = xpath.select('mods/subject/name', result)
             assert.strictEqual(nameSubjects.length, 0)
+        })
+    })
+
+    describe('ccaNamed note', () => {
+        const noteText = 'California College of the Arts was mentioned in the text.'
+        it('should add a note if ccaNamed is yes', () => {
+            const input = x(`<local>
+                    <communicationsWrapper>
+                        <ccaNamed>yes</ccaNamed>
+                    </communicationsWrapper>
+                </local>`)
+            const result = convertPressClipsXMLtoMODS(input)
+            const note = xpath.select1('note', result)
+            assert.strictEqual(note.textContent, noteText)
+        })
+
+        it('should add a note if there is even one ccaNamed yes element', () => {
+            const input = x(`<local>
+                    <communicationsWrapper>
+                        <ccaNamed>no</ccaNamed>
+                    </communicationsWrapper>
+                    <communicationsWrapper>
+                        <ccaNamed>yes</ccaNamed>
+                    </communicationsWrapper>
+                </local>`)
+            const result = convertPressClipsXMLtoMODS(input)
+            const note = xpath.select1('note', result)
+            assert.strictEqual(note.textContent, noteText)
+        })
+
+        it('should not add a note if ccaNamed is no', () => {
+            const input = x(`<local>
+                    <communicationsWrapper>
+                        <ccaNamed>no</ccaNamed>
+                    </communicationsWrapper>
+                </local>`)
+            const result = convertPressClipsXMLtoMODS(input)
+            const notes = xpath.select('mods/note', result)
+            for (const note of notes) {
+                assert.notEqual(note.textContent, noteText, 'Did not expect the ccaNamed note text')
+            }
         })
     })
 

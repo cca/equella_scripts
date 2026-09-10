@@ -35,6 +35,22 @@ function depictedPersonToSubjectName(doc) {
 }
 
 /**
+ * If ccaNamed element is "yes", add a mods note about it
+ * @param {Document} doc - XML document
+ * @returns {Document} Modified XML document with the note added if applicable
+ */
+function ccaNamedNote(doc) {
+    const ccaNamedElements = safeSelect("//local/communicationsWrapper/ccaNamed", doc)
+    const ccaNamed = ccaNamedElements.some(el => el.textContent.trim().toLowerCase() === 'yes')
+    if (ccaNamed) {
+        const note = createElement(doc, 'note', 'California College of the Arts was mentioned in the text.')
+        const mods = safeSelectFirst("//mods", doc)
+        mods.appendChild(note)
+    }
+    return doc
+}
+
+/**
  * Main conversion function to convert Press Clips XML to MODS
  * @param   {string} xmlString  XML string to convert
  * @returns {Document}          Converted MODS XML string with namespace, ready for validation
@@ -98,7 +114,8 @@ export function convertPressClipsXMLtoMODS(xmlString) {
     // local/communicationsWrapper/depictedWrapper/depictedPerson -> mods/subject/name@type=personal
     depictedPersonToSubjectName(doc)
 
-    // ? what about the yes/no communicationsWrapper/ccaNamed? convert to a note?
+    // communicationsWrapper/ccaNamed = yes -> add a note that CCA was named in the article
+    ccaNamedNote(doc)
 
     // Make <mods> the new root element (drops /local branch of XML tree)
     doc.replaceChild(mods, doc.documentElement)

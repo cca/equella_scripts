@@ -12,7 +12,7 @@ import { toStrictMODS } from './strict-mods.js'
 function parseJSONFile(filePath) {
     const content = readFileSync(filePath, 'utf-8')
     const json = JSON.parse(content)
-    
+
     // Handle both array and object with results property
     if (Array.isArray(json)) {
         return json
@@ -25,13 +25,13 @@ function parseJSONFile(filePath) {
 
 function extractXMLFromRecord(record) {
     if (!record.metadata) return null
-    
+
     // Remove the outer quotes if it's a JSON string
     let xml = record.metadata
     if (typeof xml === 'string' && xml.startsWith('"') && xml.endsWith('"')) {
         xml = JSON.parse(xml)
     }
-    
+
     return xml
 }
 
@@ -44,23 +44,23 @@ function testXMLConversion(xml, recordId) {
         validationIssues: [],
         converted: null
     }
-    
+
     try {
         // Test the conversion
         const converted = toStrictMODS(xml)
         results.converted = converted
-        
+
         // Parse the result to check for well-formedness
         const parser = new xmldom()
         const doc = parser.parseFromString(converted, 'text/xml')
-        
+
         // Check for parse errors
         const parseErrors = doc.getElementsByTagName('parsererror')
         if (parseErrors.length > 0) {
             results.parseError = parseErrors[0].textContent
             return results
         }
-        
+
         // Check for MODS namespace
         const modsElements = xpath.select("//*[local-name()='mods']", doc)
         if (modsElements.length === 0) {
@@ -72,25 +72,25 @@ function testXMLConversion(xml, recordId) {
                 results.validationIssues.push(`Incorrect namespace: ${xmlns}`)
             }
         }
-        
+
         // Check for non-standard elements that might remain
         const customElements = xpath.select("//*[local-name()='artstorClassification' or local-name()='photoClassification' or local-name()='dateType' or local-name()='subjectType']", doc)
         if (customElements.length > 0) {
             results.validationIssues.push(`Found ${customElements.length} non-standard elements remaining`)
         }
-        
+
         // Check for wrapper elements that should have been unwrapped
         const wrapperElements = xpath.select("//*[local-name()='dateCreatedWrapper' or local-name()='genreWrapper' or local-name()='noteWrapper' or local-name()='typeOfResourceWrapper']", doc)
         if (wrapperElements.length > 0) {
             results.validationIssues.push(`Found ${wrapperElements.length} wrapper elements not unwrapped`)
         }
-        
+
         results.success = results.validationIssues.length === 0
-        
+
     } catch (error) {
         results.conversionError = error.message
     }
-    
+
     return results
 }
 
@@ -104,45 +104,45 @@ function testCollection(filePath, collectionName, sampleSize = 5) {
     console.log(`TESTING COLLECTION: ${collectionName}`)
     console.log(`File: ${filePath}`)
     console.log(`${'='.repeat(80)}\n`)
-    
+
     try {
         const records = parseJSONFile(filePath)
         console.log(`Total records: ${records.length}`)
-        
+
         // Filter records that have metadata
         const recordsWithMetadata = records.filter(r => r.metadata)
         console.log(`Records with metadata: ${recordsWithMetadata.length}`)
-        
+
         if (recordsWithMetadata.length === 0) {
             console.log('⚠️  No records with metadata found')
             return { totalTests: 0, passed: 0, failed: 0 }
         }
-        
+
         // Get random sample
         const sample = getRandomSample(recordsWithMetadata, Math.min(sampleSize, recordsWithMetadata.length))
         console.log(`Testing ${sample.length} random records\n`)
-        
+
         let passed = 0
         let failed = 0
         const failedRecords = []
-        
+
         sample.forEach((record, idx) => {
             const recordId = record.uuid || record.name || `record-${idx}`
             console.log(`\n--- Test ${idx + 1}/${sample.length}: ${recordId} ---`)
-            
+
             const xml = extractXMLFromRecord(record)
             if (!xml) {
                 console.log('❌ No XML metadata found')
                 failed++
                 return
             }
-            
+
             // Show a snippet of the original XML
             const xmlSnippet = xml.substring(0, 150).replace(/\n/g, ' ')
             console.log(`Original XML: ${xmlSnippet}...`)
-            
+
             const result = testXMLConversion(xml, recordId)
-            
+
             if (result.conversionError) {
                 console.log(`❌ CONVERSION ERROR: ${result.conversionError}`)
                 failed++
@@ -160,14 +160,14 @@ function testCollection(filePath, collectionName, sampleSize = 5) {
                 console.log(`✅ SUCCESS - Converted successfully`)
                 passed++
             }
-            
+
             // Show converted snippet
             if (result.converted) {
                 const convertedSnippet = result.converted.substring(0, 150).replace(/\n/g, ' ')
                 console.log(`Converted: ${convertedSnippet}...`)
             }
         })
-        
+
         // Summary
         console.log(`\n${'-'.repeat(80)}`)
         console.log(`SUMMARY for ${collectionName}:`)
@@ -175,16 +175,16 @@ function testCollection(filePath, collectionName, sampleSize = 5) {
         console.log(`  ✅ Passed: ${passed}`)
         console.log(`  ❌ Failed: ${failed}`)
         console.log(`  Success rate: ${((passed / sample.length) * 100).toFixed(1)}%`)
-        
+
         if (failedRecords.length > 0) {
             console.log(`\nFailed records:`)
             failedRecords.forEach(({ recordId, error }) => {
                 console.log(`  - ${recordId}: ${error}`)
             })
         }
-        
+
         return { totalTests: sample.length, passed, failed }
-        
+
     } catch (error) {
         console.error(`❌ Error processing collection: ${error.message}`)
         console.error(error.stack)

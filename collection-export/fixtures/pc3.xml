@@ -1,0 +1,35 @@
+<xml>
+    <!-- has a depictedPerson -->
+    <mods>
+        <origininfo>
+            <dateCreatedWrapper>
+                <dateCreated>2013-11-11</dateCreated>
+            </dateCreatedWrapper>
+        </origininfo>
+        <titleInfo>
+            <title>Ahndraya Parlato</title>
+        </titleInfo>
+        <name>
+            <namePart>No Author</namePart>
+        </name>
+        <part>
+            <number>f370a0ea-78fa-4c04-9a64-bc61db71c16f</number>
+        </part>
+        <relateditem>
+            <title>Dust Magazine</title>
+        </relateditem>
+        <abstract />
+        <relatedItem type="host">
+            <title>Press Clips</title>
+        </relatedItem>
+    </mods>
+    <local>
+        <communicationsWrapper>
+            <depictedWrapper>
+                <depictedPerson>Ahndraya Parlato</depictedPerson>
+                <depictedConstituents>Alumnus</depictedConstituents>
+            </depictedWrapper>
+            <ccaNamed>yes</ccaNamed>
+        </communicationsWrapper>
+    </local>
+</xml>

@@ -5,10 +5,34 @@ import {
     createElement,
     hasDirectTextContent,
     renameElement,
+    safeSelect,
     safeSelectFirst,
     setupModsElement,
 } from './xml-helpers.js'
 import {convertPartNumbers, removeEmptyElements, unwrapDateCreated} from './strict-mods.js'
+
+/**
+ * Converts a depicted person in the local communications wrapper to a MODS subject name element.
+ * @param {Document} doc - XML document
+ * @returns {Document}
+ */
+function depictedPersonToSubjectName(doc) {
+    const depictedPerson = safeSelect("//local/communicationsWrapper/depictedWrapper/depictedPerson", doc)
+    for (const person of depictedPerson) {
+        if (person && hasDirectTextContent(person)) {
+            const subjectName = createElement(doc, "subject")
+            const name = createElement(doc, "name", person.textContent)
+            name.setAttribute("type", "personal")
+            subjectName.appendChild(name)
+            const mods = safeSelectFirst("//mods", doc)
+            if (mods) {
+                mods.appendChild(subjectName)
+            }
+        }
+    }
+
+    return doc
+}
 
 /**
  * Main conversion function to convert Press Clips XML to MODS
@@ -70,8 +94,10 @@ export function convertPressClipsXMLtoMODS(xmlString) {
     }
 
     // ? how to handle publication? relatedItem@type=host? drop the Press Clips relatedItem then?
-    // TODO communicationsWrapper/depictedWrapper should become mods/subject/name
-    // ? was that field ever used? I cannot find a single record with a name in it
+
+    // local/communicationsWrapper/depictedWrapper/depictedPerson -> mods/subject/name@type=personal
+    depictedPersonToSubjectName(doc)
+
     // ? what about the yes/no communicationsWrapper/ccaNamed? convert to a note?
 
     // Make <mods> the new root element (drops /local branch of XML tree)

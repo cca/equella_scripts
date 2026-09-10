@@ -140,6 +140,63 @@ describe('convertPressClipsXMLtoMODS', () => {
         })
     })
 
+    describe('subject/name', () => {
+        it('should convert depictedPerson to subject name@type=personal', () => {
+            const input = x(`<mods>
+                <local>
+                    <communicationsWrapper>
+                        <depictedWrapper>
+                            <depictedPerson>John Doe</depictedPerson>
+                        </depictedWrapper>
+                    </communicationsWrapper>
+                </local>
+            </mods>`)
+            const result = convertPressClipsXMLtoMODS(input)
+            const subject = xpath.select1('subject', result)
+            assert.ok(subject)
+            const name = xpath.select1('name', subject)
+            assert.ok(name)
+            assert.strictEqual(name.getAttribute('type'), 'personal')
+            assert.strictEqual(name.textContent, 'John Doe')
+        })
+
+        it('should handle multiple depictedPerson elements', () => {
+            const input = x(`<mods>
+                <local>
+                    <communicationsWrapper>
+                        <depictedWrapper>
+                            <depictedPerson>John Doe</depictedPerson>
+                        </depictedWrapper>
+                        <depictedWrapper>
+                            <depictedPerson>Jane Smith</depictedPerson>
+                        </depictedWrapper>
+                    </communicationsWrapper>
+                </local>
+            </mods>`)
+            const result = convertPressClipsXMLtoMODS(input)
+            const subjects = xpath.select('subject', result)
+            assert.strictEqual(subjects.length, 2)
+            const names = subjects.map(subject => xpath.select1('name', subject))
+            assert.strictEqual(names[0].textContent, 'John Doe')
+            assert.strictEqual(names[1].textContent, 'Jane Smith')
+        })
+
+        it('should skip empty depictedPerson elements', () => {
+            const input = x(`<mods>
+                <local>
+                    <communicationsWrapper>
+                        <depictedWrapper>
+                            <depictedPerson/>
+                        </depictedWrapper>
+                    </communicationsWrapper>
+                </local>
+            </mods>`)
+            const result = convertPressClipsXMLtoMODS(input)
+            const nameSubjects = xpath.select('mods/subject/name', result)
+            assert.strictEqual(nameSubjects.length, 0)
+        })
+    })
+
     describe('empty element removal', () => {
         it('should remove empty elements after conversion', () => {
             const result = convertPressClipsXMLtoMODS(x('<mods><note></note><abstract>   </abstract></mods>'))

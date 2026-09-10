@@ -1,6 +1,7 @@
 /* Much of this is modeled on strict-mods.js */
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addRoleTerm,
     createElement,
     hasDirectTextContent,
     safeSelect,
@@ -8,33 +9,6 @@ import {
     setupModsElement,
 } from './xml-helpers.js'
 import {convertPartNumbers, removeEmptyElements} from './strict-mods.js'
-
-/**
- * TODO move this to xml-helpers.js
- * Add a role/roleTerm child to a parent element assuming marcrelator authority.
- * Used by personalNames and corporateName functions.
- * @param   {Element}  parent    Parent (name) element to which the roleTerm is added
- * @param   {string}   roleTerm  Text content of the roleTerm element
- * @param   {string}   valueURI  URI for the roleTerm (optional)
- * @return  {Element|null}       The created roleTerm element, or null if parent or roleTerm is not provided
- */
-export function addRoleTerm(parent, roleTerm, valueURI = 'marcrelator') {
-    if (!parent || !roleTerm) return null
-
-    const roleElement = createElement(parent.ownerDocument, 'role')
-    parent.appendChild(roleElement)
-    const roleTermElement = createElement(parent.ownerDocument, 'roleTerm')
-    roleTermElement.textContent = roleTerm
-
-    // Set attributes
-    roleTermElement.setAttribute('authority', 'marcrelator')
-    roleTermElement.setAttribute('authorityURI', 'http://id.loc.gov/vocabulary/relators')
-    if (valueURI) roleTermElement.setAttribute('valueURI', valueURI)
-
-    roleElement.appendChild(roleTermElement)
-
-    return roleTermElement
-}
 
 /**
  * Remove " (B|MFA)" from end of string

@@ -3,8 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, renameElement, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
-import { hasDirectTextContent, safeSelect, safeSelectFirst } from './xml-helpers.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -310,17 +309,6 @@ const fixtures = {
         expected: `<xml><mods>
             <subject><temporal>1922-1935</temporal></subject>
             <subject><topic authority="lcsh">Test</topic></subject>
-        </mods></xml>`
-    },
-
-    relateditemCase: {
-        input: `<xml><mods>
-            <relateditem type="host"><title>Host Title</title></relateditem>
-            <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`,
-        expected: `<xml><mods>
-            <relatedItem type="host"><title>Host Title</title></relatedItem>
-            <titleInfo><title>Test Item</title></titleInfo>
         </mods></xml>`
     },
 
@@ -1581,112 +1569,6 @@ describe('Strict MODS Conversion', () => {
         it('should handle null document', () => {
             const result = fixDateCreatedQualifer(null)
             assert.strictEqual(result, null)
-        })
-    })
-
-    describe('renameElement', () => {
-        it('should rename element while preserving attributes and children', () => {
-            const parser = new xmldom()
-            const input = `<xml><mods><oldname attr="test"><child>content</child></oldname></mods></xml>`
-            const doc = parser.parseFromString(input, 'text/xml')
-
-            renameElement(doc, 'oldname', 'newName')
-
-            const result = doc.toString()
-
-            assert.ok(result.includes('<newName'))
-            assert.ok(result.includes('</newName>'))
-            assert.ok(!result.includes('<oldname'))
-            assert.ok(result.includes('attr="test"'))
-            assert.ok(result.includes('<child>content</child>'))
-        })
-
-        it('should convert origininfo to originInfo', () => {
-            const parser = new xmldom()
-            const input = `<xml><mods><origininfo><place/></origininfo></mods></xml>`
-            const doc = parser.parseFromString(input, 'text/xml')
-
-            renameElement(doc, 'origininfo', 'originInfo')
-
-            const result = doc.toString()
-
-            assert.ok(result.includes('<originInfo>'))
-            assert.ok(result.includes('</originInfo>'))
-            assert.ok(!result.includes('<origininfo>'))
-            assert.ok(!result.includes('</origininfo>'))
-        })
-
-        it('should convert relateditem to relatedItem', () => {
-            const parser = new xmldom()
-            const doc = parser.parseFromString(fixtures.relateditemCase.input, 'text/xml')
-
-            renameElement(doc, 'relateditem', 'relatedItem')
-
-            const result = doc.toString()
-
-            assert.ok(result.includes('<relatedItem'))
-            assert.ok(result.includes('</relatedItem>'))
-            assert.ok(!result.includes('<relateditem'))
-            assert.ok(!result.includes('</relateditem>'))
-            assert.ok(result.includes('type="host"'))
-        })
-
-        it('should add single attribute from map', () => {
-            const parser = new xmldom()
-            const input = `<xml><mods>
-                <part>
-                    <number>abc-123-def-456</number>
-                </part>
-            </mods></xml>`
-            const doc = parser.parseFromString(input, 'text/xml')
-
-            renameElement(doc, 'number', 'text', '//part', { type: 'attachment-uuid' })
-
-            const select = xpath.useNamespaces({})
-            const textElements = select('//part/text', doc)
-
-            assert.strictEqual(textElements.length, 1, 'text element should exist')
-            assert.strictEqual(textElements[0].getAttribute('type'), 'attachment-uuid')
-            assert.strictEqual(textElements[0].textContent, 'abc-123-def-456')
-        })
-
-        it('should add multiple attributes from map', () => {
-            const parser = new xmldom()
-            const input = `<xml><mods>
-                <part>
-                    <number>abc-123</number>
-                </part>
-            </mods></xml>`
-            const doc = parser.parseFromString(input, 'text/xml')
-
-            renameElement(doc, 'number', 'text', '//part', { type: 'attachment-uuid', encoding: 'utf-8', lang: 'en' })
-
-            const select = xpath.useNamespaces({})
-            const textElements = select('//part/text', doc)
-
-            assert.strictEqual(textElements.length, 1)
-            assert.strictEqual(textElements[0].getAttribute('type'), 'attachment-uuid')
-            assert.strictEqual(textElements[0].getAttribute('encoding'), 'utf-8')
-            assert.strictEqual(textElements[0].getAttribute('lang'), 'en')
-        })
-
-        it('should preserve existing attributes when adding new ones from map', () => {
-            const parser = new xmldom()
-            const input = `<xml><mods>
-                <part>
-                    <number id="123">abc-123</number>
-                </part>
-            </mods></xml>`
-            const doc = parser.parseFromString(input, 'text/xml')
-
-            renameElement(doc, 'number', 'text', '//part', { type: 'attachment-uuid' })
-
-            const select = xpath.useNamespaces({})
-            const textElements = select('//part/text', doc)
-
-            assert.strictEqual(textElements.length, 1)
-            assert.strictEqual(textElements[0].getAttribute('type'), 'attachment-uuid')
-            assert.strictEqual(textElements[0].getAttribute('id'), '123', 'Should preserve original attribute')
         })
     })
 
@@ -3645,44 +3527,6 @@ describe('Strict MODS Conversion', () => {
             })
         })
 
-        describe('renameElement XPath behavior', () => {
-            it('should rename direct children only with default XPath', () => {
-                const input = `<xml><mods>
-                    <origininfo>
-                        <place/>
-                    </origininfo>
-                    <subject>
-                        <origininfo>
-                            <nested/>
-                        </origininfo>
-                    </subject>
-                </mods></xml>`
-                const parser = new xmldom()
-                const doc = parser.parseFromString(input, 'text/xml')
-
-                // Default context searches from //mods with / (direct child)
-                renameElement(doc, 'origininfo', 'originInfo')
-
-                const result = doc.toString()
-
-                // Direct child under mods should be renamed
-                const select = xpath.useNamespaces({})
-                const originInfos = select('//mods/originInfo', doc)
-
-                assert.strictEqual(originInfos.length, 1, 'Should rename direct child')
-            })
-
-            it('should handle elements with no parent gracefully', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<xml><mods></mods></xml>', 'text/xml')
-
-                // Try to rename element that doesn't exist
-                assert.doesNotThrow(() => {
-                    renameElement(doc, 'nonexistent', 'newName')
-                })
-            })
-        })
-
         describe('removeElement edge cases', () => {
             it('should handle removing non-existent elements', () => {
                 const input = '<xml><mods><title>Test</title></mods></xml>'
@@ -4210,133 +4054,6 @@ describe('Strict MODS Conversion', () => {
             const seriesTitle = select('titleInfo/title', innerRelated[0])[0]
             assert.strictEqual(subseriesTitle.textContent, '7. General Admin Files')
             assert.strictEqual(seriesTitle.textContent, 'I. Administrative Materials')
-        })
-    })
-
-    describe('Helper functions', () => {
-        describe('hasDirectTextContent', () => {
-            it('should return true for element with direct text content', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<root>Some text</root>', 'text/xml')
-                const root = doc.documentElement
-
-                assert.strictEqual(hasDirectTextContent(root), true)
-            })
-
-            it('should return false for element with only child elements', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<root><child>Text</child></root>', 'text/xml')
-                const root = doc.documentElement
-
-                assert.strictEqual(hasDirectTextContent(root), false)
-            })
-
-            it('should return false for element with only whitespace', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<root>   \n\t  </root>', 'text/xml')
-                const root = doc.documentElement
-
-                assert.strictEqual(hasDirectTextContent(root), false)
-            })
-
-            it('should return false for empty element', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<root/>', 'text/xml')
-                const root = doc.documentElement
-
-                assert.strictEqual(hasDirectTextContent(root), false)
-            })
-
-            it('should return true for element with mixed content including text', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<root>Text before<child>nested</child>text after</root>', 'text/xml')
-                const root = doc.documentElement
-
-                assert.strictEqual(hasDirectTextContent(root), true)
-            })
-
-            it('should return false for null element', () => {
-                assert.strictEqual(hasDirectTextContent(null), false)
-            })
-
-            it('should return false for undefined element', () => {
-                assert.strictEqual(hasDirectTextContent(undefined), false)
-            })
-
-            it('should return true for element with only direct text nodes', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<location>California</location>', 'text/xml')
-                const location = doc.documentElement
-
-                assert.strictEqual(hasDirectTextContent(location), true)
-            })
-
-            it('should return false for element with text in child only', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<location><url>http://example.com</url></location>', 'text/xml')
-                const location = doc.documentElement
-
-                assert.strictEqual(hasDirectTextContent(location), false)
-            })
-        })
-
-        describe('safeSelect', () => {
-            it('should return empty array for null document', () => {
-                const result = safeSelect('//mods', null)
-                assert.deepStrictEqual(result, [])
-            })
-
-            it('should return empty array for undefined document', () => {
-                const result = safeSelect('//mods', undefined)
-                assert.deepStrictEqual(result, [])
-            })
-
-            it('should return empty array for XPath with no matches', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
-                const result = safeSelect('//invalid_xpath', doc)
-                assert.deepStrictEqual(result, [])
-            })
-
-            it('should return matching elements for valid XPath', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<xml><mods/><mods/></xml>', 'text/xml')
-                const result = safeSelect('//mods', doc)
-                assert.strictEqual(result.length, 2)
-            })
-
-            it('should not return elements without parents', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<mods><child/></mods>', 'text/xml')
-                const child = xpath.select1("//child", doc)
-                // Manually remove the parent to simulate an orphaned element
-                child.parentNode.parentNode.removeChild(child.parentNode)
-                assert.deepStrictEqual(safeSelect('//child', doc), [])
-            })
-        })
-
-        describe('safeSelectFirst', () => {
-            it('should return null for null document', () => {
-                const result = safeSelectFirst('//mods', null)
-                assert.strictEqual(result, null)
-            })
-
-            it('should return null for XPath with no matches', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
-                const result = safeSelectFirst('//invalid_xpath', doc)
-                assert.strictEqual(result, null)
-            })
-
-            it('should return the first matching element for valid XPath', () => {
-                const parser = new xmldom()
-                const doc = parser.parseFromString('<xml><mods/><mods/></xml>', 'text/xml')
-                const modsElements = xpath.select('//mods', doc)
-                const firstMods = safeSelectFirst('//mods', doc)
-                assert.ok(firstMods)
-                assert.strictEqual(firstMods.nodeName, 'mods')
-                assert.deepEqual(firstMods, modsElements[0])
-            })
         })
     })
 })

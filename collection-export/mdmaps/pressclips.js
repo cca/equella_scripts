@@ -1,13 +1,14 @@
 /* Much of this is modeled on strict-mods.js */
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addRoleTerm,
     createElement,
     hasDirectTextContent,
+    renameElement,
     safeSelectFirst,
     setupModsElement,
 } from './xml-helpers.js'
-import {convertPartNumbers, removeEmptyElements, renameElement, unwrapDateCreated} from './strict-mods.js'
-import {addRoleTerm} from './syllabus.js'
+import {convertPartNumbers, removeEmptyElements, unwrapDateCreated} from './strict-mods.js'
 
 /**
  * Main conversion function to convert Press Clips XML to MODS

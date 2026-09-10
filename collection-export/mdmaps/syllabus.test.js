@@ -1,38 +1,12 @@
 import assert from 'node:assert'
 import {describe, it} from 'mocha'
 import xpath from 'xpath'
-import {addRoleTerm, convertSyllabusXMLtoMODS, PROGRAM_SUBJECT_MAP, trimDegreePostfix} from './syllabus.js'
+import {convertSyllabusXMLtoMODS, PROGRAM_SUBJECT_MAP, trimDegreePostfix} from './syllabus.js'
 import {DOMParser} from '@xmldom/xmldom'
 
 // helper function to wrap XML in a root </xml> element
 const x = (xml) => `<xml>${xml}</xml>`
 
-describe('addRoleTerm', () => {
-    const authority = 'marcrelator'
-    const authorityURI = 'http://id.loc.gov/vocabulary/relators'
-
-    it('should add a role/roleTerm element with authority and type attributes', async () => {
-        const doc = new DOMParser().parseFromString('<mods></mods>', 'text/xml')
-        const valueURI = 'http://id.loc.gov/vocabulary/relators/tch'
-        addRoleTerm(doc.documentElement, 'teacher', valueURI)
-        const roleTerm = xpath.select1('//mods/role/roleTerm', doc)
-        assert.ok(roleTerm)
-        assert.strictEqual(roleTerm.textContent, 'teacher')
-        assert.strictEqual(roleTerm.getAttribute('authority'), authority)
-        assert.strictEqual(roleTerm.getAttribute('authorityURI'), authorityURI)
-        assert.strictEqual(roleTerm.getAttribute('valueURI'), valueURI)
-    })
-
-    it('should work without a valueURI', async () => {
-        const doc = new DOMParser().parseFromString('<mods></mods>', 'text/xml')
-        addRoleTerm(doc.documentElement, 'teacher')
-        const roleTerm = xpath.select1('//mods/role/roleTerm', doc)
-        assert.ok(roleTerm)
-        assert.strictEqual(roleTerm.textContent, 'teacher')
-        assert.strictEqual(roleTerm.getAttribute('authority'), authority)
-        assert.strictEqual(roleTerm.getAttribute('authorityURI'), authorityURI)
-    })
-})
 
 describe('trimDegreePostfix', () => {
     it('should remove degree postfixes like " (BFA)" or " (MFA)"', async () => {

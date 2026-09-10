@@ -7,7 +7,8 @@ import {
     moveAndTransformElement,
     createElement,
     isElementEmpty,
-    hasDirectTextContent
+    hasDirectTextContent,
+    renameElement
 } from './xml-helpers.js'
 
 /**
@@ -304,44 +305,6 @@ export function unwrapDateOther(doc) {
 
         // Remove the wrapper
         parent.removeChild(wrapper)
-    }
-
-    return doc
-}
-
-/**
- * TODO move this to xml-helpers
- * Helper function to rename elements while preserving attributes and children
- * Optionally adds new attributes to the renamed elements
- *
- * @param {Document} doc - XML DOM document
- * @param {string} oldName - Current element name
- * @param {string} newName - New element name
- * @param {string} [xpathContext='//mods'] - XPath context to search within (searches direct children by default)
- * @param {Object} [attributes={}] - Optional map of attribute names to values to add to renamed elements
- *                                    e.g., { type: 'attachment-uuid', encoding: 'utf-8' }
- * @returns {Document} Modified document
- */
-export function renameElement(doc, oldName, newName, xpathContext = XPATH_CONTEXTS.MODS, attributes = {}) {
-    if (!doc || !oldName || !newName) {
-        return doc
-    }
-
-    const elements = safeSelect(`${xpathContext}/${oldName}`, doc)
-
-    for (let element of elements) {
-        const newElement = doc.createElement(newName)
-        copyAttributes(element, newElement)
-
-        // Add new attributes if specified
-        if (attributes && typeof attributes === 'object') {
-            Object.entries(attributes).forEach(([name, value]) => {
-                newElement.setAttribute(name, value)
-            })
-        }
-
-        moveChildren(element, newElement)
-        element.parentNode.replaceChild(newElement, element)
     }
 
     return doc

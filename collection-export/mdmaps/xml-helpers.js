@@ -237,6 +237,69 @@ export function hasDirectTextContent(element) {
 }
 
 /**
+ * Helper function to rename elements while preserving attributes and children
+ * Optionally adds new attributes to the renamed elements
+ *
+ * @param {Document} doc - XML DOM document
+ * @param {string} oldName - Current element name
+ * @param {string} newName - New element name
+ * @param {string} [xpathContext='//mods'] - XPath context to search within (searches direct children by default)
+ * @param {Object} [attributes={}] - Optional map of attribute names to values to add to renamed elements
+ *                                    e.g., { type: 'attachment-uuid', encoding: 'utf-8' }
+ * @returns {Document} Modified document
+ */
+export function renameElement(doc, oldName, newName, xpathContext = '//mods', attributes = {}) {
+    if (!doc || !oldName || !newName) {
+        return doc
+    }
+
+    const elements = safeSelect(`${xpathContext}/${oldName}`, doc)
+
+    for (let element of elements) {
+        const newElement = doc.createElement(newName)
+        copyAttributes(element, newElement)
+
+        // Add new attributes if specified
+        if (attributes && typeof attributes === 'object') {
+            Object.entries(attributes).forEach(([name, value]) => {
+                newElement.setAttribute(name, value)
+            })
+        }
+
+        moveChildren(element, newElement)
+        element.parentNode.replaceChild(newElement, element)
+    }
+
+    return doc
+}
+
+/**
+ * Add a role/roleTerm child to a parent element assuming marcrelator authority.
+ * Used by personalNames and corporateName functions in syllabus.js.
+ * @param   {Element}  parent    Parent (name) element to which the roleTerm is added
+ * @param   {string}   roleTerm  Text content of the roleTerm element
+ * @param   {string}   valueURI  URI for the roleTerm (optional)
+ * @return  {Element|null}       The created roleTerm element, or null if parent or roleTerm is not provided
+ */
+export function addRoleTerm(parent, roleTerm, valueURI = 'marcrelator') {
+    if (!parent || !roleTerm) return null
+
+    const roleElement = createElement(parent.ownerDocument, 'role')
+    parent.appendChild(roleElement)
+    const roleTermElement = createElement(parent.ownerDocument, 'roleTerm')
+    roleTermElement.textContent = roleTerm
+
+    // Set attributes
+    roleTermElement.setAttribute('authority', 'marcrelator')
+    roleTermElement.setAttribute('authorityURI', 'http://id.loc.gov/vocabulary/relators')
+    if (valueURI) roleTermElement.setAttribute('valueURI', valueURI)
+
+    roleElement.appendChild(roleTermElement)
+
+    return roleTermElement
+}
+
+/**
  * Standardize <mods> element: 1) ensure there is exactly 1 <mods> element
  * and 2) add the appropriate attributes
  * @param {Document} doc - The XML document containing the <mods> element

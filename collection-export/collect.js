@@ -23,9 +23,7 @@ const options = rc('app', defaults)
 const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
 /**
  * Map collection UUIDs to MODS XML conversion functions
- *
- * @key {str}                   UUID for EQUELLA collection
- * @val {Callable<Document>}    Function that returns an XML document (NOT string)
+ * @type {Record<string, (xml: string) => Document>}
  */
 const modsMap = {
     "9ec74523-e018-4e01-ab4e-be4dd06cdd68": convertSyllabusXMLtoMODS

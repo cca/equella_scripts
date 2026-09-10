@@ -122,6 +122,52 @@ describe('convertPressClipsXMLtoMODS', () => {
         })
     })
 
+    describe('Press Clippings archives series', () => {
+        it('should add the Press Clippings series to the mods', () => {
+            const result = convertPressClipsXMLtoMODS(x('<mods></mods>'))
+            const outerRelatedItem = xpath.select1("relatedItem[@type='series' and @displayLabel='subseries']", result)
+            assert.ok(outerRelatedItem)
+            const outerTitle = xpath.select1('titleInfo/title', outerRelatedItem)
+            assert.ok(outerTitle)
+            assert.strictEqual(outerTitle.textContent, '1. Press Clippings')
+
+            const innerRelatedItem = xpath.select1("relatedItem[@type='series' and @displayLabel='series']", outerRelatedItem)
+            assert.ok(innerRelatedItem)
+            const innerTitle = xpath.select1('titleInfo/title', innerRelatedItem)
+            assert.ok(innerTitle)
+            assert.strictEqual(innerTitle.textContent, 'VII. Press')
+        })
+    })
+
+    describe('host relatedItem@type=host removal', () => {
+        it('should remove the host relatedItem from the mods', () => {
+            const result = convertPressClipsXMLtoMODS(x('<mods><relatedItem type="host"><title>Press Clips</title></relatedItem></mods>'))
+            const hostRelatedItem = xpath.select1("relatedItem[@type='host']", result)
+            assert.strictEqual(hostRelatedItem, undefined)
+        })
+    })
+
+    describe('publication', () => {
+        it('should move relateditem/title to relatedItem[@type="host"]/titleInfo/title', () => {
+            const text = "New York Times"
+            const result = convertPressClipsXMLtoMODS(x(`<mods><relateditem><title>${text}</title></relateditem></mods>`))
+            const hostRelatedItem = xpath.select1("relatedItem[@type='host']", result)
+            assert.ok(hostRelatedItem)
+            const title = xpath.select1('titleInfo/title', hostRelatedItem)
+            assert.ok(title)
+            assert.strictEqual(title.textContent, text)
+        })
+
+        it('should skip empty relateditem and relateditem/title elements', () => {
+            const result = convertPressClipsXMLtoMODS(x('<mods><relateditem></relateditem></mods>'))
+            const hostRelatedItem = xpath.select1("relatedItem[@type='host']", result)
+            assert.strictEqual(hostRelatedItem, undefined)
+            const result2 = convertPressClipsXMLtoMODS(x('<mods><relateditem><title></title></relateditem></mods>'))
+            const hostRelatedItem2 = xpath.select1("relatedItem[@type='host']", result2)
+            assert.strictEqual(hostRelatedItem2, undefined)
+        })
+    })
+
     describe('name role/type', () => {
         it('should add an author role & type=personal to the first mods/name', () => {
             const result = convertPressClipsXMLtoMODS(x('<mods><name><namePart>Jane Doe</namePart></name></mods>'))

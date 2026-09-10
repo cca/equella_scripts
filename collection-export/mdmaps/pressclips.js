@@ -12,6 +12,27 @@ import {
 import {convertPartNumbers, removeEmptyElements, unwrapDateCreated} from './strict-mods.js'
 
 /**
+ * Move mods/relateditem/title to mods/relatedItem[@type='host']/titleInfo/title
+ * @param {Document} doc - XML document
+ * @returns {Document} Modified XML document with the host title moved if applicable
+ */
+function fixPublication(doc) {
+    renameElement(doc, "relateditem", "relatedItem", "//mods")
+    const relatedItem = safeSelectFirst("//mods/relatedItem", doc)
+    if (relatedItem) {
+        const titles = relatedItem.getElementsByTagName('title')
+        const title = titles.length > 0 ? titles[0] : null
+        if (hasDirectTextContent(title)) {
+            const titleInfo = createElement(doc, 'titleInfo')
+            titleInfo.appendChild(title)
+            relatedItem.appendChild(titleInfo)
+        }
+        relatedItem.setAttribute('type', 'host')
+    }
+    return doc
+}
+
+/**
  * Converts a depicted person in the local communications wrapper to a MODS subject name element.
  * @param {Document} doc - XML document
  * @returns {Document}
@@ -47,6 +68,38 @@ function ccaNamedNote(doc) {
         const mods = safeSelectFirst("//mods", doc)
         mods.appendChild(note)
     }
+    return doc
+}
+
+/**
+ * Add VII. Press > 1. Press Clippings archives series
+ * @param {Document} doc - XML document
+ * @returns {Document} Modified XML document with the press clippings series added
+ */
+function addPressClippingsSeries(doc) {
+    const outerRelatedItem = doc.createElement('relatedItem')
+    outerRelatedItem.setAttribute('type', 'series')
+    outerRelatedItem.setAttribute('displayLabel', 'subseries')
+
+    const outerTitleInfo = doc.createElement('titleInfo')
+    const outerTitle = doc.createElement('title')
+    outerTitle.textContent = "1. Press Clippings"
+    outerTitleInfo.appendChild(outerTitle)
+    outerRelatedItem.appendChild(outerTitleInfo)
+
+    // Inner relatedItem is series
+    const innerRelatedItem = doc.createElement('relatedItem')
+    innerRelatedItem.setAttribute('type', 'series')
+    innerRelatedItem.setAttribute('displayLabel', 'series')
+
+    const innerTitleInfo = doc.createElement('titleInfo')
+    const innerTitle = doc.createElement('title')
+    innerTitle.textContent = "VII. Press"
+    innerTitleInfo.appendChild(innerTitle)
+    innerRelatedItem.appendChild(innerTitleInfo)
+
+    outerRelatedItem.appendChild(innerRelatedItem)
+    safeSelectFirst("//mods", doc).appendChild(outerRelatedItem)
     return doc
 }
 
@@ -109,7 +162,14 @@ export function convertPressClipsXMLtoMODS(xmlString) {
         name.setAttribute("type", "personal")
     }
 
-    // ? how to handle publication? relatedItem@type=host? drop the Press Clips relatedItem then?
+    // ! Do these in this exact order to simplify relatedItem handling
+    // Remove the relatedItem (note capitalization) @type=host = Press Clips element
+    const hostRelatedItem = safeSelectFirst("//mods/relatedItem[@type='host']", doc)
+    if (hostRelatedItem) hostRelatedItem.parentNode.removeChild(hostRelatedItem)
+    // publication (relateditem/title, note lowercase) to relatedItem@type=host/titleInfo/title
+    fixPublication(doc)
+    // Add the Press Clippings series from the archive series
+    addPressClippingsSeries(doc)
 
     // local/communicationsWrapper/depictedWrapper/depictedPerson -> mods/subject/name@type=personal
     depictedPersonToSubjectName(doc)

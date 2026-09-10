@@ -1,10 +1,11 @@
 /* Much of this is modeled on strict-mods.js */
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    createElement,
+    hasDirectTextContent,
     safeSelect,
     safeSelectFirst,
-    createElement,
-    hasDirectTextContent
+    setupModsElement,
 } from './xml-helpers.js'
 import {convertPartNumbers, removeEmptyElements} from './strict-mods.js'
 
@@ -549,22 +550,7 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     }
 
     // Ensure we have one and only one <mods> element, creating one if necessary
-    const modsElements = safeSelect("//mods", doc)
-    let mods
-    if (modsElements.length > 0) {
-        mods = modsElements[0] // default to first mods element if multiple exist
-        // If there are multiple <mods> elements, remove the extras
-        for (let i = 1; i < modsElements.length; i++) {
-            modsElements[i].parentNode.removeChild(modsElements[i])
-        }
-    } else {
-        mods = createElement(doc, 'mods')
-        doc.documentElement.appendChild(mods)
-    }
-    mods.setAttribute("xmlns", 'http://www.loc.gov/mods/v3')
-    mods.setAttribute("version", '3.8')
-    mods.setAttribute("xmlns:xsi", 'http://www.w3.org/2001/XMLSchema-instance')
-    mods.setAttribute("xsi:schemaLocation", 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd')
+    let mods = setupModsElement(doc)
 
     // Fix titleInfo elements
     fixSyllabusTitle(doc)
@@ -598,8 +584,6 @@ export function convertSyllabusXMLtoMODS(xmlString) {
 // CLI functionality - run when executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
     const fs = await import('fs')
-    const path = await import('path')
-
     const args = process.argv.slice(2)
 
     if (args.length === 0 || args.includes('--help') || args.includes('-h')) {

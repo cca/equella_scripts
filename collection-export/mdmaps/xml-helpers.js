@@ -235,3 +235,29 @@ export function hasDirectTextContent(element) {
 
     return false
 }
+
+/**
+ * Standardize <mods> element: 1) ensure there is exactly 1 <mods> element
+ * and 2) add the appropriate attributes
+ * @param {Document} doc - The XML document containing the <mods> element
+ * @returns {Element} The standardized <mods> element
+ */
+export function setupModsElement(doc) {
+    const modsElements = safeSelect("//mods", doc)
+    let mods
+    if (modsElements.length > 0) {
+        mods = modsElements[0] // default to first mods element if multiple exist
+        // If there are multiple <mods> elements, remove the extras
+        for (let i = 1; i < modsElements.length; i++) {
+            modsElements[i].parentNode.removeChild(modsElements[i])
+        }
+    } else {
+        mods = createElement(doc, 'mods')
+        doc.documentElement.appendChild(mods)
+    }
+    mods.setAttribute("xmlns", 'http://www.loc.gov/mods/v3')
+    mods.setAttribute("version", '3.8')
+    mods.setAttribute("xmlns:xsi", 'http://www.w3.org/2001/XMLSchema-instance')
+    mods.setAttribute("xsi:schemaLocation", 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd')
+    return mods
+}

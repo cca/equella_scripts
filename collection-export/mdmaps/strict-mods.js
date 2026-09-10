@@ -1343,8 +1343,6 @@ export function toStrictMODS(xmlString) {
 // CLI functionality - run when executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
     const fs = await import('fs')
-    const path = await import('path')
-
     const args = process.argv.slice(2)
 
     if (args.length === 0 || args.includes('--help') || args.includes('-h')) {

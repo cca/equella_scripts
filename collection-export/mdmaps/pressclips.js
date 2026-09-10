@@ -42,8 +42,10 @@ function depictedPersonToSubjectName(doc) {
     for (const person of depictedPerson) {
         if (person && hasDirectTextContent(person)) {
             const subjectName = createElement(doc, "subject")
-            const name = createElement(doc, "name", person.textContent)
+            const name = createElement(doc, "name")
             name.setAttribute("type", "personal")
+            const namePart = createElement(doc, "namePart", person.textContent)
+            name.appendChild(namePart)
             subjectName.appendChild(name)
             const mods = safeSelectFirst("//mods", doc)
             if (mods) {

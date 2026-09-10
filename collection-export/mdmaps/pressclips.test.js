@@ -201,7 +201,9 @@ describe('convertPressClipsXMLtoMODS', () => {
             const name = xpath.select1('name', subject)
             assert.ok(name)
             assert.strictEqual(name.getAttribute('type'), 'personal')
-            assert.strictEqual(name.textContent, 'John Doe')
+            const namePart = xpath.select1('namePart', name)
+            assert.ok(namePart)
+            assert.strictEqual(namePart.textContent, 'John Doe')
         })
 
         it('should handle multiple depictedPerson elements', () => {
@@ -219,8 +221,9 @@ describe('convertPressClipsXMLtoMODS', () => {
             const subjects = xpath.select('subject', result)
             assert.strictEqual(subjects.length, 2)
             const names = subjects.map(subject => xpath.select1('name', subject))
-            assert.strictEqual(names[0].textContent, 'John Doe')
-            assert.strictEqual(names[1].textContent, 'Jane Smith')
+            const nameParts = names.map(name => xpath.select1('namePart', name))
+            assert.strictEqual(nameParts[0].textContent, 'John Doe')
+            assert.strictEqual(nameParts[1].textContent, 'Jane Smith')
         })
 
         it('should skip empty depictedPerson elements', () => {

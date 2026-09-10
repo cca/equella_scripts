@@ -310,6 +310,7 @@ export function unwrapDateOther(doc) {
 }
 
 /**
+ * TODO move this to xml-helpers
  * Helper function to rename elements while preserving attributes and children
  * Optionally adds new attributes to the renamed elements
  *

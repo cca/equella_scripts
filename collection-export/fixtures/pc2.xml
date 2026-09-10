@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- this record has some data in communicationsWrapper -->
+<xml>
+    <mods>
+        <origininfo>
+            <dateCreatedWrapper>
+                <dateCreated>2013-12-04</dateCreated>
+            </dateCreatedWrapper>
+        </origininfo>
+        <titleInfo>
+            <title>Experimental Histories at CCA</title>
+        </titleInfo>
+        <name>
+            <namePart>Irene Chang</namePart>
+        </name>
+        <part>
+            <number>d41c47d9-c69f-4009-833d-76194458473b</number>
+        </part>
+        <relateditem>
+            <title>The East Architects Newspaper</title>
+        </relateditem>
+        <abstract />
+        <relatedItem type="host">
+            <title>Press Clips</title>
+        </relatedItem>
+    </mods>
+    <local>
+        <communicationsWrapper>
+            <depictedWrapper>
+                <depictedConstituents>Faculty</depictedConstituents>
+            </depictedWrapper>
+            <ccaNamed>yes</ccaNamed>
+        </communicationsWrapper>
+    </local>
+</xml>

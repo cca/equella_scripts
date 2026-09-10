@@ -10,6 +10,7 @@ import {
 import {convertPartNumbers, removeEmptyElements} from './strict-mods.js'
 
 /**
+ * TODO move this to xml-helpers.js
  * Add a role/roleTerm child to a parent element assuming marcrelator authority.
  * Used by personalNames and corporateName functions.
  * @param   {Element}  parent    Parent (name) element to which the roleTerm is added
@@ -570,9 +571,7 @@ export function convertSyllabusXMLtoMODS(xmlString) {
 
     addFullCourseInfoNote(doc)
 
-    // Strip the /local XML tree entirely & make <mods> the new root element
-    const local = safeSelectFirst("//local", doc)
-    if (local) doc.documentElement.removeChild(local)
+    // Make <mods> the new root element (drops /local branch of XML tree)
     doc.replaceChild(mods, doc.documentElement)
 
     doc.normalize() // remove empty text nodes and merge adjacent text nodes

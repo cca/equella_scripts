@@ -1,0 +1,31 @@
+<xml>
+    <!-- fairly standard Press Clips record -->
+    <mods>
+        <origininfo>
+            <dateCreatedWrapper>
+                <dateCreated>2013-09-01</dateCreated>
+            </dateCreatedWrapper>
+        </origininfo>
+        <titleInfo>
+            <title>Fashion on the Square</title>
+        </titleInfo>
+        <name>
+            <namePart>Tony Bravo</namePart>
+        </name>
+        <part>
+            <number>dd196353-2065-479b-aa1f-6493a5814da7</number>
+        </part>
+        <relateditem>
+            <title>SF Chronicle</title>
+        </relateditem>
+        <abstract />
+        <relatedItem type="host">
+            <title>Press Clips</title>
+        </relatedItem>
+    </mods>
+    <local>
+        <communicationsWrapper>
+            <depictedWrapper />
+        </communicationsWrapper>
+    </local>
+</xml>

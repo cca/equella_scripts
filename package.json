@@ -16,7 +16,7 @@
     "retentiontest": "mocha retention/test --config retention/test/.testretentionrc",
     "sylxmltest": "mocha collection-export/mdmaps/syllabus.test.js",
     "xmlhelperstest": "mocha collection-export/mdmaps/xml-helpers.test.js",
-    "test": "mocha",
+    "test": "npm run csvtest && npm run grouptest && npm run exportxmltest && npm run retentiontest",
     "lint": "eslint . --cache"
   },
   "repository": {

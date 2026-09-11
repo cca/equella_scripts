@@ -10,6 +10,32 @@ import {
 } from './xml-helpers.js'
 import {convertPartNumbers, removeEmptyElements, unwrapDateCreated, unwrapSimpleElement} from './strict-mods.js'
 
+// These are the terms under the Administrative part of the "CCA Departments & Prograns" taxonomy
+// which is what the local/department element uses in the EQUELLA contribution wizard
+// ? The 4 academic divisions are under Administrative but shouldn't we consider them academic?
+const ADMINISTRATIVE_DEPARTMENTS = [
+    "Academic Affairs",
+    "Advancement",
+    "Alumni Relations",
+    // "Architecture Division",
+    "Business Office",
+    "Career Services",
+    "Communications",
+    // "Design Division",
+    "ETS",
+    "Enrollment Services (ESO)",
+    "Facilities (Oakland)",
+    "Facilities (San Francisco)",
+    "Financial Aid",
+    // "Fine Arts Division",
+    "Human Resources",
+    // "Humanities and Sciences Division",
+    "Libraries",
+    "Student Affairs",
+    "Student Records",
+    "Studio Resources",
+]
+
 // DocType ENUM which will be used in 2 places (mapDocumentCategoryToSubject and addArchivesSeries)
 const DocType = Object.freeze({
     "ACCREDITATION": Symbol("ACCREDITATION"),
@@ -38,16 +64,28 @@ function determineDocType(doc) {
 }
 
 /**
- * Add Archives Series based on the document type
+ * Add Archives Series based on the document type &
+ * (if it's an Assessment document) local/department
  * @param {Document} doc - XML document
  * @param {DocType<Symbol>} docType - Assessment/Accreditation document type
- * @returns {void}
+ * @returns {Element|null} The outermost relatedItem element added to <mods>, or null if neither
+ *                          series nor subseries were provided, or no <mods> element was found
  */
 function docTypeToArchivesSeries(doc, docType) {
     if (docType === DocType.ACCREDITATION) {
-        addArchivesSeries(doc, "I. Administrative Materials", "2. Accreditation and Licensing Materials")
-    } else if (docType === DocType.ASSESSMENT) {
-        // Add archives series for assessment documents
+        return addArchivesSeries(doc, "I. Administrative Materials", "2. Accreditation and Licensing Materials")
+    }
+    if (docType === DocType.ASSESSMENT) {
+        const departments = safeSelect("//local/department", doc)
+            .map(el => el.textContent.trim())
+            .filter(dept => dept !== "")
+        for (const department of departments) {
+            if (ADMINISTRATIVE_DEPARTMENTS.includes(department)) {
+                return addArchivesSeries(doc, "IV. Department Materials", "2. Administrative Departments")
+            }
+        }
+        // If no administrative department is found, add academic department
+        return addArchivesSeries(doc, "IV. Department Materials", "1. Academic Departments")
     }
 }
 
@@ -180,7 +218,8 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     unwrapSimpleElement(doc, 'genreWrapper', "//mods")
 
     // I. Admin 2. Accred. if docType = Assessment
-    // TODO what to do otherwise?
+    // IV. Department Materials > 1. Academic if it has an academic program, 2. Admin otherwise
+    // ! This must come before departmentsToSubjectName because it uses local/department
     docTypeToArchivesSeries(doc, docType)
 
     // map Assessment/Accreditation category to mods/subject/topic

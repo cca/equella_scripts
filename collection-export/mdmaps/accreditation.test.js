@@ -130,6 +130,113 @@ describe('convertAccreditationXMLtoMODS', () => {
         })
     })
 
+    describe('archives series', () => {
+        // the four academic divisions live under the Administrative part of the
+        // "CCA Departments & Programs" taxonomy but are deliberately treated as academic
+        const DIVISIONS = [
+            'Architecture Division',
+            'Design Division',
+            'Fine Arts Division',
+            'Humanities and Sciences Division',
+        ]
+
+        // build an item with a given formSpecific category & optional local/department elements
+        const item = (formSpecific, ...departments) => x(
+            `<mods><physicalDescription><formSpecific>${formSpecific}</formSpecific></physicalDescription></mods>`
+            + (departments.length ? `<local>${departments.map(d => `<department>${d}</department>`).join('')}</local>` : '')
+        )
+
+        // assert the nested series structure: subseries is the outer relatedItem, series is nested inside
+        const assertSeries = (result, series, subseries) => {
+            const outer = xpath.select1("//mods/relatedItem[@type='series' and @displayLabel='subseries']", result)
+            assert.ok(outer, 'expected a subseries relatedItem')
+            assert.strictEqual(xpath.select('string(titleInfo/title)', outer), subseries)
+            const inner = xpath.select1("relatedItem[@type='series' and @displayLabel='series']", outer)
+            assert.ok(inner, 'expected a nested series relatedItem')
+            assert.strictEqual(xpath.select('string(titleInfo/title)', inner), series)
+        }
+
+        it('should add an archives series to every item regardless of doc type', () => {
+            for (const formSpecific of ['Assessment', 'Accreditation']) {
+                const result = convertAccreditationXMLtoMODS(item(formSpecific))
+                assert.ok(
+                    xpath.select1("//mods/relatedItem[@type='series']", result),
+                    `expected an archives series for a ${formSpecific} document`
+                )
+            }
+        })
+
+        describe('Accreditation documents', () => {
+            it('should add I. Administrative Materials > 2. Accreditation and Licensing Materials', () => {
+                const result = convertAccreditationXMLtoMODS(item('Accreditation'))
+                assertSeries(result, 'I. Administrative Materials', '2. Accreditation and Licensing Materials')
+            })
+
+            it('should use the same series for an administrative department', () => {
+                const result = convertAccreditationXMLtoMODS(item('Accreditation', 'Libraries'))
+                assertSeries(result, 'I. Administrative Materials', '2. Accreditation and Licensing Materials')
+            })
+
+            it('should use the same series for an academic department', () => {
+                const result = convertAccreditationXMLtoMODS(item('Accreditation', 'Comics (MFA)'))
+                assertSeries(result, 'I. Administrative Materials', '2. Accreditation and Licensing Materials')
+            })
+        })
+
+        describe('Assessment documents', () => {
+            it('should add IV. Department Materials > 2. Administrative Departments for an admin department', () => {
+                const result = convertAccreditationXMLtoMODS(item('Assessment', 'Libraries'))
+                assertSeries(result, 'IV. Department Materials', '2. Administrative Departments')
+            })
+
+            it('should add IV. Department Materials > 1. Academic Departments for an academic department', () => {
+                const result = convertAccreditationXMLtoMODS(item('Assessment', 'Comics (MFA)'))
+                assertSeries(result, 'IV. Department Materials', '1. Academic Departments')
+            })
+
+            it('should default to 1. Academic Departments when there is no department', () => {
+                const result = convertAccreditationXMLtoMODS(item('Assessment'))
+                assertSeries(result, 'IV. Department Materials', '1. Academic Departments')
+            })
+
+            it('should default to 1. Academic Departments when the department is empty', () => {
+                const result = convertAccreditationXMLtoMODS(item('Assessment', '   '))
+                assertSeries(result, 'IV. Department Materials', '1. Academic Departments')
+            })
+
+            it('should use 2. Administrative Departments if any one department is administrative', () => {
+                const result = convertAccreditationXMLtoMODS(item('Assessment', 'Comics (MFA)', 'Academic Affairs'))
+                assertSeries(result, 'IV. Department Materials', '2. Administrative Departments')
+            })
+        })
+
+        describe('academic divisions', () => {
+            // divisions sit under Administrative in the taxonomy but are considered academic
+            for (const division of DIVISIONS) {
+                it(`should treat ${division} as an academic department`, () => {
+                    const result = convertAccreditationXMLtoMODS(item('Assessment', division))
+                    assertSeries(result, 'IV. Department Materials', '1. Academic Departments')
+                })
+            }
+
+            it('should treat a division as academic even alongside another academic department', () => {
+                const result = convertAccreditationXMLtoMODS(item('Assessment', 'Fine Arts Division', 'Design Division'))
+                assertSeries(result, 'IV. Department Materials', '1. Academic Departments')
+            })
+
+            it('should still use 2. Administrative Departments for a division plus a true admin department', () => {
+                const result = convertAccreditationXMLtoMODS(item('Assessment', 'Fine Arts Division', 'Academic Affairs'))
+                assertSeries(result, 'IV. Department Materials', '2. Administrative Departments')
+            })
+        })
+
+        it('should add only one archives series per item', () => {
+            const result = convertAccreditationXMLtoMODS(item('Assessment', 'Fine Arts Division', 'Design Division', 'Academic Affairs'))
+            const outerSeries = xpath.select("//mods/relatedItem[@type='series' and @displayLabel='subseries']", result)
+            assert.strictEqual(outerSeries.length, 1)
+        })
+    })
+
     describe('dateCreated unwrapping', () => {
         it('should unwrap origininfo/dateCreatedWrapper/dateCreated to originInfo/dateCreated w/ edtf encoding', () => {
             const input = x(`<mods>

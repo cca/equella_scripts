@@ -1,5 +1,6 @@
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addArchivesSeries,
     createElement,
     hasDirectTextContent,
     renameElement,
@@ -39,14 +40,14 @@ function determineDocType(doc) {
 /**
  * Add Archives Series based on the document type
  * @param {Document} doc - XML document
- * @param {DocType<Symbol>} docType - The determined document type based on the content of the XML document.
+ * @param {DocType<Symbol>} docType - Assessment/Accreditation document type
  * @returns {void}
  */
-function addArchivesSeries(doc, docType) {
-    if (docType === DocType.ASSESSMENT) {
+function docTypeToArchivesSeries(doc, docType) {
+    if (docType === DocType.ACCREDITATION) {
+        addArchivesSeries(doc, "I. Administrative Materials", "2. Accreditation and Licensing Materials")
+    } else if (docType === DocType.ASSESSMENT) {
         // Add archives series for assessment documents
-    } else if (docType === DocType.ACCREDITATION) {
-        // Add archives series for accreditation documents
     }
 }
 
@@ -180,7 +181,7 @@ export function convertAccreditationXMLtoMODS(xmlString) {
 
     // I. Admin 2. Accred. if docType = Assessment
     // TODO what to do otherwise?
-    addArchivesSeries(doc, docType)
+    docTypeToArchivesSeries(doc, docType)
 
     // map Assessment/Accreditation category to mods/subject/topic
     mapDocumentCategoryToSubject(doc, docType)

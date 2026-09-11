@@ -9,28 +9,66 @@ import {
 } from './xml-helpers.js'
 import {convertPartNumbers, removeEmptyElements, unwrapDateCreated, unwrapSimpleElement} from './strict-mods.js'
 
+// DocType ENUM which will be used in 2 places (mapDocumentCategoryToSubject and addArchivesSeries)
+const DocType = Object.freeze({
+    "ACCREDITATION": Symbol("ACCREDITATION"),
+    "ASSESSMENT": Symbol("ASSESSMENT")
+})
+
+/**
+ * All items are either Assessment or Accreditation based on their mods/physicalDescription/formSpecific
+ * @param {Document} doc - XML Document
+ * @returns {DocType<Symbol>} - The determined document type based on the content of the XML document.
+ */
+function determineDocType(doc) {
+    const docCategoryText = safeSelectFirst("//mods/physicalDescription/formSpecific", doc)
+    let docType
+    switch (docCategoryText?.textContent?.trim()?.toLowerCase()) {
+    case 'accreditation':
+        docType = DocType.ACCREDITATION
+        break
+    case 'assessment':
+        docType = DocType.ASSESSMENT
+        break
+    default:
+        throw Error("Unknown document category: " + docCategoryText?.textContent)
+    }
+    return docType
+}
+
+/**
+ * Add Archives Series based on the document type
+ * @param {Document} doc - XML document
+ * @param {DocType<Symbol>} docType - The determined document type based on the content of the XML document.
+ * @returns {void}
+ */
+function addArchivesSeries(doc, docType) {
+    if (docType === DocType.ASSESSMENT) {
+        // Add archives series for assessment documents
+    } else if (docType === DocType.ACCREDITATION) {
+        // Add archives series for accreditation documents
+    }
+}
+
 /**
  * Map document category (Assessment or Accreditation) to a MODS subject/topic element.
  * @param {Document} doc - XML Document
  * @returns {void}
  * @throws {Error} If the document type is not supported
  */
-function mapDocumentCategoryToSubject(doc) {
-    const docType = safeSelectFirst("//mods/physicalDescription/formSpecific", doc).textContent
+function mapDocumentCategoryToSubject(doc, docType) {
     const mods = safeSelectFirst("//mods", doc)
     const subject = createElement(doc, 'subject')
     const topic = createElement(doc, 'topic')
     topic.setAttribute('authority', 'lcsh')
     topic.setAttribute('authorityURI', 'http://id.loc.gov/authorities/subjects')
 
-    if (docType === 'Assessment') {
+    if (docType === DocType.ASSESSMENT) {
         topic.textContent = 'Assessment'
         topic.setAttribute('valueURI', 'http://id.loc.gov/authorities/subjects/sh85045926')
-    } else if (docType === 'Accreditation') {
+    } else if (docType === DocType.ACCREDITATION) {
         topic.textContent = 'Accreditation (Education)'
         topic.setAttribute('valueURI', 'http://id.loc.gov/authorities/subjects/sh85000437')
-    } else {
-        throw Error(`Unsupported Assessment & Accreditation document type: ${docType}`)
     }
 
     // add the created elements to the document
@@ -110,6 +148,9 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     // Ensure we have one and only one <mods> element, creating one if necessary
     let mods = setupModsElement(doc)
 
+    // Do this first, used in mapDocumentCategoryToSubject & addArchivesSeries
+    const docType = determineDocType(doc)
+
     // add typeOfResource = text
     const typeOfResource = createElement(doc, 'typeOfResource', 'text')
     mods.appendChild(typeOfResource)
@@ -118,10 +159,12 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     // TODO we could map these doc types to LCGFT or AAT forms
     unwrapSimpleElement(doc, 'genreWrapper', "//mods")
 
-    // TODO archives series for these, can it be all the same?
+    // I. Admin 2. Accred. if docType = Assessment
+    // TODO what to do otherwise?
+    addArchivesSeries(doc, docType)
 
     // map Assessment/Accreditation category to mods/subject/topic
-    mapDocumentCategoryToSubject(doc)
+    mapDocumentCategoryToSubject(doc, docType)
 
     // Accreditation Organization (can be multiple) in subject/name
     fixSubjectName(doc)

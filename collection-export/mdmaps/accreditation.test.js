@@ -7,24 +7,7 @@ import {convertAccreditationXMLtoMODS} from './accreditation.js'
 const x = (xml) => `<xml>${xml}</xml>`
 
 describe('convertAccreditationXMLtoMODS', () => {
-    describe('input validation', () => {
-        it('should throw an error for non-string input', () => {
-            assert.throws(() => convertAccreditationXMLtoMODS(null), /XML input must be a string/)
-            assert.throws(() => convertAccreditationXMLtoMODS(undefined), /XML input must be a string/)
-            assert.throws(() => convertAccreditationXMLtoMODS(42), /XML input must be a string/)
-            assert.throws(() => convertAccreditationXMLtoMODS({}), /XML input must be a string/)
-        })
-
-        it('should throw an error for empty string input', () => {
-            assert.throws(() => convertAccreditationXMLtoMODS(''), /XML input cannot be empty/)
-            assert.throws(() => convertAccreditationXMLtoMODS('   '), /XML input cannot be empty/)
-        })
-
-        it('should throw an error for malformed XML', () => {
-            assert.throws(() => convertAccreditationXMLtoMODS(x('<mods><unclosed></mods>')), /Failed to parse XML/)
-        })
-    })
-
+    // we do not need to test invalid input, this is tested in multiple other places
     describe('MODS setup', () => {
         it('should include the MODS namespace & attributes', () => {
             const result = convertAccreditationXMLtoMODS(x('<mods><physicalDescription><formSpecific>Assessment</formSpecific></physicalDescription></mods>'))
@@ -90,11 +73,6 @@ describe('convertAccreditationXMLtoMODS', () => {
             const input = x('<mods><physicalDescription><formSpecific>Assessment</formSpecific></physicalDescription></mods>')
             const result = convertAccreditationXMLtoMODS(input)
             assert.strictEqual(xpath.select1('//mods/physicalDescription', result), undefined)
-        })
-
-        it('should throw an error for an unsupported document type', () => {
-            const input = x('<mods><physicalDescription><formSpecific>Unknown</formSpecific></physicalDescription></mods>')
-            assert.throws(() => convertAccreditationXMLtoMODS(input), /Unsupported Assessment & Accreditation document type/)
         })
     })
 

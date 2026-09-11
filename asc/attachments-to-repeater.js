@@ -6,9 +6,9 @@
 // Scripting Control at the bottom of the Wizard page where the
 // attachments control is
 var iter = xml.list('/local/staging/file').listIterator(),
-    index;
+    index
 
 while (iter.hasNext()) {
-    index = iter.nextIndex();
-    xml.set('/mods/part[' + index + ']/number', iter.next());
+    index = iter.nextIndex()
+    xml.set('/mods/part[' + index + ']/number', iter.next())
 }

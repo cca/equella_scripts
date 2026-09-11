@@ -186,7 +186,7 @@ if (import.meta.url.replace(/\.js$/, '') === pathToFileURL(process.argv[1]).href
     global.homeEmails = []
     main(itemsFile, homeEmailsFile).catch(e => console.error(e)).finally(() => {
         const basename = path.basename(itemsFile)
-            , new_name = itemsFile.replace(basename, `x${basename}`);
+            , new_name = itemsFile.replace(basename, `x${basename}`)
         fs.rename(itemsFile, new_name, (err) => {
             if (err) throw err
             log(`Renamed ${itemsFile} to ${new_name}`)

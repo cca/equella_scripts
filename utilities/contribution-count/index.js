@@ -74,7 +74,7 @@ function collectionCount(items) {
             console.log(`${'Collection'.padEnd(longestNameLen)}\tContribution count`)
             uuids.sort((a, b) => counts[ b ].count - counts[ a ].count)
                 .forEach(uuid => {
-                    console.log(`${counts[uuid].name.padEnd(longestNameLen)}\t${counts[uuid].count}`);
+                    console.log(`${counts[uuid].name.padEnd(longestNameLen)}\t${counts[uuid].count}`)
                 })
         }).catch(e => {
             console.error(e)

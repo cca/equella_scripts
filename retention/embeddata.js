@@ -139,7 +139,7 @@ async function main(items_file) {
     collections = await getCollections()
 
     let chunks = items.length
-    let embedded = Array.from({length: chunks}, () => []);
+    let embedded = Array.from({length: chunks}, () => [])
     for (let i = 0; i < chunks; i++) {
         for (let item of items[i]) {
             let embedded_item = await embed(item)

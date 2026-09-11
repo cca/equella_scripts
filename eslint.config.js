@@ -27,7 +27,8 @@ export default [
             indent: [ 'warn', 4 ],
             'linebreak-style': [ 'error', 'unix' ],
             'no-unused-vars': 'off',
-            'no-empty': 'off'
+            'no-empty': 'off',
+            'semi': [ 'warn', 'never' ]
         }
     },
     globalIgnores(["fine-arts-jr-review/.venv"])

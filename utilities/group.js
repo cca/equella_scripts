@@ -193,7 +193,7 @@ export function rmUsersFromGroup(users, group) {
 }
 
 async function main() {
-    let group, users, command = options._[0];
+    let group, users, command = options._[0]
     if (options.uuid && options.name) {
         console.error('Error: invoked with both a group name and UUID; use only one or the other.\n')
         usage(1)

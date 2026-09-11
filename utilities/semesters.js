@@ -15,6 +15,6 @@ const seasons = ['Fall', 'Summer', 'Spring']
 
 for (let i = end; i > start - 1; i--) {
     seasons.forEach((season) => {
-        console.log(['"', season, ' ', i, '"'].join(''));
+        console.log(['"', season, ' ', i, '"'].join(''))
     })
 }

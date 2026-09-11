@@ -62,13 +62,13 @@ if (standardNo) {
     switch (type) {
     case 'journal article':
         xml.set('/mods/relatedItem/identifier/@type', 'issn')
-        break;
+        break
     case 'book chapter':
         xml.set('/mods/relatedItem/identifier/@type', 'isbn')
-        break;
+        break
     default:
         // if it falls through, do nothing
-        break;
+        break
     }
 }
 

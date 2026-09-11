@@ -13,7 +13,7 @@ let stem = 'https://vault.cca.edu/access/searching.do?doc='
     , id
     , params = 'q=&sort=datemodified&dr=AFTER'
     , url
-    , pbcopy = spawn('pbcopy');
+    , pbcopy = spawn('pbcopy')
 
 /**
  * XML search document w/ "REPLACE" in the middle, e.g.

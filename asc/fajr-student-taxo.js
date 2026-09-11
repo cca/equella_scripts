@@ -48,7 +48,7 @@ for (var i = terms1.size() - 1; i >= 0; i--) {
     if (term.getTerm() == fullname) {
         writeMetadata(term)
         foundStudent = true
-        break;
+        break
     }
 }
 
@@ -58,7 +58,7 @@ for (i = terms2.size() - 1; i >= 0; i--) {
     if (term.getTerm() == writtenname) {
         writeMetadata(term)
         foundStudent = true
-        break;
+        break
     }
 }
 

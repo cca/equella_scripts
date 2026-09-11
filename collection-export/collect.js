@@ -263,7 +263,7 @@ if (!options.item) debug('Searching for items with these parameters:', params)
 
 search().then(r => r.json())
     .then(data => {
-        let total, items;
+        let total, items
         if (options.item) {
             total = 1
             items = Array.isArray(data) ? data : [data] // is array if no --version otherwise object

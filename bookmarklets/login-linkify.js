@@ -4,6 +4,6 @@
  * your clipboard.
  */
 var pg = location.pathname + location.search
-    , stem = 'https://vault.cca.edu/logon.do?page=';
+    , stem = 'https://vault.cca.edu/logon.do?page='
 
-void prompt('Use ⌘+C & then Return to copy URL to clipboard.', stem + encodeURIComponent(pg));
+void prompt('Use ⌘+C & then Return to copy URL to clipboard.', stem + encodeURIComponent(pg))

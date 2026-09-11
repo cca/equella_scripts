@@ -24,7 +24,7 @@ class Item {
         this.reasonsRetained = CRITERIA.filter(c => !this[c.name], this).map(fn => fn.name)
     }
 
-    static CSVHeaderRow = 'link,title,status,created,modified,owner,collaborators,collection,"to remove"\n';
+    static CSVHeaderRow = 'link,title,status,created,modified,owner,collaborators,collection,"to remove"\n'
 
     toCSV() {
         // meant to serialize multiple records so it expects an array of arrays

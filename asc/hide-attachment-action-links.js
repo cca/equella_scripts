@@ -19,4 +19,4 @@
 
     $(document).ready(showLinksHandler)
     $(document).ajaxSuccess(showLinksHandler)
-}(jQuery));
+}(jQuery))

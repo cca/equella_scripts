@@ -120,6 +120,25 @@ function departmentsToSubjectName(doc) {
 }
 
 /**
+ * A few dates fixes: originInfo capitalization and add date encoding, convert semesterCreated
+ * to dateCreated
+ * @param {Document} doc - XML document containing the MODS data
+ * @returns {void}
+ */
+function fixOriginInfoDates(doc) {
+    unwrapDateCreated(doc)
+    renameElement(doc, "origininfo", "originInfo", "//mods")
+    const dateCreated = safeSelectFirst("//mods/originInfo/dateCreated", doc)
+    if (hasDirectTextContent(dateCreated)) {
+        dateCreated.setAttribute("encoding", "edtf")
+    }
+    const semesterCreated = safeSelectFirst("//mods/originInfo/semesterCreated", doc)
+    if (hasDirectTextContent(semesterCreated)) {
+        renameElement(doc, "semesterCreated", "dateCreated", "//mods/originInfo")
+    }
+}
+
+/**
  * Main conversion function to convert "Assessment & Accreditation Documents" XML to MODS
  * @param   {string} xmlString  XML string to convert
  * @returns {Document}          Converted MODS XML string with namespace, ready for validation
@@ -172,17 +191,8 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     // /local/department -> mods/subject/name@type=corporate
     departmentsToSubjectName(doc)
 
-    // origininfo/dateCreatedWrapper/dateCreated -> originInfo/dateCreated
-    unwrapDateCreated(doc)
-    renameElement(doc, "origininfo", "originInfo", "//mods")
-    const dateCreated = safeSelectFirst("//mods/originInfo/dateCreated", doc)
-    if (hasDirectTextContent(dateCreated)) {
-        dateCreated.setAttribute("encoding", "edtf")
-    }
-    const semesterCreated = safeSelectFirst("//mods/originInfo/semesterCreated", doc)
-    if (hasDirectTextContent(semesterCreated)) {
-        renameElement(doc, "semesterCreated", "dateCreated", "//mods/originInfo")
-    }
+    // standardize dates in origininfo & fix its casing
+    fixOriginInfoDates(doc)
 
     // mods/part/number to part/text @type=attachment-uuid
     convertPartNumbers(doc)

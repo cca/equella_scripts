@@ -11,6 +11,56 @@ import {
 import {convertPartNumbers, removeEmptyElements, unwrapDateCreated} from './strict-mods.js'
 
 /**
+ * Map document category (Assessment or Accreditation) to a MODS subject/topic element.
+ * @param {Document} doc - XML Document
+ * @returns {void}
+ * @throws {Error} If the document type is not supported
+ */
+function mapDocumentCategoryToSubject(doc) {
+    const docType = safeSelectFirst("//mods/physicalDescription/formSpecific", doc).textContent
+    const mods = safeSelectFirst("//mods", doc)
+    const subject = createElement(doc, 'subject')
+    const topic = createElement(doc, 'topic')
+    topic.setAttribute('authority', 'lcsh')
+    topic.setAttribute('authorityURI', 'http://id.loc.gov/authorities/subjects')
+
+    if (docType === 'Assessment') {
+        topic.textContent = 'Assessment'
+        topic.setAttribute('valueURI', 'http://id.loc.gov/authorities/subjects/sh85045926')
+    } else if (docType === 'Accreditation') {
+        topic.textContent = 'Accreditation (Education)'
+        topic.setAttribute('valueURI', 'http://id.loc.gov/authorities/subjects/sh85000437')
+    } else {
+        throw Error(`Unsupported Assessment & Accreditation document type: ${docType}`)
+    }
+
+    // add the created elements to the document
+    subject.appendChild(topic)
+    mods.appendChild(subject)
+
+    // remove the physicalDescription element
+    mods.removeChild(mods.getElementsByTagName("physicalDescription")[0])
+}
+
+/**
+ * move mods/subject/name to mods/subject/name/namePart
+ * & add type=corporate attribute to name
+ * @param {Document} - XML document
+ * @returns {void}
+ */
+function fixSubjectName(doc) {
+    const accreditationOrgs = safeSelect("//mods/subject/name", doc)
+    for (const org of accreditationOrgs) {
+        if (hasDirectTextContent(org)) {
+            const namePart = createElement(doc, 'namePart', org.textContent)
+            org.removeChild(org.firstChild)
+            org.appendChild(namePart)
+            org.setAttribute('type', 'corporate')
+        }
+    }
+}
+
+/**
  * Main conversion function to convert "Assessment & Accreditation Documents" XML to MODS
  * @param   {string} xmlString  XML string to convert
  * @returns {Document}          Converted MODS XML string with namespace, ready for validation
@@ -44,6 +94,16 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     mods.appendChild(typeOfResource)
 
     // TODO mods/genre equal to the type of doc, no authority (or map to an authority)
+
+    // TODO archives series for these, can it be all the same?
+
+    // map Assessment/Accreditation category to mods/subject/topic
+    mapDocumentCategoryToSubject(doc)
+
+    // Accreditation Organization (can be multiple) in subject/name
+    fixSubjectName(doc)
+
+    // TODO related departments, /local/department, can be multiple
 
     // origininfo/dateCreatedWrapper/dateCreated -> originInfo/dateCreated
     unwrapDateCreated(doc)

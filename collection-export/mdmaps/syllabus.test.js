@@ -2,7 +2,6 @@ import assert from 'node:assert'
 import {describe, it} from 'mocha'
 import xpath from 'xpath'
 import {convertSyllabusXMLtoMODS, PROGRAM_SUBJECT_MAP, trimDegreePostfix} from './syllabus.js'
-import {DOMParser} from '@xmldom/xmldom'
 
 // helper function to wrap XML in a root </xml> element
 const x = (xml) => `<xml>${xml}</xml>`

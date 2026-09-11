@@ -3,7 +3,7 @@ import assert from 'node:assert'
 
 import rc from 'rc'
 
-import { getGroupByUUID, getGroupByName, addUsersToGroup, rmUsersFromGroup } from '../group.js'
+import { getGroupByUUID, getGroupByName } from '../group.js'
 
 const opts = rc('group', {})
 

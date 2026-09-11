@@ -2,7 +2,6 @@ import fs from 'node:fs'
 
 import rc from 'rc'
 // used in commented-out exemption criteria
-import xpath from 'xpath'
 
 import Item from './item.js'
 import log from './log.js'

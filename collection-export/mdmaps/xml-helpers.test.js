@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { addRoleTerm, hasDirectTextContent, renameElement, safeSelect, safeSelectFirst } from './xml-helpers.js'
+import { addArchivesSeries, addRoleTerm, hasDirectTextContent, renameElement, safeSelect, safeSelectFirst } from './xml-helpers.js'
 
 describe('XML Helpers', () => {
     describe('renameElement', () => {
@@ -312,6 +312,101 @@ describe('XML Helpers', () => {
             assert.ok(firstMods)
             assert.strictEqual(firstMods.nodeName, 'mods')
             assert.deepEqual(firstMods, modsElements[0])
+        })
+    })
+
+    describe('addArchivesSeries', () => {
+        it('should return null and add nothing if both series & subseries are empty', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+            const result = addArchivesSeries(doc, '', '')
+            assert.strictEqual(result, null)
+            assert.strictEqual(xpath.select1('//mods/relatedItem', doc), undefined)
+        })
+
+        it('should return null and add nothing when series & subseries are omitted', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+            const result = addArchivesSeries(doc)
+            assert.strictEqual(result, null)
+            assert.strictEqual(xpath.select1('//mods/relatedItem', doc), undefined)
+        })
+
+        it('should return null when there is no <mods> element', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml/>', 'text/xml')
+            const result = addArchivesSeries(doc, 'VII. Press', '1. Press Clippings')
+            assert.strictEqual(result, null)
+        })
+
+        it('should add a single relatedItem@displayLabel=series when only series is given', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+            const result = addArchivesSeries(doc, 'VII. Press')
+            assert.ok(result)
+            const relatedItem = xpath.select1('//mods/relatedItem', doc)
+            assert.ok(relatedItem)
+            assert.strictEqual(relatedItem.getAttribute('type'), 'series')
+            assert.strictEqual(relatedItem.getAttribute('displayLabel'), 'series')
+            assert.strictEqual(xpath.select("string(titleInfo/title)", relatedItem), 'VII. Press')
+            // no nested relatedItem
+            assert.strictEqual(xpath.select1('relatedItem', relatedItem), undefined)
+        })
+
+        it('should add a single relatedItem@displayLabel=subseries when only subseries is given', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+            const result = addArchivesSeries(doc, '', '1. Press Clippings')
+            assert.ok(result)
+            const relatedItem = xpath.select1('//mods/relatedItem', doc)
+            assert.ok(relatedItem)
+            assert.strictEqual(relatedItem.getAttribute('type'), 'series')
+            assert.strictEqual(relatedItem.getAttribute('displayLabel'), 'subseries')
+            assert.strictEqual(xpath.select("string(titleInfo/title)", relatedItem), '1. Press Clippings')
+        })
+
+        it('should nest a series relatedItem inside a subseries relatedItem when both are given', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+            const result = addArchivesSeries(doc, 'VII. Press', '1. Press Clippings')
+            assert.ok(result)
+            const outer = xpath.select1('//mods/relatedItem', doc)
+            assert.ok(outer)
+            assert.strictEqual(outer.getAttribute('displayLabel'), 'subseries')
+            assert.strictEqual(xpath.select("string(titleInfo/title)", outer), '1. Press Clippings')
+
+            const inner = xpath.select1('relatedItem', outer)
+            assert.ok(inner)
+            assert.strictEqual(inner.getAttribute('type'), 'series')
+            assert.strictEqual(inner.getAttribute('displayLabel'), 'series')
+            assert.strictEqual(xpath.select("string(titleInfo/title)", inner), 'VII. Press')
+        })
+
+        it('should trim whitespace from series & subseries text', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+            addArchivesSeries(doc, '  VII. Press  ', '  1. Press Clippings  ')
+            const outer = xpath.select1('//mods/relatedItem', doc)
+            assert.strictEqual(xpath.select("string(titleInfo/title)", outer), '1. Press Clippings')
+            const inner = xpath.select1('relatedItem', outer)
+            assert.strictEqual(xpath.select("string(titleInfo/title)", inner), 'VII. Press')
+        })
+
+        it('should treat whitespace-only strings as empty', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods/></xml>', 'text/xml')
+            const result = addArchivesSeries(doc, '   ', '   ')
+            assert.strictEqual(result, null)
+            assert.strictEqual(xpath.select1('//mods/relatedItem', doc), undefined)
+        })
+
+        it('should append the archives series relatedItem after existing mods content', () => {
+            const parser = new xmldom()
+            const doc = parser.parseFromString('<xml><mods><titleInfo><title>Existing</title></titleInfo></mods></xml>', 'text/xml')
+            addArchivesSeries(doc, 'VII. Press', '1. Press Clippings')
+            const mods = xpath.select1('//mods', doc)
+            assert.strictEqual(mods.childNodes[0].nodeName, 'titleInfo')
+            assert.strictEqual(mods.childNodes[1].nodeName, 'relatedItem')
         })
     })
 })

@@ -1,5 +1,6 @@
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addArchivesSeries,
     addRoleTerm,
     createElement,
     hasDirectTextContent,
@@ -78,29 +79,7 @@ function ccaNamedNote(doc) {
  * @returns {Document} Modified XML document with the press clippings series added
  */
 function addPressClippingsSeries(doc) {
-    const outerRelatedItem = doc.createElement('relatedItem')
-    outerRelatedItem.setAttribute('type', 'series')
-    outerRelatedItem.setAttribute('displayLabel', 'subseries')
-
-    const outerTitleInfo = doc.createElement('titleInfo')
-    const outerTitle = doc.createElement('title')
-    outerTitle.textContent = "1. Press Clippings"
-    outerTitleInfo.appendChild(outerTitle)
-    outerRelatedItem.appendChild(outerTitleInfo)
-
-    // Inner relatedItem is series
-    const innerRelatedItem = doc.createElement('relatedItem')
-    innerRelatedItem.setAttribute('type', 'series')
-    innerRelatedItem.setAttribute('displayLabel', 'series')
-
-    const innerTitleInfo = doc.createElement('titleInfo')
-    const innerTitle = doc.createElement('title')
-    innerTitle.textContent = "VII. Press"
-    innerTitleInfo.appendChild(innerTitle)
-    innerRelatedItem.appendChild(innerTitleInfo)
-
-    outerRelatedItem.appendChild(innerRelatedItem)
-    safeSelectFirst("//mods", doc).appendChild(outerRelatedItem)
+    addArchivesSeries(doc, 'VII. Press', '1. Press Clippings')
     return doc
 }
 

@@ -300,6 +300,55 @@ export function addRoleTerm(parent, roleTerm, valueURI = 'marcrelator') {
 }
 
 /**
+ * Add a (potentially nested) archives series relatedItem structure to the <mods> element.
+ * If both series & subseries are given, creates a subseries relatedItem (displayLabel="subseries")
+ * that wraps a nested series relatedItem (displayLabel="series"). If only one is given, creates
+ * a single relatedItem for it. Does nothing (and returns null) if both are empty.
+ * Used by strict-mods.js, pressclips.js, and accreditation.js to avoid duplicating this structure.
+ *
+ * @param {Document} doc - XML DOM document containing a <mods> element
+ * @param {string} [series=''] - Series title text, e.g. "VII. Press"
+ * @param {string} [subseries=''] - Subseries title text, e.g. "1. Press Clippings"
+ * @returns {Element|null} The outermost relatedItem element added to <mods>, or null if neither
+ *                          series nor subseries were provided, or no <mods> element was found
+ */
+export function addArchivesSeries(doc, series = '', subseries = '') {
+    const seriesText = (series || '').trim()
+    const subseriesText = (subseries || '').trim()
+
+    if (!seriesText && !subseriesText) {
+        return null
+    }
+
+    const mods = safeSelectFirst('//mods', doc)
+    if (!mods) {
+        return null
+    }
+
+    const makeSeriesRelatedItem = (displayLabel, title) => {
+        const relatedItem = createElement(doc, 'relatedItem', '', {type: 'series', displayLabel})
+        const titleInfo = createElement(doc, 'titleInfo')
+        titleInfo.appendChild(createElement(doc, 'title', title))
+        relatedItem.appendChild(titleInfo)
+        return relatedItem
+    }
+
+    let outerRelatedItem
+    if (seriesText && subseriesText) {
+        // subseries is the outer relatedItem, series is nested inside it
+        outerRelatedItem = makeSeriesRelatedItem('subseries', subseriesText)
+        outerRelatedItem.appendChild(makeSeriesRelatedItem('series', seriesText))
+    } else if (seriesText) {
+        outerRelatedItem = makeSeriesRelatedItem('series', seriesText)
+    } else {
+        outerRelatedItem = makeSeriesRelatedItem('subseries', subseriesText)
+    }
+
+    mods.appendChild(outerRelatedItem)
+    return outerRelatedItem
+}
+
+/**
  * Standardize <mods> element: 1) ensure there is exactly 1 <mods> element
  * and 2) add the appropriate attributes
  * @param {Document} doc - The XML document containing the <mods> element

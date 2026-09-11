@@ -6,9 +6,10 @@
   "scripts": {
     "contrib-wiz": "uglifyjs bookmarklets/link-to-contrib-wizard.js -c -m -o cw.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat cw.min.js)\" | sed -e 's/^/javascript:/' | pbcopy",
     "login-link": "uglifyjs bookmarklets/login-linkify.js -c -m -o ll.min.js; node -e 'console.log(encodeURIComponent(process.argv[1]))' \"$(cat ll.min.js)\" | sed -e 's/^/javascript:/' | pbcopy",
+    "accreditationtest": "mocha collection-export/mdmaps/accreditation.test.js",
     "csvtest": "NODE_ENV=test mocha utilities/metadata-csv/tests",
     "grouptest": "mocha utilities/test/group --config utilities/test/.grouprc",
-    "exportxmltest": "mocha collection-export/mdmaps/pressclips.test.js collection-export/mdmaps/strict-mods.test.js collection-export/mdmaps/syllabus.test.js collection-export/mdmaps/xml-helpers.test.js",
+    "exportxmltest": "mocha collection-export/mdmaps/accreditation.test.js collection-export/mdmaps/pressclips.test.js collection-export/mdmaps/strict-mods.test.js collection-export/mdmaps/syllabus.test.js collection-export/mdmaps/xml-helpers.test.js",
     "modstest": "mocha collection-export/mdmaps/strict-mods.test.js",
     "modstest:integration": "mocha collection-export/mdmaps/strict-mods-integration.test.js",
     "pressclipstest": "mocha collection-export/mdmaps/pressclips.test.js",

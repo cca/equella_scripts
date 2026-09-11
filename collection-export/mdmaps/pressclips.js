@@ -120,7 +120,7 @@ export function convertPressClipsXMLtoMODS(xmlString) {
     const genre = createElement(doc, 'genre', 'Periodicals', {
         authority: 'marcgt',
         authorityURI: 'http://id.loc.gov/authorities/genreForms',
-        valueURI: 'http://id.loc.gov/authorities/genreForms/gf2014026139'
+        valueURI: 'http://id.loc.gov/authorities/genreForms/gf2014026139',
     })
     mods.appendChild(genre)
 

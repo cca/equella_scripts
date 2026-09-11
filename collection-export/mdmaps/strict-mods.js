@@ -9,7 +9,7 @@ import {
     isElementEmpty,
     hasDirectTextContent,
     renameElement,
-    addArchivesSeries
+    addArchivesSeries,
 } from './xml-helpers.js'
 
 /**
@@ -580,8 +580,8 @@ export function moveClassificationToSubject(doc, classificationElement, authorit
         {
             wrapperElement: ELEMENT_NAMES.SUBJECT,
             addAttributes: { authority: "ccac" },
-            skipEmpty: true
-        }
+            skipEmpty: true,
+        },
     )
 }
 
@@ -973,7 +973,7 @@ export function removeEmptyClassifications(doc) {
         // Check if classification has direct text content (meaningful content)
         if (!hasDirectTextContent(classification)) {
             const classificationTypes = Array.from(classification.childNodes).filter(
-                node => node.nodeType === 1 && node.tagName === 'classificationType'
+                node => node.nodeType === 1 && node.tagName === 'classificationType',
             )
 
             // If classification only contains classificationType (no actual classification value),

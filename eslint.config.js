@@ -22,20 +22,21 @@ export default [
                 user: 'readonly',
                 xml: 'readonly',
             },
-            sourceType: 'module'
+            sourceType: 'module',
         },
         plugins: {
             "unused-imports": unusedImports,
         },
         rules: {
-            indent: [ 'warn', 4 ],
+            'comma-dangle': ["error", "always-multiline"],
+            'indent': [ 'warn', 4 ],
             'linebreak-style': [ 'error', 'unix' ],
             'no-unused-vars': 'off',
             'no-empty': 'off',
             'semi': ['warn', 'never'],
             // Flag and autofix unused imports
             "unused-imports/no-unused-imports": "warn",
-        }
+        },
     },
-    globalIgnores(["fine-arts-jr-review/.venv"])
+    globalIgnores(["fine-arts-jr-review/.venv"]),
 ]

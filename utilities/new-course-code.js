@@ -31,7 +31,7 @@ console.log(`Creating course information taxonomies for department code ${DEPT}`
     let data = {
         name: taxo,
         readonly: false,
-        dataSource: 'internal'
+        dataSource: 'internal',
     }
     fetch_opts.body = JSON.stringify(data)
     fetch(url, fetch_opts).then(res => {

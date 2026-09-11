@@ -71,7 +71,7 @@ function handleErr (e) { if (e) throw e }
 
 let counts = {
     total: 0,
-    exempt: 0
+    exempt: 0,
 }
 
 fs.readFile(file, { encoding: 'utf-8' }, (err, data) => {

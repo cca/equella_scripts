@@ -105,7 +105,7 @@ describe('Chunk items', () => {
             "fou": [7, 8],
             "fiv": [9, 10, 11],
             "six": [12, 13, 14],
-            "sev": [15]
+            "sev": [15],
         }
         assert.deepEqual(
             chunk(gi, 2),
@@ -113,16 +113,16 @@ describe('Chunk items', () => {
                 [ gi["one"], gi["two"] ],
                 [ gi["thr"], gi["fou"] ],
                 [ gi["fiv"], gi["six"] ],
-                [ gi["sev"] ]
-            ]
+                [ gi["sev"] ],
+            ],
         )
         assert.deepEqual(
             chunk(gi, 3),
             [
                 [ gi["one"], gi["two"], gi["thr"] ],
                 [ gi["fou"], gi["fiv"], gi["six"] ],
-                [ gi["sev"] ]
-            ]
+                [ gi["sev"] ],
+            ],
         )
     })
 })
@@ -177,7 +177,7 @@ describe('Contact owner', () => {
 describe('Delete item', () => {
     let headers = {
         'Accept': 'application/json',
-        'X-Authorization': 'access_token=' + options.token
+        'X-Authorization': 'access_token=' + options.token,
     }
     let httpOpts = { headers: headers, method: 'POST' }
     // note that the del methods expect an item hash, not a URL
@@ -187,7 +187,7 @@ describe('Delete item', () => {
         // first we lock a test item (defined in .testretentionrc)
         await fetch(
             `${options.url}/api/item/${options.test_item_uuid}/1/lock`,
-            httpOpts
+            httpOpts,
         ).then(res => {
             if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
         }).catch(err => {
@@ -222,7 +222,7 @@ describe('Delete item', () => {
         // https://vault.cca.edu/apidocs.do#operations-Item_actions-restore
         await fetch(
             `${options.url}/api/item/${options.test_item_uuid}/1/action/restore`,
-            httpOpts
+            httpOpts,
         ).then(res => {
             if (!res.ok) throw new Error(`HTTP status of the reponse: ${res.status} ${res.statusText}.`)
         }).catch(err => {
@@ -244,7 +244,7 @@ describe('Embed extra info in the item', () => {
         let user = {
             "id": "12341234",
             "firstName": "given",
-            "lastName": "sur"
+            "lastName": "sur",
         }
         let item = embedUser(user, items.highRated)
         assert.equal(item.owner.firstName, user.firstName)

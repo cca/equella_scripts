@@ -143,7 +143,7 @@ describe('convertAccreditationXMLtoMODS', () => {
         // build an item with a given formSpecific category & optional local/department elements
         const item = (formSpecific, ...departments) => x(
             `<mods><physicalDescription><formSpecific>${formSpecific}</formSpecific></physicalDescription></mods>`
-            + (departments.length ? `<local>${departments.map(d => `<department>${d}</department>`).join('')}</local>` : '')
+            + (departments.length ? `<local>${departments.map(d => `<department>${d}</department>`).join('')}</local>` : ''),
         )
 
         // assert the nested series structure: subseries is the outer relatedItem, series is nested inside
@@ -161,7 +161,7 @@ describe('convertAccreditationXMLtoMODS', () => {
                 const result = convertAccreditationXMLtoMODS(item(formSpecific))
                 assert.ok(
                     xpath.select1("//mods/relatedItem[@type='series']", result),
-                    `expected an archives series for a ${formSpecific} document`
+                    `expected an archives series for a ${formSpecific} document`,
                 )
             }
         })

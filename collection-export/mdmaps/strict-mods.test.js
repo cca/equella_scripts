@@ -15,7 +15,7 @@ const fixtures = {
         expected: `<xml><mods>
             <typeOfResource>text</typeOfResource>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     typeOfResourceWrapperEmpty: {
@@ -26,7 +26,7 @@ const fixtures = {
         expected: `<xml><mods>
             <typeOfResource/>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     multipleTypeOfResourceWrappers: {
@@ -39,7 +39,7 @@ const fixtures = {
             <typeOfResource>text</typeOfResource>
             <titleInfo><title>Test Item</title></titleInfo>
             <typeOfResource>still image</typeOfResource>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     noTypeOfResourceWrapper: {
@@ -50,7 +50,7 @@ const fixtures = {
         expected: `<xml><mods>
             <titleInfo><title>Test Item</title></titleInfo>
             <typeOfResource>text</typeOfResource>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     genreWrapper: {
@@ -61,7 +61,7 @@ const fixtures = {
         expected: `<xml><mods>
             <genre authority="aat">photographs</genre>
             <titleInfo><title>Test Photo</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     genreWrapperEmpty: {
@@ -72,7 +72,7 @@ const fixtures = {
         expected: `<xml><mods>
             <genre/>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     noteWrapper: {
@@ -83,7 +83,7 @@ const fixtures = {
         expected: `<xml><mods>
             <note type="depicted persons">John Doe</note>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     multipleNoteWrappers: {
@@ -96,7 +96,7 @@ const fixtures = {
             <note type="depicted persons">John Doe</note>
             <note type="condition">good</note>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     allWrappers: {
@@ -111,7 +111,7 @@ const fixtures = {
             <genre>correspondence</genre>
             <note>Test note</note>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleNoAttributes: {
@@ -120,7 +120,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleUsagePrimary: {
@@ -129,7 +129,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo otherType="primary"><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleUsageAbbreviated: {
@@ -138,7 +138,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo type="abbreviated"><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleUsageNonStandard: {
@@ -147,7 +147,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo otherType="donkey"><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleInfoTypeEmptyString: {
@@ -156,7 +156,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleInfoUsageTitleAbbreviated: {
@@ -165,7 +165,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo usage="primary" type="abbreviated"><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleInfoTypeEnumerated: {
@@ -174,7 +174,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo otherType="enumerated"><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleInfoAndTitleOtherTypes: {
@@ -184,7 +184,7 @@ const fixtures = {
         // we prefer the title's usage attribute over the titleInfo's type attribute
         expected: `<xml><mods>
             <titleInfo otherType="other"><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleInfoUsageSecondary: {
@@ -193,7 +193,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo otherType="secondary"><title>Alternative Title</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleInfoUsagePrimary: {
@@ -202,7 +202,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo usage="primary"><title>Main Title</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleInfoUsageInvalidWithOtherType: {
@@ -211,7 +211,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo otherType="display"><title>Test Title</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleUsageWithExistingType: {
@@ -220,7 +220,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo type="alternative" otherType="abbreviated"><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     titleUsageAbbreviatedNoExistingType: {
@@ -229,7 +229,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo type="abbreviated"><title>Short Title</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     dateCreatedSingle: {
@@ -247,7 +247,7 @@ const fixtures = {
             <originInfo>
                 <dateCreated keyDate="yes">1925-01-20</dateCreated>
             </originInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     dateCreatedRange: {
@@ -265,7 +265,7 @@ const fixtures = {
             <originInfo>
                 <dateCreated encoding="edtf" keyDate="yes">2022/2023</dateCreated>
             </originInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     dateCreatedRangeNoKeyDate: {
@@ -282,7 +282,7 @@ const fixtures = {
             <originInfo>
                 <dateCreated encoding="edtf">2024-01/2025-12</dateCreated>
             </originInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     dateCreatedEmpty: {
@@ -298,7 +298,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <originInfo/>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subjectWithType: {
@@ -309,7 +309,7 @@ const fixtures = {
         expected: `<xml><mods>
             <subject><temporal>1922-1935</temporal></subject>
             <subject><topic authority="lcsh">Test</topic></subject>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     // convertSubNameWrapper fixtures
@@ -326,7 +326,7 @@ const fixtures = {
             <name type="personal">
                 <namePart>Smith, John</namePart>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperAffiliationOnly: {
@@ -347,7 +347,7 @@ const fixtures = {
                 <role><roleTerm>Artist</roleTerm></role>
                 <affiliation>CCA</affiliation>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperDepartmentOnly: {
@@ -365,7 +365,7 @@ const fixtures = {
                 <namePart>Johnson, Mary</namePart>
                 <affiliation>Libraries</affiliation>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperAffiliationAndConstituent: {
@@ -387,7 +387,7 @@ const fixtures = {
                 <role><roleTerm>Curator</roleTerm></role>
                 <affiliation>CCA Staff</affiliation>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperDepartmentAndGradDate: {
@@ -407,7 +407,7 @@ const fixtures = {
                 <namePart>Lee, Robert</namePart>
                 <affiliation>Fine Arts (MFA) 2007</affiliation>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperFullExample: {
@@ -433,7 +433,7 @@ const fixtures = {
                 <affiliation>Libraries</affiliation>
                 <description>Capp Street Project Archive Curator</description>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperDescriptionOnly: {
@@ -454,7 +454,7 @@ const fixtures = {
                 <role><roleTerm>photographer</roleTerm></role>
                 <description>Environmental Psychologist at UC Davis</description>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperMultipleNames: {
@@ -487,7 +487,7 @@ const fixtures = {
                 <affiliation>CCA Graduate Student</affiliation>
                 <affiliation>Fine Arts (MFA)</affiliation>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperConferenceType: {
@@ -503,7 +503,7 @@ const fixtures = {
             <name type="conference">
                 <namePart>CCAC: School of Fine Arts</namePart>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     subNameWrapperExistingAffiliation: {
@@ -535,7 +535,7 @@ const fixtures = {
                 <affiliation>CCA</affiliation>
                 <affiliation>Design (MFA)</affiliation>
             </name>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     // wrapCopyInformation fixtures
@@ -571,7 +571,7 @@ const fixtures = {
                     </copyInformation>
                 </holdingSimple>
             </location>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     copyInformationWithSublocationDetail: {
@@ -608,7 +608,7 @@ const fixtures = {
                     </copyInformation>
                 </holdingSimple>
             </location>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     copyInformationMultipleLocations: {
@@ -667,7 +667,7 @@ const fixtures = {
                     </copyInformation>
                 </holdingSimple>
             </location>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     locationWithoutCopyInformation: {
@@ -682,7 +682,7 @@ const fixtures = {
                 <physicalLocation>Oakland Campus</physicalLocation>
                 <url>https://example.com</url>
             </location>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     speakerReleaseDetailYes: {
@@ -703,7 +703,7 @@ const fixtures = {
                 <text/>
                 <text>Speaker Release Form</text>
             </part>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     speakerReleaseDetailNo: {
@@ -723,7 +723,7 @@ const fixtures = {
                 <extent>text file PDF</extent>
                 <text/>
             </part>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     speakerReleaseDetailMixed: {
@@ -757,7 +757,7 @@ const fixtures = {
                 <extent>text file PDF</extent>
                 <text>Speaker Release Form</text>
             </part>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     speakerReleaseDetailNoParts: {
@@ -766,7 +766,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo><title>Test</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     archivesWrapperBoth: {
@@ -792,7 +792,7 @@ const fixtures = {
                     </titleInfo>
                 </relatedItem>
             </relatedItem>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     archivesWrapperSeriesOnly: {
@@ -812,7 +812,7 @@ const fixtures = {
                     <title>II. Publications</title>
                 </titleInfo>
             </relatedItem>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     archivesWrapperEmpty: {
@@ -827,7 +827,7 @@ const fixtures = {
         </mods></xml>`,
         expected: `<xml><mods>
             <titleInfo><title>Test Item</title></titleInfo>
-        </mods></xml>`
+        </mods></xml>`,
     },
 
     archivesWrapperMultiple: {
@@ -860,8 +860,8 @@ const fixtures = {
                     <title>II. Second Series</title>
                 </titleInfo>
             </relatedItem>
-        </mods></xml>`
-    }
+        </mods></xml>`,
+    },
 }
 
 // Helper function to normalize XML for comparison (removes whitespace differences)
@@ -2461,7 +2461,7 @@ describe('Strict MODS Conversion', () => {
                         <titleInfo><title>Related Resource</title></titleInfo>
                         <location><url>https://vault.cca.edu/items/9d019022-72ce-4774-9e2a-0c315c14f1d1/1/</url></location>
                     </relatedItem>
-                </mods></xml>`
+                </mods></xml>`,
             },
             physicalLocationInRelatedItem: {
                 input: `<xml><mods>
@@ -2475,7 +2475,7 @@ describe('Strict MODS Conversion', () => {
                         <titleInfo><title>Publication</title></titleInfo>
                         <location><physicalLocation>CCA/C Archives / Archives Publications / Catalogs:Reference Copies / 1971-1974</physicalLocation></location>
                     </relatedItem>
-                </mods></xml>`
+                </mods></xml>`,
             },
             httpUrlInLocation: {
                 input: `<xml><mods>
@@ -2483,7 +2483,7 @@ describe('Strict MODS Conversion', () => {
                 </mods></xml>`,
                 expected: `<xml><mods>
                     <location><url>http://www.example.com/resource</url></location>
-                </mods></xml>`
+                </mods></xml>`,
             },
             wikipediaUrl: {
                 input: `<xml><mods>
@@ -2491,7 +2491,7 @@ describe('Strict MODS Conversion', () => {
                 </mods></xml>`,
                 expected: `<xml><mods>
                     <location><url>https://en.wikipedia.org/wiki/Wikipedia:Meetup/Oakland/ArtandFeminism_2015</url></location>
-                </mods></xml>`
+                </mods></xml>`,
             },
             alreadyWrapped: {
                 input: `<xml><mods>
@@ -2503,7 +2503,7 @@ describe('Strict MODS Conversion', () => {
                     <location>
                         <physicalLocation>Oakland Campus</physicalLocation>
                     </location>
-                </mods></xml>`
+                </mods></xml>`,
             },
             emptyLocation: {
                 input: `<xml><mods>
@@ -2511,7 +2511,7 @@ describe('Strict MODS Conversion', () => {
                 </mods></xml>`,
                 expected: `<xml><mods>
                     <location></location>
-                </mods></xml>`
+                </mods></xml>`,
             },
             whitespaceOnly: {
                 input: `<xml><mods>
@@ -2519,8 +2519,8 @@ describe('Strict MODS Conversion', () => {
                 </mods></xml>`,
                 expected: `<xml><mods>
                     <location>   </location>
-                </mods></xml>`
-            }
+                </mods></xml>`,
+            },
         }
 
         it('should wrap URL text content in <url> element', () => {
@@ -2587,7 +2587,7 @@ describe('Strict MODS Conversion', () => {
 
 
 
-                </mods></xml>`
+                </mods></xml>`,
             },
             validClassification: {
                 input: `<xml><mods>
@@ -2595,7 +2595,7 @@ describe('Strict MODS Conversion', () => {
                 </mods></xml>`,
                 expected: `<xml><mods>
                     <classification authority="lcc">ND237.H64</classification>
-                </mods></xml>`
+                </mods></xml>`,
             },
             mixed: {
                 input: `<xml><mods>
@@ -2607,7 +2607,7 @@ describe('Strict MODS Conversion', () => {
 
                     <classification authority="lcc">ND237.H64</classification>
 
-                </mods></xml>`
+                </mods></xml>`,
             },
             emptyClassification: {
                 input: `<xml><mods>
@@ -2615,8 +2615,8 @@ describe('Strict MODS Conversion', () => {
                 </mods></xml>`,
                 expected: `<xml><mods>
                     <classification></classification>
-                </mods></xml>`
-            }
+                </mods></xml>`,
+            },
         }
 
         it('should remove classification with only classificationType child', () => {

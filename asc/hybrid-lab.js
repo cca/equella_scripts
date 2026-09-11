@@ -12,7 +12,7 @@ var hlsections = [
     'IXDSN-300-01',
     'SCIMA-200-01',
     'SCIMA-200-11',
-    'SCMIA-212-01'
+    'SCMIA-212-01',
 ]
 
 if (semester == 'Fall 2018' && hlsections.indexOf(section) > -1) {

@@ -37,7 +37,7 @@ class Item {
             this.owner.id,
             this.collaborators.join(', '),
             this.collection.uuid,
-            this.toBeRemoved
+            this.toBeRemoved,
         ]])
     }
 

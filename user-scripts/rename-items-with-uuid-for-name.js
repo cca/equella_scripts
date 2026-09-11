@@ -15,7 +15,7 @@ var titleXPath = 'mods/titleInfo/title',
         'mods/name/namePart',
         'local/courseInfo/semester',
         'local/courseInfo/course',
-        'local/courseInfo/faculty'
+        'local/courseInfo/faculty',
     ],
     makeNewTitle = function (paths, separator) {
         var newTitle = [], len = paths.length

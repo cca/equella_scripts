@@ -16,7 +16,7 @@ const testFiles = [
     { path: 'data/1.xml', name: 'data/1.xml' },
     { path: 'data/3.xml', name: 'data/3.xml' },
     { path: 'data/facresearch.json', name: 'facresearch (first record)', isJson: true, recordIndex: 0 },
-    { path: 'data/mudflats.json', name: 'mudflats (first record)', isJson: true, recordIndex: 0 }
+    { path: 'data/mudflats.json', name: 'mudflats (first record)', isJson: true, recordIndex: 0 },
 ]
 
 for (const testFile of testFiles) {
@@ -50,7 +50,7 @@ for (const testFile of testFiles) {
         try {
             execSync(`xmllint --noout --schema data/mods.xsd ${tempFile}`, {
                 encoding: 'utf-8',
-                stdio: 'pipe'
+                stdio: 'pipe',
             })
             console.log('✅ VALID - No schema errors!')
         } catch (error) {
@@ -61,19 +61,19 @@ for (const testFile of testFiles) {
                 line.includes('fails to validate') || 
                 line.includes('element') || 
                 line.includes('Invalid') ||
-                line.includes('No declaration')
+                line.includes('No declaration'),
             )
             
             console.log('⚠️  VALIDATION ERRORS:')
             
             // Count sublocationDetail errors
             const sublocationDetailErrors = errorLines.filter(l => 
-                l.includes('sublocationDetail')
+                l.includes('sublocationDetail'),
             ).length
             
             // Count other errors
             const otherErrors = errorLines.filter(l => 
-                !l.includes('sublocationDetail')
+                !l.includes('sublocationDetail'),
             ).length
             
             console.log(`\n  sublocationDetail errors: ${sublocationDetailErrors} (expected)`)

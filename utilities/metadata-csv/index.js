@@ -82,7 +82,7 @@ function writeCSV(items) {
         'Date Modified',
         'Owner',
         'Collaborators',
-        'Collection'
+        'Collection',
     ].concat(Object.values(metadataMap))
     console.log(stringify([header]).trim())
 
@@ -102,7 +102,7 @@ function writeCSV(items) {
             item.modifiedDate,
             item.owner.id,
             item.collaborators.join(', '),
-            item.collection.uuid
+            item.collection.uuid,
         ].concat(strings)
         // stringify expects an array of row arrays
         console.log(stringify([row]).trim())

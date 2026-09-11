@@ -15,7 +15,7 @@ const headers = new Headers({
     'X-Authorization': 'access_token=' + options.token,
 })
 const agent = new https.Agent({
-    maxSockets: 10
+    maxSockets: 10,
 })
 const fetch_options = {
     agent: agent,

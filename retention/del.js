@@ -32,7 +32,7 @@ const agent = new https.Agent({
 })
 const headers = {
     'Accept': 'application/json',
-    'X-Authorization': 'access_token=' + options.token
+    'X-Authorization': 'access_token=' + options.token,
 }
 
 /**
@@ -53,7 +53,7 @@ export function unlockItem(item) {
     // item was locked when we wanted to delete it
     return fetch(
         `${options.url}/api/item/${item.uuid}/${item.version}/lock`,
-        { agent: agent, headers: headers, method: 'DELETE' }
+        { agent: agent, headers: headers, method: 'DELETE' },
     )
 }
 
@@ -68,7 +68,7 @@ export function deleteItem(item) {
     // https://vault.cca.edu/apidocs.do#operations-Items-deleteItem
     return fetch(
         `${options.url}/api/item/${item.uuid}/${item.version}`,
-        { agent: agent, headers: headers, method: 'DELETE' }
+        { agent: agent, headers: headers, method: 'DELETE' },
     )
 }
 

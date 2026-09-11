@@ -79,7 +79,7 @@ var map = {
     // renamed from "Visual Studies" 2020FA, program code => HAAVC 2021SP
     'VISST': ['History of Art and Visual Culture (BFA)', 'Humanities & Sciences'],
     'WRITE': ['Writing (MFA)', 'Humanities & Sciences'],
-    'WRLIT': ['Writing & Literature (BFA)', 'Humanities & Sciences']
+    'WRLIT': ['Writing & Literature (BFA)', 'Humanities & Sciences'],
 }
 var dxp = 'local/courseInfo/department'
 var dept = get(dxp)

@@ -24,7 +24,7 @@ const agent = new https.Agent({
 })
 const headers = {
     'Accept': 'application/json',
-    'X-Authorization': 'access_token=' + options.token
+    'X-Authorization': 'access_token=' + options.token,
 }
 const fetch_options = { headers: headers, agent: agent }
 const dirname = path.dirname(fileURLToPath(import.meta.url))

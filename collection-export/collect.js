@@ -53,7 +53,7 @@ if ((!options.collection || !options.collection.match(UUIDRegex)) && (!options.i
 // query string parameters for API, mostly defined in rc options, see apidocs.do
 let params = {
     collections: options.collection,
-    info: options.info
+    info: options.info,
 };
 
 // more search params which we omit rather than supplying a default value

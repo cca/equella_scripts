@@ -16,7 +16,7 @@ const headers = {
     'Accept': 'application/json',
 }
 const httpsAgent = new https.Agent({
-    maxSockets: 5
+    maxSockets: 5,
 })
 
 // log messages only when debug=true
@@ -61,7 +61,7 @@ function applyChanges(item, xml) {
         agent: httpsAgent,
         method: 'PUT',
         headers: putHeaders,
-        body: JSON.stringify(item), })
+        body: JSON.stringify(item) })
         // EQUELLA responds with an empty body on success
         .then(r => {
             if (r.ok) return console.log(`Successfully edited item ${url}`)

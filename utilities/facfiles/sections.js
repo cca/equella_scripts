@@ -26,7 +26,7 @@ const params = new URLSearchParams({
     info: 'metadata,attachment',
     // maximum no. of items we can get in an API request
     length: LENGTH,
-    q: options.match
+    q: options.match,
 })
 
 // if config has modifiedAfter, add it to the query string

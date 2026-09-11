@@ -24,7 +24,7 @@ let params = new URLSearchParams({
     order: "modified",
     reverse: true,
     showall: true,
-    start: 0
+    start: 0,
 })
 let total = 0
 let all_items = []

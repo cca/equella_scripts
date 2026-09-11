@@ -19,7 +19,7 @@ const headers = {
     'Content-Type': 'application/json',
 }
 const httpsAgent = new https.Agent({
-    maxSockets: 5
+    maxSockets: 5,
 })
 
 function makeXMLDoc(values) {
@@ -37,8 +37,8 @@ function createItem(values) {
     const item = {
         metadata: new XMLSerializer().serializeToString(doc),
         collection: {
-            uuid: options.collection
-        }
+            uuid: options.collection,
+        },
     }
 
     if (options.dryrun) {

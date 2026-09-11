@@ -33,7 +33,7 @@ $('.wizard-parentcontrol').each((i, ctrl) => {
     // ensure we're in a mods/part repeater
     if ($(ctrl).find('label h3').eq(0).text().trim() === 'File Title') {
         let parts = {
-            filename: $(ctrl).find('a.MuiTypography-root.MuiLink-root.MuiLink-underlineHover.MuiTypography-colorPrimary').eq(0).text()
+            filename: $(ctrl).find('a.MuiTypography-root.MuiLink-root.MuiLink-underlineHover.MuiTypography-colorPrimary').eq(0).text(),
         }
         try { parts.date = parts.filename.match(/\d{4}-\d{2}-\d{2}/)[0] } catch { }
         try { parts.extension = parts.filename.match(/\.[a-zA-Z0-9]+$/)[0] } catch { }

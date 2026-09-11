@@ -7,7 +7,7 @@
 function log () {
     var msg = [
         'SCRIPT:',
-        'item', item.getUuid() + '/' + item.getVersion()
+        'item', item.getUuid() + '/' + item.getVersion(),
         // oh you want to see some JavaScript? here's some JavaScript
     ].concat(Array.prototype.slice.call(arguments)).join(' ')
 
@@ -114,7 +114,7 @@ function fileStorage() {
     // collections that use secondary storage (only Industrial Design right now)
     var sec_storage = {
         path: "/mnt2/equelladata",
-        collections: ["5b07c041-2353-4712-92d0-a71eed9201da"]
+        collections: ["5b07c041-2353-4712-92d0-a71eed9201da"],
     }
 
     if (sec_storage.collections.indexOf(collection_uuid) != -1) {

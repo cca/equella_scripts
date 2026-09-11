@@ -23,7 +23,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should successfully process item-1 (complex record with dates and subjects)', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             assert.doesNotThrow(() => {
@@ -37,7 +37,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should successfully process item-3 (large file with 300+ part elements)', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-3-fa63fed7-e4f0-45a6-b8a1-a5c36f954fe7.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -60,7 +60,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should be idempotent on already-strict MODS', () => {
             const strictInput = readFileSync(
                 join(__dirname, 'data', 'item-1-strict.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result1 = toStrictMODS(strictInput)
@@ -70,7 +70,7 @@ describe('Integration Tests - Real-World Data', () => {
             assert.strictEqual(
                 normalizeXML(result1),
                 normalizeXML(result2),
-                'Should be idempotent'
+                'Should be idempotent',
             )
         })
     })
@@ -79,7 +79,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should remove all custom wrapper elements from item-1', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -95,7 +95,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should remove all non-MODS elements from item-1', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -110,7 +110,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should fix all case-sensitivity issues', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -124,7 +124,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should convert date ranges to EDTF format', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-3-fa63fed7-e4f0-45a6-b8a1-a5c36f954fe7.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -146,7 +146,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should preserve all title content', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -158,7 +158,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should preserve all subject content', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -171,7 +171,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should preserve attributes during transformations', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -251,7 +251,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should produce well-formed XML', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -267,7 +267,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should have MODS namespace in output', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -280,7 +280,7 @@ describe('Integration Tests - Real-World Data', () => {
         it('should not include xml wrapper element', () => {
             const input = readFileSync(
                 join(__dirname, 'data', 'item-1-a359d0d9-5990-4330-becf-bffd88c48ecc.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const result = toStrictMODS(input)
@@ -298,7 +298,7 @@ describe('Integration Tests - Real-World Data', () => {
 
             const input = readFileSync(
                 join(__dirname, 'data', 'item-3-fa63fed7-e4f0-45a6-b8a1-a5c36f954fe7.xml'),
-                'utf-8'
+                'utf-8',
             )
 
             const start = Date.now()

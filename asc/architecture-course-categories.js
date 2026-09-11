@@ -86,7 +86,7 @@ if (xml.contains('/local/courseWorkWrapper/courseWorkType', 'Course work')) {
         , 'INTER-308'
         , 'INTER-320'
         , 'INTER-404'
-        , 'INTER-400'
+        , 'INTER-400',
     ]
 
     // is it in the list of studio courses? set courseCategory then

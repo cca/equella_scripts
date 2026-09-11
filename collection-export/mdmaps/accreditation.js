@@ -39,7 +39,7 @@ const ADMINISTRATIVE_DEPARTMENTS = [
 // DocType ENUM which will be used in 2 places (mapDocumentCategoryToSubject and addArchivesSeries)
 const DocType = Object.freeze({
     "ACCREDITATION": Symbol("ACCREDITATION"),
-    "ASSESSMENT": Symbol("ASSESSMENT")
+    "ASSESSMENT": Symbol("ASSESSMENT"),
 })
 
 /**

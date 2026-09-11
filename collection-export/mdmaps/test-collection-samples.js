@@ -42,7 +42,7 @@ function testXMLConversion(xml, recordId) {
         parseError: null,
         conversionError: null,
         validationIssues: [],
-        converted: null
+        converted: null,
     }
 
     try {

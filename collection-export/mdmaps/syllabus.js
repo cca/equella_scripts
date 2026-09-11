@@ -157,181 +157,181 @@ export const PROGRAM_SUBJECT_MAP = {
         "value": "animation (visual works)",
         "valueURI": "https://vocab.getty.edu/aat/300411663",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "architecture": {
         "value": "architecture (discipline)",
         "valueURI": "https://vocab.getty.edu/aat/300054156",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "ceramics": {
         "value": "studio ceramics",
         "valueURI": "https://vocab.getty.edu/aat/300185650",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "comics": {
         "value": "comics (documents)",
         "valueURI": "https://vocab.getty.edu/aat/300015635",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "craft": {
         "value": "crafts (art genres)",
         "valueURI": "https://vocab.getty.edu/aat/300054704",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "curatorial practice": {
         "value": "curating",
         "valueURI": "https://vocab.getty.edu/aat/300054277",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "design": {
         "value": "design (discipline)",
         "valueURI": "http://vocab.getty.edu/aat/300054171",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "design strategy": {
         "value": "business (commercial function)", // MBA so we use business
         "valueURI": "https://vocab.getty.edu/aat/300054343",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "critical ethnic studies": {
         "value": "antiracist", // closest conceptually in AAT
         "valueURI": "https://vocab.getty.edu/aat/300449021",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "fashion design": {
         "value": "fashion design",
         "valueURI": "https://vocab.getty.edu/aat/300138708",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "film": {
         "value": "film (discipline)",
         "valueURI": "https://vocab.getty.edu/aat/300054141",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "fine arts": {
         "value": "fine arts (discipline)",
         "valueURI": "https://vocab.getty.edu/aat/300054195",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "furniture": {
         "value": "furniture",
         "valueURI": "https://vocab.getty.edu/aat/300037680",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "game arts": {
         "value": "games",
         "valueURI": "https://vocab.getty.edu/aat/300069657",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "glass": {
         "value": "glassworking",
         "valueURI": "https://vocab.getty.edu/aat/300053929",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "graphic design": {
         "value": "graphic design",
         "valueURI": "https://vocab.getty.edu/aat/300054181",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "communication design": { // aka graphic design
         "value": "graphic design",
         "valueURI": "https://vocab.getty.edu/aat/300054181",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "illustration": {
         "value": "illustration (process)",
         "valueURI": "https://vocab.getty.edu/aat/300054200",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "industrial design": {
         "value": "industrial design",
         "valueURI": "https://vocab.getty.edu/aat/300054183",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "history of art and visual culture": {
         "value": "art history",
         "valueURI": "https://vocab.getty.edu/aat/300054233",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "interior design": {
         "value": "interior design",
         "valueURI": "https://vocab.getty.edu/aat/300054184",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "interaction design": {
         "value": "interactive art", // nothing closer in AAT or LCSH
         "valueURI": "https://vocab.getty.edu/aat/300266754",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "jewelry / metal arts": {
         "value": "jewelry making",
         "valueURI": "https://vocab.getty.edu/aat/300053611",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "photography": {
         "value": "photography (process)",
         "valueURI": "https://vocab.getty.edu/aat/300054225",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "painting/drawing": {
         "value": "paintings (visual works)",
         "valueURI": "http://vocab.getty.edu/aat/300033618",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "printmedia": {
         "value": "printmaking",
         "valueURI": "https://vocab.getty.edu/aat/300131119",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "sculpture": {
         "value": "sculpture (visual works)",
         "valueURI": "https://vocab.getty.edu/aat/300047090",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "textiles": {
         "value": "textiles (visual works)",
         "valueURI": "https://vocab.getty.edu/aat/300014063",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "writing": {
         "value": "writing (processes)",
         "valueURI": "https://vocab.getty.edu/aat/300054698",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
     "writing & literature": {
         "value": "literature (documents)",
         "valueURI": "https://vocab.getty.edu/aat/300180362",
         "authority": "aat",
-        "authorityURI": "http://vocab.getty.edu/aat/"
+        "authorityURI": "http://vocab.getty.edu/aat/",
     },
 }
 

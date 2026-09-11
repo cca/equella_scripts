@@ -66,7 +66,7 @@ function collectionCount(items) {
             uuids.forEach(uuid => {
                 counts[uuid] = {
                     count: counts[uuid],
-                    name: data.results.find(coll => coll.uuid === uuid).name
+                    name: data.results.find(coll => coll.uuid === uuid).name,
                 }
             })
             // print "sorted hash" as best we can in JS

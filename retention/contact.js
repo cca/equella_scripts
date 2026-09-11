@@ -22,8 +22,8 @@ if (options.transporter == 'mailgun') {
         secure: false,
         auth: {
             user: options.smtp_user,
-            pass: options.smtp_pass
-        }
+            pass: options.smtp_pass,
+        },
     })
 } else if (options.transporter == 'google' || options.transporter == 'gmail') {
     // see https://nodemailer.com/usage/using-gmail/
@@ -33,8 +33,8 @@ if (options.transporter == 'mailgun') {
         secure: true,
         auth: {
             user: options.smtp_user,
-            pass: options.smtp_pass
-        }
+            pass: options.smtp_pass,
+        },
     })
 }
 
@@ -124,7 +124,7 @@ export function mailUser(username, items) {
         <p>For more information about this process, read <a href="https://portal.cca.edu/essentials/technology-services/web-services/vault/vault-retention-policy/">the VAULT retention policy</a> on Portal.</p>
         <p>Sincerely,<br>CCA Libraries<br>https://libraries.cca.edu&nbsp;|&nbsp;vault@cca.edu</p>
         <p><img height="48px" width="197px" src="https://www.cca.edu/sites/default/files/images/cca-logotype-394.png" style="border:0px;vertical-align:middle"></p>
-        <p>145 Hooper Street | San Francisco, CA | 94107</p><p><i>CCA is situated on the traditional unceded lands of the Chochenyo and Ramaytush Ohlone peoples.</i></p>`
+        <p>145 Hooper Street | San Francisco, CA | 94107</p><p><i>CCA is situated on the traditional unceded lands of the Chochenyo and Ramaytush Ohlone peoples.</i></p>`,
     }
 
     if (options.verbose || options.v) {

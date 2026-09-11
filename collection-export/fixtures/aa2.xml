@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!-- item with no genreWrapper -->
+    <local>
+        <department>Fine Arts Division</department>
+        <viewLevel>shared with college &amp; academic administrators</viewLevel>
+    </local>
+    <mods>
+        <physicalDescription>
+            <formSpecific>Assessment</formSpecific>
+        </physicalDescription>
+        <titleInfo>
+            <title>Course Learning Outcome Indexes</title>
+        </titleInfo>
+        <origininfo>
+            <dateCreatedWrapper>
+                <dateCreated>2019-20</dateCreated>
+            </dateCreatedWrapper>
+        </origininfo>
+        <part>
+            <number>bfb59613-d423-4137-a490-11aaba45d656</number>
+            <number>534723a6-2a4c-4266-b420-1bbf9b15e3ec</number>
+            <number>e6c895b1-822c-45e0-b918-93b92da6a22f</number>
+            <number>8523f3f0-a312-41a5-af41-c03154b22e01</number>
+            <number>9ebc54aa-00e8-411a-9d73-4371809e13b0</number>
+            <number>f912c581-f680-4a32-ab05-c9fb8e691f08</number>
+            <number>d3dcd7b7-ce0e-4549-9808-c4902fdc7ed4</number>
+            <number>dec5dbb0-1fe4-4130-b29e-afece97dc8f3</number>
+            <number>439b09f5-c536-4c4b-b35a-4d85ab2aee5f</number>
+            <number>fc7b1fde-456b-43b3-9b47-2f97ddb90fab</number>
+            <number>41e733cf-cd38-4443-812c-103ceb449177</number>
+        </part>
+        <abstract>Indexes of Course Learning Outcomes for all courses in program.</abstract>
+    </mods>
+</xml>

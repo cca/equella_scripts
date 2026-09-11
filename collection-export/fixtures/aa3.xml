@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!-- item with subject name (WASC) -->
+    <mods>
+        <titleInfo>
+            <title>New Program Implementation Form - WASC - 2013-14</title>
+        </titleInfo>
+        <genreWrapper>
+            <genre>New Program Implementation Form</genre>
+        </genreWrapper>
+        <origininfo>
+            <dateCreatedWrapper>
+                <dateCreated>2013-14</dateCreated>
+            </dateCreatedWrapper>
+        </origininfo>
+        <subject>
+            <name>Western Association of Schools and Colleges</name>
+        </subject>
+        <part>
+            <number>eb7a6b3c-cbd4-4677-9657-44da4ea9344f</number>
+        </part>
+        <physicalDescription>
+            <formSpecific>Accreditation</formSpecific>
+        </physicalDescription>
+        <abstract />
+    </mods>
+    <local>
+        <department>Comics (MFA)</department>
+    </local>
+</xml>

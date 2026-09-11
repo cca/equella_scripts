@@ -1,4 +1,3 @@
-/* Much of this is modeled on strict-mods.js */
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
     addRoleTerm,

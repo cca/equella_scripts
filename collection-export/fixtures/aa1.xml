@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!-- standard-looking item from this collection -->
+    <local>
+        <department>Architecture Division</department>
+        <viewLevel>shared with college &amp; academic administrators</viewLevel>
+    </local>
+    <mods>
+        <physicalDescription>
+            <formSpecific>Assessment</formSpecific>
+        </physicalDescription>
+        <titleInfo>
+            <title>Year-End Assessment Reports - Architecture Division - 2018-19</title>
+        </titleInfo>
+        <origininfo>
+            <dateCreatedWrapper>
+                <dateCreated>2018-19</dateCreated>
+            </dateCreatedWrapper>
+        </origininfo>
+        <genreWrapper>
+            <genre>Year-end assessment report</genre>
+        </genreWrapper>
+        <part>
+            <number>0b23dc4e-b95d-4e84-884c-49fc5936d2ac</number>
+            <number>d803970d-697f-40b1-b4dc-308e1a4c94a1</number>
+            <number>8a703c81-89fd-498b-a40f-30089f0031ae</number>
+            <number>4ea03283-4cf5-463d-9dc4-2eace3a72a2c</number>
+        </part>
+        <abstract />
+    </mods>
+</xml>

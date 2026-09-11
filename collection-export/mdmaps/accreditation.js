@@ -1,6 +1,5 @@
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
-    addRoleTerm,
     createElement,
     hasDirectTextContent,
     renameElement,
@@ -8,7 +7,7 @@ import {
     safeSelectFirst,
     setupModsElement,
 } from './xml-helpers.js'
-import {convertPartNumbers, removeEmptyElements, unwrapDateCreated} from './strict-mods.js'
+import {convertPartNumbers, removeEmptyElements, unwrapDateCreated, unwrapSimpleElement} from './strict-mods.js'
 
 /**
  * Map document category (Assessment or Accreditation) to a MODS subject/topic element.
@@ -61,6 +60,28 @@ function fixSubjectName(doc) {
 }
 
 /**
+ * Move local/department elements to MODS subject/name@type=corporate/namePart
+ * @param {Document} doc - XML Document
+ * @returns {void}
+ */
+function departmentsToSubjectName(doc) {
+    const departments = safeSelect("//local/department", doc)
+    const mods = safeSelectFirst("//mods", doc)
+    for (const dept of departments) {
+        if (hasDirectTextContent(dept)) {
+            const name = createElement(doc, 'name')
+            const subject = createElement(doc, 'subject')
+            name.setAttribute('type', 'corporate')
+            const namePart = createElement(doc, 'namePart', dept.textContent)
+            name.appendChild(namePart)
+            subject.appendChild(name)
+            mods.appendChild(subject)
+        }
+        dept.parentElement.removeChild(dept)
+    }
+}
+
+/**
  * Main conversion function to convert "Assessment & Accreditation Documents" XML to MODS
  * @param   {string} xmlString  XML string to convert
  * @returns {Document}          Converted MODS XML string with namespace, ready for validation
@@ -93,7 +114,9 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     const typeOfResource = createElement(doc, 'typeOfResource', 'text')
     mods.appendChild(typeOfResource)
 
-    // TODO mods/genre equal to the type of doc, no authority (or map to an authority)
+    // mods/genreWrapper/genre -> mods/genre
+    // TODO we could map these doc types to LCGFT or AAT forms
+    unwrapSimpleElement(doc, 'genreWrapper', "//mods")
 
     // TODO archives series for these, can it be all the same?
 
@@ -103,7 +126,8 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     // Accreditation Organization (can be multiple) in subject/name
     fixSubjectName(doc)
 
-    // TODO related departments, /local/department, can be multiple
+    // /local/department -> mods/subject/name@type=corporate
+    departmentsToSubjectName(doc)
 
     // origininfo/dateCreatedWrapper/dateCreated -> originInfo/dateCreated
     unwrapDateCreated(doc)

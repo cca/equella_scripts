@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!-- semesterCreated and multiple local/departments -->
+    <mods>
+        <titleInfo>
+            <title>Commission Action Letter - NASAD - June 2015</title>
+        </titleInfo>
+        <genreWrapper>
+            <genre>Letter</genre>
+        </genreWrapper>
+        <subject>
+            <name>National Association of Schools of Art and Design</name>
+        </subject>
+        <origininfo>
+            <semesterCreated>Summer 2015</semesterCreated>
+            <dateCreatedWrapper>
+                <dateCreated>2014-15</dateCreated>
+            </dateCreatedWrapper>
+        </origininfo>
+        <part>
+            <number>e82683df-b808-4da9-83c8-fac13937e7d8</number>
+        </part>
+        <physicalDescription>
+            <formSpecific>Accreditation</formSpecific>
+        </physicalDescription>
+        <abstract />
+    </mods>
+    <local>
+        <department>Fine Arts Division</department>
+        <department>Design Division</department>
+        <department>Academic Affairs</department>
+    </local>
+</xml>

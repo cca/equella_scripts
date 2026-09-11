@@ -144,6 +144,20 @@ describe('convertAccreditationXMLtoMODS', () => {
             assert.strictEqual(dateCreated.textContent, '2021')
             assert.strictEqual(dateCreated.getAttribute('encoding'), 'edtf')
         })
+
+        it('should rename semesterCreated to dateCreated without an encoding attribute', () => {
+            const input = x(`<mods>
+                <physicalDescription><formSpecific>Assessment</formSpecific></physicalDescription>
+                <origininfo><semesterCreated>Fall 2021</semesterCreated></origininfo>
+            </mods>`)
+            const result = convertAccreditationXMLtoMODS(input)
+            const originInfo = xpath.select1('//mods/originInfo', result)
+            assert.ok(originInfo)
+            const dateCreated = xpath.select1('dateCreated', originInfo)
+            assert.ok(dateCreated)
+            assert.strictEqual(dateCreated.textContent, 'Fall 2021')
+            assert.strictEqual(dateCreated.getAttribute('encoding'), null)
+        })
     })
 
     describe('part/number conversion', () => {

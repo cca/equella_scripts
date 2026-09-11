@@ -179,6 +179,10 @@ export function convertAccreditationXMLtoMODS(xmlString) {
     if (hasDirectTextContent(dateCreated)) {
         dateCreated.setAttribute("encoding", "edtf")
     }
+    const semesterCreated = safeSelectFirst("//mods/originInfo/semesterCreated", doc)
+    if (hasDirectTextContent(semesterCreated)) {
+        renameElement(doc, "semesterCreated", "dateCreated", "//mods/originInfo")
+    }
 
     // mods/part/number to part/text @type=attachment-uuid
     convertPartNumbers(doc)

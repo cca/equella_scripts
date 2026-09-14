@@ -8,7 +8,14 @@ import rc from 'rc'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import {convertAccreditationXMLtoMODS, convertPressClipsXMLtoMODS, convertSyllabusXMLtoMODS, toStrictMODS} from './mdmaps/index.js'
+import {
+    convertAccreditationXMLtoMODS,
+    convertArtCollectiontoMODS,
+    convertDBRtoMODS,
+    convertPressClipsXMLtoMODS,
+    convertSyllabusXMLtoMODS,
+    toStrictMODS,
+} from './mdmaps/index.js'
 
 const defaults = {
     // obviously need attachment & metadata info
@@ -27,6 +34,8 @@ const UUIDRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-
  */
 const modsMap = {
     "e5269fd8-c50c-4d28-8420-bd7351e573bc": convertAccreditationXMLtoMODS,
+    "b8852fc5-4423-4bc7-958f-7ea643a0b438": convertArtCollectiontoMODS,
+    "c34be1f4-c3ea-47d9-b336-e39ad6e926f4": convertDBRtoMODS,
     "c99a7b30-b877-494d-8cd2-7d860793ee92": convertPressClipsXMLtoMODS,
     "9ec74523-e018-4e01-ab4e-be4dd06cdd68": convertSyllabusXMLtoMODS,
 }

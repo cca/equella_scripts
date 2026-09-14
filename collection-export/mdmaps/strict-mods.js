@@ -1,15 +1,16 @@
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
-    safeSelect,
-    copyAttributes,
-    moveChildren,
-    moveAndTransformElement,
-    createElement,
-    isElementEmpty,
-    hasDirectTextContent,
-    renameElement,
     addArchivesSeries,
+    copyAttributes,
+    createElement,
+    hasDirectTextContent,
+    isElementEmpty,
+    moveAndTransformElement,
+    moveChildren,
+    renameElement,
+    safeSelect,
+    setupModsElement,
 } from './xml-helpers.js'
 
 /**

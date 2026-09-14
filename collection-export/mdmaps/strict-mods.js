@@ -1237,17 +1237,8 @@ export function toStrictMODS(xmlString) {
     removeEmptyElements(doc)
 
     // Extract mods element and add namespace (for validation)
-    const modsElements = safeSelect(XPATH_CONTEXTS.MODS, doc)
-    if (modsElements.length > 0) {
-        const modsElement = modsElements[0]
-
-        // Add MODS namespace if not present (required for schema validation)
-        if (!modsElement.getAttribute(ATTRIBUTES.XMLNS)) {
-            modsElement.setAttribute(ATTRIBUTES.XMLNS, 'http://www.loc.gov/mods/v3')
-        }
-
-        doc.replaceChild(modsElement, doc.documentElement)
-    }
+    const mods = setupModsElement(doc)
+    doc.replaceChild(mods, doc.documentElement)
 
     return doc
 }

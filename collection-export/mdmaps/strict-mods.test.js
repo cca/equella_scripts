@@ -3,11 +3,30 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS as toStrictMODSDocument } from './strict-mods.js'
-
-function toStrictMODS(xmlString) {
-    return toStrictMODSDocument(xmlString).toString()
-}
+import {
+    convertArchivesWrapper,
+    convertAuthorityElement,
+    convertNamePartDate,
+    convertSpeakerReleaseDetail,
+    convertSubNameWrapper,
+    fixDateCreatedKeyDate,
+    fixDateCreatedQualifer,
+    fixTitleAttributes,
+    moveAndRenameElement,
+    moveClassificationToSubject,
+    removeAttribute,
+    removeBadNameUsageAttrs,
+    removeElement,
+    removeEmptyClassifications,
+    removeEmptyElements,
+    toStrictMODS,
+    unwrapDateCreated,
+    unwrapDateOther,
+    unwrapSimpleElement,
+    wrapCopyInformation,
+    wrapElement,
+    wrapTextWithChild,
+} from './strict-mods.js'
 
 // Test fixtures
 const fixtures = {
@@ -2485,48 +2504,49 @@ describe('Strict MODS Conversion', () => {
         }
 
         it('should wrap URL text content in <url> element', () => {
-            const result = normalizeXML(toStrictMODS(locationTextFixtures.urlInRelatedItem))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><relatedItem type="isReferencedBy"><titleInfo><title>Related Resource</title></titleInfo><location><url>https://vault.cca.edu/items/9d019022-72ce-4774-9e2a-0c315c14f1d1/1/</url></location></relatedItem></mods>`)
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(locationTextFixtures.urlInRelatedItem)
+            const url = xpath.select1("//mods/relatedItem[@type='isReferencedBy']/location/url", result)
+            assert.ok(url)
+            assert.strictEqual(url.textContent, 'https://vault.cca.edu/items/9d019022-72ce-4774-9e2a-0c315c14f1d1/1/')
         })
 
         it('should wrap physical location text content in <physicalLocation> element', () => {
-            const result = normalizeXML(toStrictMODS(locationTextFixtures.physicalLocationInRelatedItem))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><relatedItem type="otherVersion"><titleInfo><title>Publication</title></titleInfo><location><physicalLocation>CCA/C Archives / Archives Publications / Catalogs:Reference Copies / 1971-1974</physicalLocation></location></relatedItem></mods>`)
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(locationTextFixtures.physicalLocationInRelatedItem)
+            const location = xpath.select1("//mods/relatedItem[@type='otherVersion']/location/physicalLocation", result)
+            assert.ok(location)
+            assert.strictEqual(location.textContent, 'CCA/C Archives / Archives Publications / Catalogs:Reference Copies / 1971-1974')
         })
 
         it('should wrap HTTP URLs in <url> element', () => {
-            const result = normalizeXML(toStrictMODS(locationTextFixtures.httpUrlInLocation))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><url>http://www.example.com/resource</url></location></mods>`)
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(locationTextFixtures.httpUrlInLocation)
+            const url = xpath.select1('//mods/location/url', result)
+            assert.ok(url)
+            assert.strictEqual(url.textContent, 'http://www.example.com/resource')
         })
 
         it('should wrap Wikipedia URLs in <url> element', () => {
-            const result = normalizeXML(toStrictMODS(locationTextFixtures.wikipediaUrl))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><url>https://en.wikipedia.org/wiki/Wikipedia:Meetup/Oakland/ArtandFeminism_2015</url></location></mods>`)
-
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(locationTextFixtures.wikipediaUrl)
+            const url = xpath.select1('//mods/location/url', result)
+            assert.ok(url)
+            assert.strictEqual(url.textContent, 'https://en.wikipedia.org/wiki/Wikipedia:Meetup/Oakland/ArtandFeminism_2015')
         })
 
         it('should not modify already wrapped location', () => {
-            const result = normalizeXML(toStrictMODS(locationTextFixtures.alreadyWrapped))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation></location></mods>`)
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(locationTextFixtures.alreadyWrapped)
+            const locations = xpath.select('//mods/location/*', result)
+            assert.strictEqual(locations.length, 1)
+            assert.strictEqual(locations[0].nodeName, 'physicalLocation')
+            assert.strictEqual(locations[0].textContent, 'Oakland Campus')
         })
 
         it('should not modify empty location', () => {
-            const result = normalizeXML(toStrictMODS(locationTextFixtures.emptyLocation))
-            // Empty elements are removed by removeEmptyElements()
-            const expected = normalizeXML(`<xml/>`)
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(locationTextFixtures.emptyLocation)
+            assert.strictEqual(xpath.select1('//location', result), undefined)
         })
 
         it('should not modify location with only whitespace', () => {
-            const result = normalizeXML(toStrictMODS(locationTextFixtures.whitespaceOnly))
-            // Empty elements are removed by removeEmptyElements()
-            const expected = normalizeXML(`<xml/>`)
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(locationTextFixtures.whitespaceOnly)
+            assert.strictEqual(xpath.select1('//location', result), undefined)
         })
     })
 
@@ -2587,10 +2607,11 @@ describe('Strict MODS Conversion', () => {
         })
 
         it('should preserve classification with text content', () => {
-            const result = normalizeXML(toStrictMODS(classificationFixtures.validClassification.input))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><classification authority="lcc">ND237.H64</classification></mods>`)
-
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(classificationFixtures.validClassification.input)
+            const classification = xpath.select1('//mods/classification', result)
+            assert.ok(classification)
+            assert.strictEqual(classification.getAttribute('authority'), 'lcc')
+            assert.strictEqual(classification.textContent, 'ND237.H64')
         })
 
         it('should handle mixed valid and invalid classifications', () => {
@@ -2657,88 +2678,80 @@ describe('Strict MODS Conversion', () => {
                 <typeOfResourceWrapper><typeOfResource>text</typeOfResource></typeOfResourceWrapper>
             </mods></xml>`
 
-            const document = toStrictMODSDocument(input)
-            const result = document.toString()
-
-            assert.strictEqual(document.nodeType, 9, 'Should return an XML document')
-            assert.strictEqual(document.documentElement.nodeName, 'mods', 'Should promote mods to the document root')
-            // Should not include xml wrapper
-            assert.ok(!result.includes('<xml>'))
-            assert.ok(!result.includes('</xml>'))
-            // Should include mods element with namespace
-            assert.ok(result.includes('<mods'))
-            assert.ok(result.includes('xmlns="http://www.loc.gov/mods/v3"'))
-            assert.ok(result.includes('</mods>'))
-            // Should have applied transformations
-            assert.ok(result.includes('<typeOfResource>text</typeOfResource>'))
-            assert.ok(!result.includes('typeOfResourceWrapper'))
-        })
-
-        it('should preserve existing MODS namespace', () => {
-            const input = `<xml><mods xmlns="http://www.loc.gov/mods/v3">
-                <titleInfo><title>Test</title></titleInfo>
-            </mods></xml>`
-
             const result = toStrictMODS(input)
 
-            // Should preserve namespace
-            assert.ok(result.includes('xmlns="http://www.loc.gov/mods/v3"'))
-            // Should only appear once
-            const matches = result.match(/xmlns="http:\/\/www\.loc\.gov\/mods\/v3"/g)
-            assert.strictEqual(matches.length, 1, 'Namespace should appear exactly once')
+            assert.strictEqual(result.nodeType, 9, 'Should return an XML document')
+            assert.strictEqual(result.documentElement.nodeName, 'mods')
+            assert.strictEqual(result.documentElement.getAttribute('xmlns'), 'http://www.loc.gov/mods/v3')
+            assert.strictEqual(xpath.select1('//xml', result), undefined)
+            assert.strictEqual(xpath.select1('//typeOfResourceWrapper', result), undefined)
+            assert.strictEqual(xpath.select('string(//mods/typeOfResource)', result), 'text')
+        })
+
+        it('should use the correct MODS namespace', () => {
+            const input = `<xml><mods><titleInfo><title>Test</title></titleInfo></mods></xml>`
+            const result = toStrictMODS(input)
+            assert.strictEqual(result.documentElement.getAttribute('xmlns'), 'http://www.loc.gov/mods/v3')
         })
 
         it('should convert XML string with typeOfResourceWrapper', () => {
             const input = fixtures.typeOfResourceWrapper.input
-            const result = normalizeXML(toStrictMODS(input))
-
-            // Check transformations applied
-            assert.ok(result.includes('<typeOfResource>text</typeOfResource>'))
-            assert.ok(!result.includes('typeOfResourceWrapper'))
-            assert.ok(result.includes('xmlns="http://www.loc.gov/mods/v3"'))
+            const result = toStrictMODS(input)
+            assert.strictEqual(xpath.select('string(//mods/typeOfResource)', result), 'text')
+            assert.strictEqual(xpath.select1('//typeOfResourceWrapper', result), undefined)
+            assert.strictEqual(result.documentElement.getAttribute('xmlns'), 'http://www.loc.gov/mods/v3')
         })
 
         it('should convert XML string with genreWrapper', () => {
             const input = fixtures.genreWrapper.input
-            const result = normalizeXML(toStrictMODS(input))
-
-            assert.ok(result.includes('<genre authority="aat">photographs</genre>'))
-            assert.ok(!result.includes('genreWrapper'))
+            const result = toStrictMODS(input)
+            const genre = xpath.select1('//mods/genre', result)
+            assert.ok(genre)
+            assert.strictEqual(genre.getAttribute('authority'), 'aat')
+            assert.strictEqual(genre.textContent, 'photographs')
+            assert.strictEqual(xpath.select1('//genreWrapper', result), undefined)
         })
 
         it('should convert XML string with noteWrapper', () => {
             const input = fixtures.noteWrapper.input
-            const result = normalizeXML(toStrictMODS(input))
-
-            assert.ok(result.includes('<note type="depicted persons">John Doe</note>'))
-            assert.ok(!result.includes('noteWrapper'))
+            const result = toStrictMODS(input)
+            const note = xpath.select1('//mods/note', result)
+            assert.ok(note)
+            assert.strictEqual(note.getAttribute('type'), 'depicted persons')
+            assert.strictEqual(note.textContent, 'John Doe')
+            assert.strictEqual(xpath.select1('//noteWrapper', result), undefined)
         })
 
         it('should convert XML with all wrapper types', () => {
             const input = fixtures.allWrappers.input
-            const result = normalizeXML(toStrictMODS(input))
-
-            assert.ok(result.includes('<typeOfResource>text</typeOfResource>'))
-            assert.ok(result.includes('<genre>correspondence</genre>'))
-            assert.ok(result.includes('<note>Test note</note>'))
-            assert.ok(!result.includes('Wrapper'))
+            const result = toStrictMODS(input)
+            assert.strictEqual(xpath.select('string(//mods/typeOfResource)', result), 'text')
+            assert.strictEqual(xpath.select('string(//mods/genre)', result), 'correspondence')
+            assert.strictEqual(xpath.select('string(//mods/note)', result), 'Test note')
+            assert.strictEqual(xpath.select1('//*[contains(local-name(), "Wrapper")]', result), undefined)
         })
 
         it('should convert single date with originInfo case fix', () => {
             const input = fixtures.dateCreatedSingle.input
-            const result = normalizeXML(toStrictMODS(input))
-
-            assert.ok(result.includes('<originInfo>'))
-            assert.ok(result.includes('<dateCreated keyDate="yes">1925-01-20</dateCreated>'))
-            assert.ok(!result.includes('<origininfo>'))
-            assert.ok(!result.includes('dateType'))
+            const result = toStrictMODS(input)
+            const originInfo = xpath.select1('//mods/originInfo', result)
+            assert.ok(originInfo)
+            assert.strictEqual(originInfo.nodeName, 'originInfo')
+            const dateCreated = xpath.select1('dateCreated', originInfo)
+            assert.ok(dateCreated)
+            assert.strictEqual(dateCreated.getAttribute('keyDate'), 'yes')
+            assert.strictEqual(dateCreated.textContent, '1925-01-20')
+            assert.strictEqual(xpath.select1('//dateType', result), undefined)
         })
 
         it('should convert date range to EDTF', () => {
             const input = fixtures.dateCreatedRange.input
-            const result = normalizeXML(toStrictMODS(input))
-
-            assert.ok(result.includes('<dateCreated encoding="edtf" keyDate="yes">2022/2023</dateCreated>'))
+            const result = toStrictMODS(input)
+            const dateCreated = xpath.select1('//mods/originInfo/dateCreated', result)
+            assert.ok(dateCreated)
+            assert.strictEqual(dateCreated.getAttribute('encoding'), 'edtf')
+            assert.strictEqual(dateCreated.getAttribute('keyDate'), 'yes')
+            assert.strictEqual(dateCreated.textContent, '2022/2023')
         })
 
         it('should convert dateOther range to EDTF and preserve type', () => {
@@ -2755,11 +2768,14 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<dateOther encoding="edtf" type="In use">1907/2027</dateOther>'),
-                'Should convert dateOther range to EDTF and preserve type attribute')
-            assert.ok(!result.includes('dateOtherWrapper'), 'Should remove wrapper')
-            assert.ok(!result.includes('pointStart'), 'Should remove pointStart')
-            assert.ok(!result.includes('pointEnd'), 'Should remove pointEnd')
+            const dateOther = xpath.select1('//mods/originInfo/dateOther', result)
+            assert.ok(dateOther)
+            assert.strictEqual(dateOther.getAttribute('encoding'), 'edtf')
+            assert.strictEqual(dateOther.getAttribute('type'), 'In use')
+            assert.strictEqual(dateOther.textContent, '1907/2027')
+            assert.strictEqual(xpath.select1('//dateOtherWrapper', result), undefined)
+            assert.strictEqual(xpath.select1('//pointStart', result), undefined)
+            assert.strictEqual(xpath.select1('//pointEnd', result), undefined)
         })
 
         it('should convert single dateOther and preserve attributes', () => {
@@ -2774,9 +2790,12 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<dateOther encoding="w3cdtf" type="exhibit">2016-12-05</dateOther>'),
-                'Should preserve single dateOther with its attributes')
-            assert.ok(!result.includes('dateOtherWrapper'), 'Should remove wrapper')
+            const dateOther = xpath.select1('//mods/originInfo/dateOther', result)
+            assert.ok(dateOther)
+            assert.strictEqual(dateOther.getAttribute('encoding'), 'w3cdtf')
+            assert.strictEqual(dateOther.getAttribute('type'), 'exhibit')
+            assert.strictEqual(dateOther.textContent, '2016-12-05')
+            assert.strictEqual(xpath.select1('//dateOtherWrapper', result), undefined)
         })
 
         it('should remove subjectType and fix relateditem case', () => {
@@ -2786,9 +2805,10 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('subjectType'))
-            assert.ok(result.includes('<relatedItem>'))
-            assert.ok(!result.includes('<relateditem>'))
+            assert.strictEqual(xpath.select1('//subjectType', result), undefined)
+            const relatedItem = xpath.select1('//mods/relatedItem', result)
+            assert.ok(relatedItem)
+            assert.strictEqual(relatedItem.nodeName, 'relatedItem')
         })
 
         it('should convert topicCONA to topic with authority', () => {
@@ -2798,10 +2818,11 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('topicCONA'), 'Should not contain topicCONA')
-            assert.ok(result.includes('<topic authority="cona">Architecture</topic>'),
-                'Should convert to topic with authority="cona"')
-            assert.ok(result.includes('<topic authority="cona">Sculpture</topic>'))
+            assert.strictEqual(xpath.select1('//topicCONA', result), undefined)
+            const topics = xpath.select('//mods/subject/topic', result)
+            assert.strictEqual(topics.length, 2)
+            assert.deepStrictEqual(topics.map(topic => topic.textContent), ['Architecture', 'Sculpture'])
+            assert.ok(topics.every(topic => topic.getAttribute('authority') === 'cona'))
         })
 
         it('should remove artstorClassification elements', () => {
@@ -2811,8 +2832,8 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('artstorClassification'), 'Should remove artstorClassification')
-            assert.ok(result.includes('<title>Test</title>'), 'Should preserve other content')
+            assert.strictEqual(xpath.select1('//artstorClassification', result), undefined)
+            assert.strictEqual(xpath.select('string(//mods/titleInfo/title)', result), 'Test')
         })
 
         it('should wrap relatedItem/title with titleInfo', () => {
@@ -2823,10 +2844,10 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<relatedItem>'), 'Should have relatedItem')
-            assert.ok(result.includes('<titleInfo>'), 'Should have titleInfo wrapper')
-            assert.ok(result.includes('<title>Related Work Title</title>'), 'Should have title')
-            assert.ok(result.includes('</titleInfo>'), 'titleInfo should be closed')
+            const relatedItem = xpath.select1('//mods/relatedItem', result)
+            assert.ok(relatedItem)
+            assert.strictEqual(xpath.select('string(titleInfo/title)', relatedItem), 'Related Work Title')
+            assert.strictEqual(xpath.select1('title', relatedItem), undefined)
         })
 
         it('should move formBroad and formSpecific to genre', () => {
@@ -2838,10 +2859,12 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('formBroad'), 'Should remove formBroad')
-            assert.ok(!result.includes('formSpecific'), 'Should remove formSpecific')
-            assert.ok(result.includes('<genre>correspondence</genre>'), 'Should have correspondence genre')
-            assert.ok(result.includes('<genre>personal</genre>'), 'Should have personal genre')
+            assert.strictEqual(xpath.select1('//formBroad', result), undefined)
+            assert.strictEqual(xpath.select1('//formSpecific', result), undefined)
+            assert.deepStrictEqual(
+                xpath.select('//mods/genre', result).map(genre => genre.textContent),
+                ['correspondence', 'personal'],
+            )
         })
 
         it('should wrap language text with languageTerm and move authority', () => {
@@ -2850,11 +2873,13 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<language>'), 'Should have language')
-            assert.ok(result.includes('<languageTerm authority="iso639-2b">eng</languageTerm>'),
-                'Should wrap text with languageTerm and move authority')
-            assert.ok(!result.includes('<language authority'),
-                'Language should not have authority attribute')
+            const language = xpath.select1('//mods/language', result)
+            assert.ok(language)
+            assert.strictEqual(language.getAttribute('authority'), null)
+            const languageTerm = xpath.select1('languageTerm', language)
+            assert.ok(languageTerm)
+            assert.strictEqual(languageTerm.getAttribute('authority'), 'iso639-2b')
+            assert.strictEqual(languageTerm.textContent, 'eng')
         })
 
         it('should remove href attribute from accessCondition', () => {
@@ -2863,10 +2888,11 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<accessCondition'), 'Should have accessCondition')
-            assert.ok(!result.includes('href='), 'Should not have href attribute')
-            assert.ok(result.includes('type="use and reproduction"'), 'Should preserve type attribute')
-            assert.ok(result.includes('>CC-BY</accessCondition>'), 'Should preserve text content')
+            const accessCondition = xpath.select1('//mods/accessCondition', result)
+            assert.ok(accessCondition)
+            assert.strictEqual(accessCondition.getAttribute('href'), null)
+            assert.strictEqual(accessCondition.getAttribute('type'), 'use and reproduction')
+            assert.strictEqual(accessCondition.textContent, 'CC-BY')
         })
 
         it('should remove all empty elements', () => {
@@ -2879,13 +2905,12 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('<place'), 'Empty place should be removed')
-            assert.ok(!result.includes('<publisher'), 'Empty publisher should be removed')
-            assert.ok(!result.includes('<genre'), 'Empty genre should be removed')
-            assert.ok(!result.includes('<subject'), 'Empty subject should be removed')
-            assert.ok(result.includes('<originInfo>'), 'originInfo with content should be preserved')
-            assert.ok(result.includes('<dateCreated>2024</dateCreated>'), 'dateCreated with content should be preserved')
-            assert.ok(result.includes('<note>Has content</note>'), 'note with content should be preserved')
+            assert.strictEqual(xpath.select1('//mods/originInfo/place', result), undefined)
+            assert.strictEqual(xpath.select1('//mods/originInfo/publisher', result), undefined)
+            assert.strictEqual(xpath.select1('//mods/genre', result), undefined)
+            assert.strictEqual(xpath.select1('//mods/subject', result), undefined)
+            assert.strictEqual(xpath.select('string(//mods/originInfo/dateCreated)', result), '2024')
+            assert.strictEqual(xpath.select('string(//mods/note)', result), 'Has content')
         })
 
         it('should move physicalDescriptionNote/note to physicalDescription/note', () => {
@@ -2902,11 +2927,14 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('physicalDescriptionNote'), 'physicalDescriptionNote wrapper should be removed')
-            assert.ok(result.includes('<physicalDescription>'), 'Should have physicalDescription')
-            assert.ok(result.includes('<note type="medium">marked draft</note>'), 'Should have medium note')
-            assert.ok(result.includes('<note type="condition">poor</note>'), 'Should have condition note')
-            assert.ok(result.includes('digitalOrigin'), 'Should preserve existing physicalDescription content')
+            assert.strictEqual(xpath.select1('//physicalDescriptionNote', result), undefined)
+            const physicalDescription = xpath.select1('//mods/physicalDescription', result)
+            assert.ok(physicalDescription)
+            const notes = xpath.select('note', physicalDescription)
+            assert.strictEqual(notes.length, 2)
+            assert.deepStrictEqual(notes.map(note => note.textContent), ['marked draft', 'poor'])
+            assert.deepStrictEqual(notes.map(note => note.getAttribute('type')), ['medium', 'condition'])
+            assert.strictEqual(xpath.select('string(digitalOrigin)', physicalDescription), 'reformatted digital')
         })
 
         it('should rename part/title to part/text', () => {
@@ -2915,8 +2943,8 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<text>filename.pdf</text>'), 'Should rename title to text in part')
-            assert.ok(!result.includes('<part><title>'), 'Should not have title directly in part')
+            assert.strictEqual(xpath.select('string(//mods/part/text)', result), 'filename.pdf')
+            assert.strictEqual(xpath.select1('//mods/part/title', result), undefined)
         })
 
         it('should handle part with title and single number correctly', () => {
@@ -2929,13 +2957,10 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            // Should have one text for filename and one for UUID
-            const textMatches = result.match(/<text[^>]*>.*?<\/text>/g) || []
-            const partMatches = result.match(/<part>.*?<\/part>/gs) || []
-
-            assert.strictEqual(partMatches.length, 1, 'Should have exactly one part')
-            assert.ok(result.includes('<text>Document.pdf</text>'), 'Should have filename as text')
-            assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'Should have UUID as text with type')
+            const parts = xpath.select('//mods/part', result)
+            assert.strictEqual(parts.length, 1)
+            assert.strictEqual(xpath.select('string(text[not(@type)])', parts[0]), 'Document.pdf')
+            assert.strictEqual(xpath.select("string(text[@type='attachment-uuid'])", parts[0]), 'uuid-1')
         })
 
         it('should handle part with title and multiple numbers by keeping UUIDs separate', () => {
@@ -2953,19 +2978,13 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            const partMatches = result.match(/<part>.*?<\/part>/gs) || []
-
-            // Should have two parts: one with filename, one with all UUIDs
-            assert.strictEqual(partMatches.length, 2, 'Should have exactly two parts')
-
-            // First part should have only the filename (no UUID)
-            assert.ok(result.includes('<text>180426001.tif</text>'), 'First part should have filename')
-
-            // Second part should have all UUIDs
-            const secondPart = partMatches[1]
-            assert.ok(secondPart.includes('<text type="attachment-uuid">uuid-1</text>'), 'UUID part should include uuid-1')
-            assert.ok(secondPart.includes('<text type="attachment-uuid">uuid-2</text>'), 'UUID part should include uuid-2')
-            assert.ok(secondPart.includes('<text type="attachment-uuid">uuid-3</text>'), 'UUID part should include uuid-3')
+            const parts = xpath.select('//mods/part', result)
+            assert.strictEqual(parts.length, 2)
+            assert.strictEqual(xpath.select('string(text[not(@type)])', parts[0]), '180426001.tif')
+            assert.deepStrictEqual(
+                xpath.select("text[@type='attachment-uuid']", parts[1]).map(text => text.textContent),
+                ['uuid-1', 'uuid-2', 'uuid-3'],
+            )
         })
 
         it('should handle part with no title but multiple numbers by creating UUID part', () => {
@@ -2979,10 +2998,10 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            // Should create UUID part with all UUIDs
-            // Original part may be removed as empty after UUID extraction
-            assert.ok(result.includes('<text type="attachment-uuid">uuid-1</text>'), 'Should include uuid-1')
-            assert.ok(result.includes('<text type="attachment-uuid">uuid-2</text>'), 'Should include uuid-2')
+            assert.deepStrictEqual(
+                xpath.select("//mods/part/text[@type='attachment-uuid']", result).map(text => text.textContent),
+                ['uuid-1', 'uuid-2'],
+            )
         })
 
         it('should move part/extent to part/extent/list', () => {
@@ -2994,9 +3013,13 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('<extent>10 pages</extent>'), 'Should not have extent directly in part')
-            assert.ok(result.includes('<extent><list>10 pages</list></extent>'),
-                'Should move extent text to list/item structure')
+            const extent = xpath.select1('//mods/part/extent', result)
+            assert.ok(extent)
+            assert.strictEqual(xpath.select('string(list)', extent), '10 pages')
+            assert.strictEqual(
+                [...extent.childNodes].some(node => node.nodeType === 3 && node.data.trim()),
+                false,
+            )
         })
 
         it('should remove redundant numberB, numberC, numberD from part', () => {
@@ -3011,11 +3034,13 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('numberB'), 'Should not contain numberB')
-            assert.ok(!result.includes('numberC'), 'Should not contain numberC')
-            assert.ok(!result.includes('numberD'), 'Should not contain numberD')
-            assert.ok(result.includes('<text type="attachment-uuid">eb0960c6-5594-41ee-a1da-df3cec309d89</text>'),
-                'Should still have converted attachment UUID')
+            assert.strictEqual(xpath.select1('//numberB', result), undefined)
+            assert.strictEqual(xpath.select1('//numberC', result), undefined)
+            assert.strictEqual(xpath.select1('//numberD', result), undefined)
+            assert.strictEqual(
+                xpath.select("string(//mods/part/text[@type='attachment-uuid'])", result),
+                'eb0960c6-5594-41ee-a1da-df3cec309d89',
+            )
         })
 
         it('should rename part/title to part/text', () => {
@@ -3028,9 +3053,10 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<part>'), 'Should have part element')
-            assert.ok(result.includes('<text>filename.pdf</text>'), 'Should rename title to text in part')
-            assert.ok(!result.includes('<part><title>'), 'Should not have title directly in part')
+            const part = xpath.select1('//mods/part', result)
+            assert.ok(part)
+            assert.strictEqual(xpath.select('string(text[not(@type)])', part), 'filename.pdf')
+            assert.strictEqual(xpath.select1('title', part), undefined)
         })
 
         it('should move photoClassification to subject/topic', () => {
@@ -3040,9 +3066,11 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('photoClassification'), 'Should not have photoClassification')
-            assert.ok(result.includes('<subject>'), 'Should have subject wrapper')
-            assert.ok(result.includes('<topic authority="ccac">architectural photography</topic>'), 'Should have topic with authority')
+            assert.strictEqual(xpath.select1('//photoClassification', result), undefined)
+            const topic = xpath.select1('//mods/subject/topic', result)
+            assert.ok(topic)
+            assert.strictEqual(topic.getAttribute('authority'), 'ccac')
+            assert.strictEqual(topic.textContent, 'architectural photography')
         })
 
         it('should wrap relatedItem/title with titleInfo', () => {
@@ -3052,10 +3080,10 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<relatedItem type="host"><titleInfo><title>Parent Collection</title></titleInfo></relatedItem>'),
-                'Should wrap relatedItem title with titleInfo')
-            assert.ok(!result.includes('<relatedItem type="host"><title>'),
-                'Should not have direct title under relatedItem')
+            const relatedItem = xpath.select1("//mods/relatedItem[@type='host']", result)
+            assert.ok(relatedItem)
+            assert.strictEqual(xpath.select('string(titleInfo/title)', relatedItem), 'Parent Collection')
+            assert.strictEqual(xpath.select1('title', relatedItem), undefined)
         })
 
         it('should deduplicate internetMediaType in physicalDescription', () => {
@@ -3071,12 +3099,9 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            // Should only have one of each type
-            const tiffMatches = result.match(/<internetMediaType>image\/tiff<\/internetMediaType>/g) || []
-            const jpegMatches = result.match(/<internetMediaType>image\/jpeg<\/internetMediaType>/g) || []
-
-            assert.strictEqual(tiffMatches.length, 1, 'Should have exactly one image/tiff')
-            assert.strictEqual(jpegMatches.length, 1, 'Should have exactly one image/jpeg')
+            const types = xpath.select('//mods/physicalDescription/internetMediaType', result)
+                .map(type => type.textContent)
+            assert.deepStrictEqual(types, ['image/tiff', 'image/jpeg'])
         })
 
         it('should deduplicate internetMediaType while preserving order', () => {
@@ -3092,8 +3117,8 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            // Should have each type once, in order of first appearance
-            const types = [...result.matchAll(/<internetMediaType>(.*?)<\/internetMediaType>/g)].map(m => m[1])
+            const types = xpath.select('//mods/physicalDescription/internetMediaType', result)
+                .map(type => type.textContent)
 
             assert.deepStrictEqual(types, ['image/tiff', 'image/jpeg', 'application/pdf'],
                 'Should preserve order of first appearance')
@@ -3109,8 +3134,10 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<digitalOrigin>born digital</digitalOrigin>'), 'Should preserve digitalOrigin')
-            assert.ok(result.includes('<extent>10 pages</extent>'), 'Should preserve extent')
+            const physicalDescription = xpath.select1('//mods/physicalDescription', result)
+            assert.ok(physicalDescription)
+            assert.strictEqual(xpath.select('string(digitalOrigin)', physicalDescription), 'born digital')
+            assert.strictEqual(xpath.select('string(extent)', physicalDescription), '10 pages')
         })
 
 
@@ -3125,11 +3152,13 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('formBroad'), 'Should not contain formBroad')
-            assert.ok(!result.includes('formSpecific'), 'Should not contain formSpecific')
-            assert.ok(result.includes('<genre>correspondence</genre>'), 'Should have genre from formBroad')
-            assert.ok(result.includes('<genre>personal</genre>'), 'Should have genre from formSpecific')
-            assert.ok(result.includes('digitalOrigin'), 'Should preserve other physicalDescription content')
+            assert.strictEqual(xpath.select1('//formBroad', result), undefined)
+            assert.strictEqual(xpath.select1('//formSpecific', result), undefined)
+            assert.deepStrictEqual(
+                xpath.select('//mods/genre', result).map(genre => genre.textContent),
+                ['correspondence', 'personal'],
+            )
+            assert.strictEqual(xpath.select('string(//mods/physicalDescription/digitalOrigin)', result), 'born digital')
         })
 
         it('should wrap originInfo/place text with placeTerm', () => {
@@ -3143,11 +3172,13 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<place>'), 'Should have place element')
-            assert.ok(result.includes('<placeTerm>Oakland, CA</placeTerm>'),
-                'Should wrap place text with placeTerm')
-            assert.ok(!result.includes('<place>Oakland, CA</place>'),
-                'Should not have unwrapped text in place')
+            const place = xpath.select1('//mods/originInfo/place', result)
+            assert.ok(place)
+            assert.strictEqual(xpath.select('string(placeTerm)', place), 'Oakland, CA')
+            assert.strictEqual(
+                [...place.childNodes].some(node => node.nodeType === 3 && node.data.trim()),
+                false,
+            )
         })
 
         it('should handle empty place elements gracefully', () => {
@@ -3160,8 +3191,7 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            // Empty place should be removed by removeEmptyElements
-            assert.ok(!result.includes('<place'), 'Empty place should be removed')
+            assert.strictEqual(xpath.select1('//mods/originInfo/place', result), undefined)
         })
 
         it('should wrap subject/name text with namePart', () => {
@@ -3173,13 +3203,15 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<subject>'), 'Should have subject element')
-            assert.ok(result.includes('<name authority="local" type="personal">'),
-                'Should have name with preserved attributes')
-            assert.ok(result.includes('<namePart>Bruce, Tecoah P.</namePart>'),
-                'Should wrap name text with namePart')
-            assert.ok(!result.includes('<name authority="local" type="personal">Bruce, Tecoah P.</name>'),
-                'Should not have unwrapped text in name')
+            const name = xpath.select1('//mods/subject/name', result)
+            assert.ok(name)
+            assert.strictEqual(name.getAttribute('authority'), 'local')
+            assert.strictEqual(name.getAttribute('type'), 'personal')
+            assert.strictEqual(xpath.select('string(namePart)', name), 'Bruce, Tecoah P.')
+            assert.strictEqual(
+                [...name.childNodes].some(node => node.nodeType === 3 && node.data.trim()),
+                false,
+            )
         })
 
         it('should handle multiple subject/name elements', () => {
@@ -3194,10 +3226,12 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<namePart>Smith, John</namePart>'),
-                'Should wrap first name')
-            assert.ok(result.includes('<namePart>ACME Corp</namePart>'),
-                'Should wrap second name')
+            const names = xpath.select('//mods/subject/name', result)
+            assert.strictEqual(names.length, 2)
+            assert.deepStrictEqual(
+                names.map(name => xpath.select('string(namePart)', name)),
+                ['Smith, John', 'ACME Corp'],
+            )
         })
 
         it('should convert namePartDate to namePart with type="date"', () => {
@@ -3211,11 +3245,9 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('namePartDate'), 'Should not contain namePartDate')
-            assert.ok(result.includes('<namePart type="date">1920-2000</namePart>'),
-                'Should have namePart with type="date"')
-            assert.ok(result.includes('<namePart>Doe, John</namePart>'),
-                'Should preserve other namePart elements')
+            assert.strictEqual(xpath.select1('//namePartDate', result), undefined)
+            assert.strictEqual(xpath.select("string(//mods/name/namePart[@type='date'])", result), '1920-2000')
+            assert.strictEqual(xpath.select('string(//mods/name/namePart[not(@type)])', result), 'Doe, John')
         })
 
         it('should handle multiple names with namePartDate', () => {
@@ -3232,11 +3264,11 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(!result.includes('namePartDate'), 'Should not contain namePartDate')
-            assert.ok(result.includes('<namePart type="date">1930-2010</namePart>'),
-                'Should convert first namePartDate')
-            assert.ok(result.includes('<namePart type="date">1850-</namePart>'),
-                'Should convert second namePartDate')
+            assert.strictEqual(xpath.select1('//namePartDate', result), undefined)
+            assert.deepStrictEqual(
+                xpath.select("//mods/name/namePart[@type='date']", result).map(namePart => namePart.textContent),
+                ['1930-2010', '1850-'],
+            )
         })
 
         it('should wrap languageOfCataloging with languageTerm and move authority', () => {
@@ -3246,11 +3278,13 @@ describe('Strict MODS Conversion', () => {
             </mods></xml>`
             const result = toStrictMODS(input)
 
-            assert.ok(result.includes('<languageOfCataloging>'), 'Should have languageOfCataloging')
-            assert.ok(result.includes('<languageTerm authority="iso639-2b">eng</languageTerm>'),
-                'Should wrap text with languageTerm and move authority')
-            assert.ok(!result.includes('<languageOfCataloging authority'),
-                'LanguageOfCataloging should not have authority attribute')
+            const language = xpath.select1('//mods/recordInfo/languageOfCataloging', result)
+            assert.ok(language)
+            assert.strictEqual(language.getAttribute('authority'), null)
+            const languageTerm = xpath.select1('languageTerm', language)
+            assert.ok(languageTerm)
+            assert.strictEqual(languageTerm.getAttribute('authority'), 'iso639-2b')
+            assert.strictEqual(languageTerm.textContent, 'eng')
         })
     })
 
@@ -3479,9 +3513,9 @@ describe('Strict MODS Conversion', () => {
             it('should handle XML without mods element', () => {
                 const input = '<xml><other>content</other></xml>'
                 const result = toStrictMODS(input)
-
-                // Should not crash, just return the document as-is
-                assert.ok(result.includes('content'))
+                // root element is still mods, drops other branch
+                assert.strictEqual(result.documentElement.nodeName, 'mods')
+                assert.strictEqual(xpath.select('string(/xml/other)', result), '')
             })
         })
 
@@ -3833,34 +3867,51 @@ describe('Strict MODS Conversion', () => {
     describe('copyInformationStrictMODS', () => {
         // copyInformationSimple
         it('should convert simple copyInformation to strict MODS', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.copyInformationSimple.input))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Meyer Library</subLocation><shelfLocator>Shelf A-123</shelfLocator></copyInformation></holdingSimple></location></mods>`)
-
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(fixtures.copyInformationSimple.input)
+            const copyInformation = xpath.select1('//mods/location/holdingSimple/copyInformation', result)
+            assert.ok(copyInformation)
+            assert.strictEqual(xpath.select('string(subLocation)', copyInformation), 'Meyer Library')
+            assert.strictEqual(xpath.select('string(shelfLocator)', copyInformation), 'Shelf A-123')
         })
 
         // copyInformationWithSublocationDetail
         it('should convert copyInformation with sublocation and sublocationDetail to strict MODS', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.copyInformationWithSublocationDetail.input))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Meyer Library</subLocation><shelfLocator>(Folder) Letter to Dr. Porter</shelfLocator><note>Archives - Founder's Files (Box) Meyer #1</note></copyInformation></holdingSimple></location></mods>`)
-
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(fixtures.copyInformationWithSublocationDetail.input)
+            const copyInformation = xpath.select1('//mods/location/holdingSimple/copyInformation', result)
+            assert.ok(copyInformation)
+            assert.strictEqual(xpath.select('string(subLocation)', copyInformation), 'Meyer Library')
+            assert.strictEqual(xpath.select('string(shelfLocator)', copyInformation), '(Folder) Letter to Dr. Porter')
+            assert.strictEqual(xpath.select('string(note)', copyInformation), "Archives - Founder's Files (Box) Meyer #1")
+            assert.strictEqual(xpath.select1('sublocationDetail', copyInformation), undefined)
         })
 
         // copyInformationMultipleLocations
         it('should convert multiple locations with copyInformation to strict MODS', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.copyInformationMultipleLocations.input))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Meyer Library</subLocation><shelfLocator>A-1</shelfLocator></copyInformation></holdingSimple></location><location><physicalLocation>San Francisco Campus</physicalLocation><holdingSimple><copyInformation><subLocation>Main Library</subLocation><shelfLocator>B-2</shelfLocator></copyInformation></holdingSimple></location></mods>`)
-
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(fixtures.copyInformationMultipleLocations.input)
+            const locations = xpath.select('//mods/location', result)
+            assert.strictEqual(locations.length, 2)
+            assert.deepStrictEqual(
+                locations.map(location => xpath.select('string(physicalLocation)', location)),
+                ['Oakland Campus', 'San Francisco Campus'],
+            )
+            assert.deepStrictEqual(
+                locations.map(location => xpath.select('string(holdingSimple/copyInformation/subLocation)', location)),
+                ['Meyer Library', 'Main Library'],
+            )
+            assert.deepStrictEqual(
+                locations.map(location => xpath.select('string(holdingSimple/copyInformation/shelfLocator)', location)),
+                ['A-1', 'B-2'],
+            )
         })
 
         // locationWithoutCopyInformation
         it('should convert location without copyInformation to strict MODS', () => {
-            const result = normalizeXML(toStrictMODS(fixtures.locationWithoutCopyInformation.input))
-            const expected = normalizeXML(`<mods xmlns="http://www.loc.gov/mods/v3"><location><physicalLocation>Oakland Campus</physicalLocation><url>https://example.com</url></location></mods>`)
-
-            assert.strictEqual(result, expected)
+            const result = toStrictMODS(fixtures.locationWithoutCopyInformation.input)
+            const location = xpath.select1('//mods/location', result)
+            assert.ok(location)
+            assert.strictEqual(xpath.select('string(physicalLocation)', location), 'Oakland Campus')
+            assert.strictEqual(xpath.select('string(url)', location), 'https://example.com')
+            assert.strictEqual(xpath.select1('holdingSimple', location), undefined)
         })
     })
 

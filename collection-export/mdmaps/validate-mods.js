@@ -40,7 +40,7 @@ for (const testFile of testFiles) {
         }
         
         // Convert to strict MODS
-        const converted = toStrictMODS(xml)
+        const converted = toStrictMODS(xml).toString()
         
         // Write to temp file
         const tempFile = `temp/test-${testFile.name.replace(/[^a-z0-9]/gi, '-')}.xml`

@@ -1099,7 +1099,7 @@ export function convertSubNameWrapper(doc) {
  * Main conversion function to convert custom MODS to strict MODS
  *
  * @param {string} xmlString - XML string to convert
- * @returns {string} Converted MODS XML string with namespace, ready for validation
+ * @returns {Document} Converted MODS XML document with namespace, ready for validation
  * @throws {Error} If XML is malformed, cannot be parsed, or input is invalid
  */
 export function toStrictMODS(xmlString) {
@@ -1245,11 +1245,10 @@ export function toStrictMODS(xmlString) {
             modsElement.setAttribute(ATTRIBUTES.XMLNS, 'http://www.loc.gov/mods/v3')
         }
 
-        return modsElement.toString()
+        doc.replaceChild(modsElement, doc.documentElement)
     }
 
-    // Fallback: return full document if no mods element found
-    return doc.toString()
+    return doc
 }
 
 // CLI functionality - run when executed directly
@@ -1282,7 +1281,7 @@ Extracts the <mods> element with proper namespace for validation.
     try {
         const xmlString = fs.readFileSync(inputFile, 'utf-8')
         const result = toStrictMODS(xmlString)
-        console.log(result)
+        console.log(result.toString())
     } catch (error) {
         console.error(`Error: ${error.message}`)
         process.exit(1)

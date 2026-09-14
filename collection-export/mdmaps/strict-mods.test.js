@@ -3,7 +3,11 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS } from './strict-mods.js'
+import { removeBadNameUsageAttrs, unwrapSimpleElement, fixTitleAttributes, unwrapDateCreated, unwrapDateOther, fixDateCreatedKeyDate, fixDateCreatedQualifer, removeElement, removeEmptyElements, removeAttribute, convertAuthorityElement, moveClassificationToSubject, wrapElement, wrapTextWithChild, moveAndRenameElement, convertNamePartDate, convertSubNameWrapper, wrapCopyInformation, removeEmptyClassifications, convertSpeakerReleaseDetail, convertArchivesWrapper, toStrictMODS as toStrictMODSDocument } from './strict-mods.js'
+
+function toStrictMODS(xmlString) {
+    return toStrictMODSDocument(xmlString).toString()
+}
 
 // Test fixtures
 const fixtures = {
@@ -2702,8 +2706,11 @@ describe('Strict MODS Conversion', () => {
                 <typeOfResourceWrapper><typeOfResource>text</typeOfResource></typeOfResourceWrapper>
             </mods></xml>`
 
-            const result = toStrictMODS(input)
+            const document = toStrictMODSDocument(input)
+            const result = document.toString()
 
+            assert.strictEqual(document.nodeType, 9, 'Should return an XML document')
+            assert.strictEqual(document.documentElement.nodeName, 'mods', 'Should promote mods to the document root')
             // Should not include xml wrapper
             assert.ok(!result.includes('<xml>'))
             assert.ok(!result.includes('</xml>'))

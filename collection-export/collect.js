@@ -207,11 +207,11 @@ function writeXML(item, dir) {
         return fs.writeFile(path.join(dir, 'metadata', 'metadata.mods.xml'), modsDoc.toString(), handleErr)
     }
     if (options.mods) {
-        const strictMods = toStrictMODS(item.metadata)
-        if (!strictMods) {
+        const strictModsDoc = toStrictMODS(item.metadata)
+        if (!strictModsDoc) {
             return console.error(`Error: unable to convert metadata to strict MODS for item ${item.links.view}`)
         }
-        fs.writeFile(path.join(dir, 'metadata', 'metadata.mods.xml'), strictMods, handleErr)
+        fs.writeFile(path.join(dir, 'metadata', 'metadata.mods.xml'), strictModsDoc.toString(), handleErr)
     }
 }
 

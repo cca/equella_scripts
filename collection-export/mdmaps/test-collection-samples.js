@@ -47,7 +47,7 @@ function testXMLConversion(xml, recordId) {
 
     try {
         // Test the conversion
-        const converted = toStrictMODS(xml)
+        const converted = toStrictMODS(xml).toString()
         results.converted = converted
 
         // Parse the result to check for well-formedness

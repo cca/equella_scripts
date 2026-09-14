@@ -4,7 +4,11 @@ import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
-import { toStrictMODS } from './strict-mods.js'
+import { toStrictMODS as toStrictMODSDocument } from './strict-mods.js'
+
+function toStrictMODS(xmlString) {
+    return toStrictMODSDocument(xmlString).toString()
+}
 
 // parent dirname of current file, e.g. equeLla_scripts/collection-export
 const __dirname = dirname(import.meta.dirname)

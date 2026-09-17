@@ -1,6 +1,7 @@
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addAccessCondition,
     addArchivesSeries,
     copyAttributes,
     createElement,
@@ -1097,6 +1098,20 @@ export function convertSubNameWrapper(doc) {
 }
 
 /**
+ * local/viewLevel becomes mods/accessCondition@type="restriction on access"
+ * @param {Document} doc - XML document
+ * @returns {void}
+ */
+export function viewLevelToAccessCondition(doc) {
+    const viewLevels = safeSelect("//local/viewLevel", doc)
+    for (let viewLevel of viewLevels) {
+        if (hasDirectTextContent(viewLevel)) {
+            addAccessCondition(doc, viewLevel.textContent.trim())
+        }
+    }
+}
+
+/**
  * Main conversion function to convert custom MODS to strict MODS
  *
  * @param {string} xmlString - XML string to convert
@@ -1231,6 +1246,8 @@ export function toStrictMODS(xmlString) {
 
     // Deduplicate internetMediaType in physicalDescription
     deduplicateInternetMediaType(doc)
+
+    viewLevelToAccessCondition(doc)
 
     doc.normalize() // remove empty text nodes and merge adjacent text nodes
     // Remove all empty elements (no text, no children with text)

@@ -1,6 +1,7 @@
 /* Much of this is modeled on strict-mods.js */
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addAccessCondition,
     addRoleTerm,
     createElement,
     hasDirectTextContent,
@@ -544,6 +545,10 @@ export function convertSyllabusXMLtoMODS(xmlString) {
     addOriginInfo(doc)
 
     addFullCourseInfoNote(doc)
+
+    // We choose this string because it is the closest match used in Libraries collection
+    // Syllabi were originally shared with: the instructors, the program chair, division dean, & provost
+    addAccessCondition(doc, 'shared with college administrators')
 
     // Make <mods> the new root element (drops /local branch of XML tree)
     doc.replaceChild(mods, doc.documentElement)

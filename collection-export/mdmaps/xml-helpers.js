@@ -373,3 +373,24 @@ export function setupModsElement(doc) {
     mods.setAttribute("xsi:schemaLocation", 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd')
     return mods
 }
+
+/**
+ * Add an <accessCondition> element to the MODS document
+ * @param {Document} doc - The MODS XML document
+ * @param {string} text - The text content for the <accessCondition> element
+ * @param {'restriction on access'|'use and reproduction'} [type='restriction on access'] - The type attribute for the <accessCondition> element, default 'restriction on access'
+ * @returns {Element|null} The created <accessCondition> element, or null if not created
+ */
+export function addAccessCondition(doc, text, type = 'restriction on access') {
+    if (!text) return null
+    if (!['restriction on access', 'use and reproduction'].includes(type)) {
+        throw new RangeError(`Unsupported access condition type: ${type}`)
+    }
+    const mods = safeSelectFirst("//mods", doc)
+    if (!mods) return null
+    const accessCondition = createElement(doc, 'accessCondition')
+    accessCondition.setAttribute('type', type)
+    accessCondition.textContent = text
+    mods.appendChild(accessCondition)
+    return accessCondition
+}

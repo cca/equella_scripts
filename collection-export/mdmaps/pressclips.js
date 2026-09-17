@@ -1,5 +1,6 @@
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addAccessCondition,
     addArchivesSeries,
     addRoleTerm,
     createElement,
@@ -156,6 +157,9 @@ export function convertPressClipsXMLtoMODS(xmlString) {
 
     // communicationsWrapper/ccaNamed = yes -> add a note that CCA was named in the article
     ccaNamedNote(doc)
+
+    // Effectively "CCA Only", this is the string used in the Libraries collection
+    addAccessCondition(doc, 'Hidden from public')
 
     // Make <mods> the new root element (drops /local branch of XML tree)
     doc.replaceChild(mods, doc.documentElement)

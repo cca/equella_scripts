@@ -1,5 +1,6 @@
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 import {
+    addAccessCondition,
     addArchivesSeries,
     createElement,
     hasDirectTextContent,
@@ -178,6 +179,21 @@ function fixOriginInfoDates(doc) {
 }
 
 /**
+ * Ensure that the MODS document has an appropriate access condition based on the local/viewLevel element. If no viewLevel is specified, a default access condition is added.
+ * @param {Document} doc - XML document
+ * @returns {void}
+ */
+function ensureAccessCondition(doc) {
+    const viewLevel = safeSelectFirst("//local/viewLevel", doc)
+    if (hasDirectTextContent(viewLevel)) {
+        addAccessCondition(doc, viewLevel.textContent.trim())
+    } else {
+        // Default access level
+        addAccessCondition(doc, 'shared with college administrators')
+    }
+}
+
+/**
  * Main conversion function to convert "Assessment & Accreditation Documents" XML to MODS
  * @param   {string} xmlString  XML string to convert
  * @returns {Document}          Converted MODS XML string with namespace, ready for validation
@@ -236,6 +252,8 @@ export function convertAccreditationXMLtoMODS(xmlString) {
 
     // mods/part/number to part/text @type=attachment-uuid
     convertPartNumbers(doc)
+
+    ensureAccessCondition(doc)
 
     // Make <mods> the new root element (drops /local branch of XML tree)
     doc.replaceChild(mods, doc.documentElement)

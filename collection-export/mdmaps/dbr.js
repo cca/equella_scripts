@@ -1,5 +1,5 @@
 import {DOMParser as xmldom} from '@xmldom/xmldom'
-import {addArchivesSeries} from './xml-helpers.js'
+import {addAccessCondition, addArchivesSeries} from './xml-helpers.js'
 import {toStrictMODS} from './strict-mods.js'
 
 /**
@@ -14,6 +14,7 @@ export function convertDBRtoMODS(xmlString) {
     const parser = new xmldom()
     const doc = parser.parseFromString(xmlString, 'text/xml')
     const strictMODS = toStrictMODS(doc.toString())
+    addAccessCondition(strictMODS, 'public')
     // Add the College Publications archives series
     addArchivesSeries(strictMODS, 'VIII. Periodicals and Other Publications', '1. College Publications')
     return strictMODS

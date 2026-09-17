@@ -3,9 +3,38 @@ import { describe, it } from 'mocha'
 import xpath from 'xpath'
 import { DOMParser as xmldom } from '@xmldom/xmldom'
 
-import { addArchivesSeries, addRoleTerm, hasDirectTextContent, renameElement, safeSelect, safeSelectFirst } from './xml-helpers.js'
+import { addAccessCondition, addArchivesSeries, addRoleTerm, hasDirectTextContent, renameElement, safeSelect, safeSelectFirst } from './xml-helpers.js'
 
 describe('XML Helpers', () => {
+    describe('addAccessCondition', () => {
+        it('should use the default restriction-on-access type', () => {
+            const doc = new xmldom().parseFromString('<mods/>', 'text/xml')
+
+            addAccessCondition(doc, 'Available by appointment')
+
+            const accessCondition = xpath.select1('//mods/accessCondition', doc)
+            assert.strictEqual(accessCondition.getAttribute('type'), 'restriction on access')
+        })
+
+        it('should allow use-and-reproduction type', () => {
+            const doc = new xmldom().parseFromString('<mods/>', 'text/xml')
+
+            addAccessCondition(doc, 'Permission required for reuse', 'use and reproduction')
+
+            const accessCondition = xpath.select1('//mods/accessCondition', doc)
+            assert.strictEqual(accessCondition.getAttribute('type'), 'use and reproduction')
+        })
+
+        it('should reject unsupported types', () => {
+            const doc = new xmldom().parseFromString('<mods/>', 'text/xml')
+
+            assert.throws(
+                () => addAccessCondition(doc, 'Available by appointment', 'invalid'),
+                /Unsupported access condition type: invalid/,
+            )
+        })
+    })
+
     describe('renameElement', () => {
         it('should rename element while preserving attributes and children', () => {
             const parser = new xmldom()

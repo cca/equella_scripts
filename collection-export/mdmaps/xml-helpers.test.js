@@ -33,6 +33,28 @@ describe('XML Helpers', () => {
                 /Unsupported access condition type: invalid/,
             )
         })
+
+        it('should not add empty text accessConditions', () => {
+            const doc = new xmldom().parseFromString('<mods/>', 'text/xml')
+            const accessCondition = addAccessCondition(doc, '')
+            assert.strictEqual(accessCondition, null)
+            const accessConditionInDoc = xpath.select1('//mods/accessCondition', doc)
+            assert.strictEqual(accessConditionInDoc, undefined)
+        })
+
+        it('should not clobber existing accessConditions', () => {
+            const acText = 'Do not'
+            const doc = new xmldom().parseFromString(`<mods><accessCondition type="use and reproduction">${acText}</accessCondition></mods>`, 'text/xml')
+            const newAcText = 'Available by appointment'
+            addAccessCondition(doc, newAcText)
+
+            const accessConditions = xpath.select('//mods/accessCondition', doc)
+            assert.strictEqual(accessConditions.length, 2)
+            assert.strictEqual(accessConditions[0].getAttribute('type'), 'use and reproduction')
+            assert.strictEqual(accessConditions[0].textContent, acText)
+            assert.strictEqual(accessConditions[1].getAttribute('type'), 'restriction on access')
+            assert.strictEqual(accessConditions[1].textContent, newAcText)
+        })
     })
 
     describe('renameElement', () => {

@@ -8,8 +8,7 @@ Download all (or a subset) of items from a VAULT collection. Each item becomes i
 2. create an .apprc file with an OAuth token and the root URL of the openEQUELLA instance
 3. (optional) edit collection and filtering options into the .apprc
 4. (optional) to validate MODS XML, download [mods.xsd](https://www.loc.gov/standards/mods/v3/mods.xsd) and install `xmllint` (e.g. `brew install xmllint`)
-
-`xmlstarlet` is also useful, specifically its `xmlstarlet fo` format subcommand to pretty-print XML files.
+5. (optional) `xmlstarlet` to format (`xmlstarlet fo`) XML files (`brew install xmlstarlet`)
 
 ## Usage
 
@@ -19,11 +18,11 @@ Usage: node collect.js [options]
 
 Options:
   --collection <UUID>  UUID of collection to export
-  --html               Write a brief HTML index for each item
+  --html               Write a brief HTML index
   --item <UUID>        UUID of single item to export
   --name               Use item name for export folders instead of UUID
-  --no-mods            Do not write strict MODS XML for each item
-  --syllabus           Convert courseInfo syllabus metadata to MODS
+  --no-map             Do not apply collection-specific MODS maps
+  --no-mods            Do not write strict MODS XML
   --verbose            Print debug info
 
 You can also specify any valid EQUELLA search parameters such as "--status DRAFT,ARCHIVE" or "--modifiedBefore 2020-01-01".
@@ -43,25 +42,15 @@ node collect --collection (eq coll --name "Syllabus Collection" | jq -r .uuid) -
 
 By default item folders are named after UUID and then version. The `--name` flag makes the folder's the item's title, but titles can be duplicative or absent. An integer is appended to the folder name if it would collide with an existing folder.
 
-## Metadata Evaluation
-
-Often we want to see the possible values a particular field takes on in the exported collection. The Fish shell technique below is useful; in this example, we look for possible mods/noteWrapper/note@type attribute values.
-
-```sh
-for i in data/*/metadata/metadata.xml;
-    xmlstarlet fo $i | grep -C 2 "note type"
-end
-```
-
-## Notes
+## Attachment Notes
 
 HTML page attachments are downloaded and named after their UUID.
 
-ZIPs can exist as unpacked individual files or a zip attachment, we download both if they are present.
+ZIPs can exist as unpacked individual files or a zip attachment; we download both if they are present.
 
 Attachments that reference URLs or other EQUELLA items are not downloaded but present in the exported metadata.
 
-## Testing the Collection Export
+## Testing Collection Export
 
 ```sh
 # single item test
@@ -85,30 +74,36 @@ for i in (seq 1 $n)
 end
 ```
 
-## Strict MODS Module
+## MODS Metadata Conversion
 
-The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XML to strict MODS schema-compliant XML by unwrapping custom wrapper elements, removing non-standard elements and attributes, and creating child elements where necessary (e.g. `mods/language` -> `mods/language/languageTerm`.). Our MODS implementation uses custom "wrapper" elements (like `typeOfResourceWrapper`, `genreWrapper`, `noteWrapper`) that are not part of the official MODS schema to work with EQUELLA's contribution form repeaters.
+The `strict-mods.js` module used in collect.js converts EQUELLA's custom MODS XML to strict MODS 3.8 schema-compliant XML by unwrapping custom wrapper elements, removing non-standard elements and attributes, and creating child elements where necessary (e.g. `mods/language` -> `mods/language/languageTerm`.). Our MODS implementation uses custom "wrapper" elements (like `typeOfResourceWrapper`, `genreWrapper`, `noteWrapper`) that are not part of the official schema to work with EQUELLA's contribution form repeaters.
 
-### Strict MODS Testing
+### Collection-specific Metadata Conversion
+
+Various collections have specific mappings to MODS beyond the strict MODS conversion, doing things like handling special `/local` fields or adding contextual information that is unique to each collection (e.g. a `mods/genre` of "syllabi" for all items in the Syllabus Collection). Each collection-specific mapping has its own script in the [`mdmaps`](./mdmaps/) directory and these scripts can be used a la carte to test conversions on individual XML files. They also have their own test suites as package.json scripts available to `npm run`.
+
+`node collect` automatically performs collection-specific XML to MODS conversions for any items in the collections listed below. Pass `--no-map` to opt out of this behavior.
+
+Mapped collections:
+
+- Assessment & Accreditation Documents
+- Art Collection
+- Open Access Journal Articles (i.e. Design Book Review)
+- Press Clips
+- Syllabus collection
+
+### Converting & Validating MODS Files
 
 ```sh
-# Run strict MODS tests
-npm run modstest
+# Run all XML mapping tests, strict MODS and collection-specific conversions
+npm run exportxmltest
 # Test random samples from exported JSON files
 node mdmaps/test-collection-samples.js data/mudflats.json 10
 ```
 
-The [`test-collection-samples.js`](./mdmaps/test-collection-samples.js) tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods library to verify conversions work correctly.
+The [`test-collection-samples.js`](./mdmaps/test-collection-samples.js) script tests random samples of XML metadata from exported EQUELLA JSON files against the strict-mods.js library to verify conversions work correctly.
 
-## Collection-specific Metadata Conversion
-
-Various collections have specific mappings to MODS beyond the strict MODS conversions, doing things like handling special `/local` fields or adding contextual information that is unique to each collection (e.g. a `mods/genre` of "syllabi" for all items in the Syllabus Collection). Each collection-specific mapping has its own script in the [`mdmaps`](./mdmaps/) directory and these scripts can be used a la carte to test conversions on individual XML files. They also have their own test routines as package.json scripts available to `npm run`.
-
-`node collect` automatically performs collection-specific XML to MODS conversions for any items in the Syllabus Collection. Pass `--no-map` to opt out of this behavior.
-
-### Converting & Validating MODS Files
-
-The strict-mods module can be run as a command-line tool to convert and validate MODS metadata. It automatically extracts the `<mods>` element and adds the required MODS namespace.
+Below are examples of conversions and validations against the MODS schema using `xmllint`.
 
 ```sh
 # Convert an item's metadata to strict MODS

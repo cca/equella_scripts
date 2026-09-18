@@ -38,15 +38,12 @@ const results = [["Collection","Collection UUID","Item Name","Item UUID","Versio
 const summary = {}
 const dbg = (...args) => { if (options.debug) console.debug(...args) }
 const ensureXMLPrefix = (s) => s.startsWith('/xml') ? s : `/xml${s}`
-
-for await (const row of fs.createReadStream(inputCsvPath).pipe(csv())) {
-    // skip rows where we do not have a real filter
-    if (!row.Filter.startsWith('/')) continue
-
+const fetchTheses = async (params) => {
     const query = new URLSearchParams({
-        collections: row.UUID,
-        length: options.length,
-        where: ensureXMLPrefix(row.Filter),
+        collections: params.collections,
+        length: params.length,
+        start: params.start,
+        where: ensureXMLPrefix(params.where),
     })
     const url = `${options.root}/api/search/?${query}`
 
@@ -61,16 +58,42 @@ for await (const row of fs.createReadStream(inputCsvPath).pipe(csv())) {
     dbg('HTTP',response.status, url)
 
     const data = await response.json()
-    summary[row.Collection] = data.available
-    // TODO we are only getting the first page of theses
     data.results.forEach(item => results.push([
-        row.Collection,
-        row.UUID,
+        params.name,
+        params.collections,
         item.name,
         item.uuid,
         item.version,
         `${options.root}/item/${item.uuid}/${item.version}`,
     ]))
+    return data
+}
+
+for await (const row of fs.createReadStream(inputCsvPath).pipe(csv())) {
+    // skip rows where we do not have a real filter
+    if (!row.Filter.startsWith('/')) continue
+
+    const data = await fetchTheses({
+        name: row.Collection,
+        collections: row.UUID,
+        length: options.length,
+        start: 0,
+        where: ensureXMLPrefix(row.Filter),
+    })
+    summary[row.Collection] = data.available
+
+    // page through results if there are more than the initial length
+    let start = options.length
+    while (start < data.available) {
+        const nextPage = await fetchTheses({
+            name: row.Collection,
+            collections: row.UUID,
+            length: options.length,
+            start: start,
+            where: ensureXMLPrefix(row.Filter),
+        })
+        start += options.length
+    }
 }
 
 fs.writeFileSync('theses.csv', stringify(results))

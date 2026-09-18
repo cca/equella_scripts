@@ -45,6 +45,7 @@
   "dependencies": {
     "@xmldom/xmldom": "^0.9.12",
     "async": "^3.2.6",
+    "csv-parser": "^3.2.1",
     "csv-reader": "^1.0.12",
     "csv-stringify": "^6.8.3",
     "equella-cli": "^3.2.1",

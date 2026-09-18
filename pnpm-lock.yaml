@@ -14,6 +14,9 @@ importers:
       async:
         specifier: ^3.2.6
         version: 3.2.6
+      csv-parser:
+        specifier: ^3.2.1
+        version: 3.2.1
       csv-reader:
         specifier: ^1.0.12
         version: 1.0.12
@@ -217,6 +220,11 @@ packages:
   crypto-random-string@4.0.0:
     resolution: {integrity: sha512-x8dy3RnvYdlUcPOjkEHqozhiwzKNSq7GcPuXFbnyMOCHxX8V3OgIg/pYuabl2sbUPfIJaeAQB7PMOK8DFIdoRA==}
     engines: {node: '>=12'}
+
+  csv-parser@3.2.1:
+    resolution: {integrity: sha512-v8RPMSglouR9od735SnwSxLBbCJqEPSbgm1R5qfr8yIiMUCEFjox56kRZid0SvgHJEkxeIEu3+a9QS3YRh7CuA==}
+    engines: {node: '>= 10'}
+    hasBin: true
 
   csv-reader@1.0.12:
     resolution: {integrity: sha512-0AAgazKJUywtjvZbclNuovIiQY/WyvojWw15Y2k3kPixE+pDiOFnfg5FcH3CfDqqnrB2f3p5oPAc446EXD01Tw==}
@@ -899,6 +907,8 @@ snapshots:
   crypto-random-string@4.0.0:
     dependencies:
       type-fest: 1.4.0
+
+  csv-parser@3.2.1: {}
 
   csv-reader@1.0.12: {}
 

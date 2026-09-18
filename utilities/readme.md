@@ -2,6 +2,10 @@
 
 Various utilities. The ones with subfolders will have their own readmes with explanations.
 
+## theses
+
+Given a spreadsheet of collections ([example](https://docs.google.com/spreadsheets/d/14t4SRtXy_Y3vRs8JYyxzOIUb-YPrYjcPJYnXbgELdas/edit?gid=1935440201#gid=1935440201)) with XPath filter expressions that limit to theses/capstone projects, this script looks up all the thesis-type items, writes a CSV of them all, and prints a summary table of how many there are in each collection. Usage: `./theses.js spreadsheet.csv`.
+
 ## copy-search-url
 
 It's tedious to copy-paste Power Search URLs in templates, this script aids in that by copying them to your clipboard. You have to edit some of the variables in the script itself to match what you're trying to do (which power search, what metadata field).
